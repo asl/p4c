@@ -52,9 +52,11 @@ class P4ToolsTestCase {
 class P4ToolsTest : public ::testing::Test {};
 
 /// Converts IR::Member into symbolic variables.
-class SymbolicConverter : public Transform {
+class SymbolicConverter : public TransformCRTP<SymbolicConverter> {
+    using Base = TransformCRTP<SymbolicConverter>;
  public:
-    const IR::SymbolicVariable *preorder(IR::Member *member) override;
+    using Base::preorder;
+    const IR::SymbolicVariable *preorder(IR::Member *member);
 };
 
 }  // namespace Test

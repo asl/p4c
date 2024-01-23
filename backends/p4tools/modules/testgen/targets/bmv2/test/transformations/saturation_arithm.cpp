@@ -109,13 +109,15 @@ class Z3SolverSatTests : public ::testing::Test {
 namespace ArithmTest {
 
 /// The main class for saturation transformation.
-class SaturationTransform : public Transform {
+class SaturationTransform : public TransformCRTP<SaturationTransform> {
+    using Base = TransformCRTP<SaturationTransform>;
  public:
+    using Base::postorder;
     /// transforms saturation adding
-    const IR::Node *postorder(IR::AddSat *add) override { return SaturationElim::eliminate(add); }
+    const IR::Node *postorder(IR::AddSat *add) { return SaturationElim::eliminate(add); }
 
     /// transforms saturation substraction
-    const IR::Node *postorder(IR::SubSat *sub) override { return SaturationElim::eliminate(sub); }
+    const IR::Node *postorder(IR::SubSat *sub) { return SaturationElim::eliminate(sub); }
 };
 
 void test(const IR::Expression *expression, const IR::AssignmentStatement *variableValue) {

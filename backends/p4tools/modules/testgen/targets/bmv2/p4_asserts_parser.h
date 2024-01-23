@@ -19,7 +19,9 @@ namespace P4Tools::P4Testgen::Bmv2 {
 /// Once we have resolved the tokens in the annotation, we can then lookup the corresponding type.
 using IdenitifierTypeMap = std::map<cstring, const IR::Type *>;
 
-class AssertsParser : public Transform {
+class AssertsParser : public TransformCRTP<AssertsParser> {
+    using Base = TransformCRTP<AssertsParser>;
+    std::vector<std::vector<const IR::Expression *>> &restrictionsVec;
     /// A vector of restrictions imposed on the control-plane.
     ConstraintsVector &restrictionsVec;
 
@@ -32,8 +34,9 @@ class AssertsParser : public Transform {
     static std::vector<const IR::Expression *> genIRStructs(cstring tableName,
                                                             cstring restrictionString,
                                                             const IdenitifierTypeMap &typeMap);
-    const IR::Node *postorder(IR::P4Action *actionContext) override;
-    const IR::Node *postorder(IR::P4Table *tableContext) override;
+    using Base::postorder;
+    const IR::Node *postorder(IR::P4Action *actionContext);
+    const IR::Node *postorder(IR::P4Table *tableContext);
 };
 
 class Token {

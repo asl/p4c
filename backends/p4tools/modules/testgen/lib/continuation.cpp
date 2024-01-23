@@ -65,7 +65,8 @@ Continuation::Body::Body(const std::vector<Command> &cmds) {
 /// needs. In particular, since the variables being substituted are freshly/uniquely generated, we
 /// shouldn't have to worry about variable capture, and our continuations are created in a way that
 /// we shouldn't have to worry about accidentally replacing lvalues.
-class VariableSubstitution : public Transform {
+class VariableSubstitution : public TransformCRTP<VariableSubstitution> {
+    using Base = TransformCRTP<VariableSubstitution>;
  private:
     /// The variable being substituted.
     const IR::PathExpression *var;
@@ -76,7 +77,8 @@ class VariableSubstitution : public Transform {
     const IR::Node *expr;
 
  public:
-    const IR::Node *postorder(IR::PathExpression *pathExpr) override {
+    using Base::postorder;
+    const IR::Node *postorder(IR::PathExpression *pathExpr) {
         if (*var == *pathExpr) {
             return expr;
         }

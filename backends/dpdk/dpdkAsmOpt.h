@@ -37,19 +37,21 @@ limitations under the License.
 
 namespace DPDK {
 // This pass removes label that no jmps jump to
-class RemoveRedundantLabel : public Transform {
+class RemoveRedundantLabel : public TransformCRTP<RemoveRedundantLabel> {
+    using Base = TransformCRTP<RemoveRedundantLabel>;
  public:
     const IR::IndexedVector<IR::DpdkAsmStatement> *removeRedundantLabel(
         const IR::IndexedVector<IR::DpdkAsmStatement> &s);
 
-    const IR::Node *postorder(IR::DpdkListStatement *l) override {
+    using Base::postorder;
+    const IR::Node *postorder(IR::DpdkListStatement *l) {
         const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
         newStmts = removeRedundantLabel(l->statements);
         l->statements = *newStmts;
         return l;
     }
 
-    const IR::Node *postorder(IR::DpdkAction *l) override {
+    const IR::Node *postorder(IR::DpdkAction *l) {
         const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
         newStmts = removeRedundantLabel(l->statements);
         l->statements = *newStmts;
@@ -64,18 +66,21 @@ class RemoveRedundantLabel : public Transform {
 //
 // jmp label1 will be removed.
 
-class RemoveConsecutiveJmpAndLabel : public Transform {
+class RemoveConsecutiveJmpAndLabel : public TransformCRTP<RemoveConsecutiveJmpAndLabel> {
+    using Base = TransformCRTP<RemoveConsecutiveJmpAndLabel>;
  public:
     const IR::IndexedVector<IR::DpdkAsmStatement> *removeJmpAndLabel(
         const IR::IndexedVector<IR::DpdkAsmStatement> &s);
-    const IR::Node *postorder(IR::DpdkListStatement *l) override {
+
+    using Base::postorder;
+    const IR::Node *postorder(IR::DpdkListStatement *l) {
         const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
         newStmts = removeJmpAndLabel(l->statements);
         l->statements = *newStmts;
         return l;
     }
 
-    const IR::Node *postorder(IR::DpdkAction *l) override {
+    const IR::Node *postorder(IR::DpdkAction *l) {
         const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
         newStmts = removeJmpAndLabel(l->statements);
         l->statements = *newStmts;
@@ -98,19 +103,21 @@ class RemoveConsecutiveJmpAndLabel : public Transform {
 // ...
 // jmp label2
 
-class ThreadJumps : public Transform {
+class ThreadJumps : public TransformCRTP<ThreadJumps> {
+    using Base = TransformCRTP<ThreadJumps>;
  public:
     const IR::IndexedVector<IR::DpdkAsmStatement> *threadJumps(
         const IR::IndexedVector<IR::DpdkAsmStatement> &s);
 
-    const IR::Node *postorder(IR::DpdkListStatement *l) override {
+    using Base::postorder;
+    const IR::Node *postorder(IR::DpdkListStatement *l) {
         const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
         newStmts = threadJumps(l->statements);
         l->statements = *newStmts;
         return l;
     }
 
-    const IR::Node *postorder(IR::DpdkAction *l) override {
+    const IR::Node *postorder(IR::DpdkAction *l) {
         const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
         newStmts = threadJumps(l->statements);
         l->statements = *newStmts;
@@ -121,19 +128,21 @@ class ThreadJumps : public Transform {
 // This pass removes labels whose next instruction is a label. In addition, it
 // will update any jmp that jump to this label to the label next to it.
 
-class RemoveLabelAfterLabel : public Transform {
+class RemoveLabelAfterLabel : public TransformCRTP<RemoveLabelAfterLabel> {
+    using Base = TransformCRTP<RemoveLabelAfterLabel>;
  public:
     const IR::IndexedVector<IR::DpdkAsmStatement> *removeLabelAfterLabel(
         const IR::IndexedVector<IR::DpdkAsmStatement> &s);
 
-    const IR::Node *postorder(IR::DpdkListStatement *l) override {
+    using Base::postorder;
+    const IR::Node *postorder(IR::DpdkListStatement *l) {
         const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
         newStmts = removeLabelAfterLabel(l->statements);
         l->statements = *newStmts;
         return l;
     }
 
-    const IR::Node *postorder(IR::DpdkAction *l) override {
+    const IR::Node *postorder(IR::DpdkAction *l) {
         const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
         newStmts = removeLabelAfterLabel(l->statements);
         l->statements = *newStmts;
@@ -159,18 +168,22 @@ class CollectUsedMetadataField : public InspectorCRTP<CollectUsedMetadataField> 
 };
 
 // This pass removes all unused fields from metadata struct
-class RemoveUnusedMetadataFields : public Transform {
+class RemoveUnusedMetadataFields : public TransformCRTP<RemoveUnusedMetadataFields> {
+    using Base = TransformCRTP<RemoveUnusedMetadataFields>;
     ordered_set<cstring> &used_fields;
 
  public:
     explicit RemoveUnusedMetadataFields(ordered_set<cstring> &used_fields)
         : used_fields(used_fields) {}
-    const IR::Node *preorder(IR::DpdkAsmProgram *p) override;
+
+    using Base::preorder;
+    const IR::Node *preorder(IR::DpdkAsmProgram *p);
     bool isByteSizeField(const IR::Type *field_type);
 };
 
 // This pass shorten the Identifier length
-class ShortenTokenLength : public Transform {
+class ShortenTokenLength : public TransformCRTP<ShortenTokenLength> {
+    using Base = TransformCRTP<ShortenTokenLength>;
     ordered_map<cstring, cstring> &newNameMap;
     static size_t count;
     // Currently Dpdk allows Identifier of 63 char long or less
@@ -201,7 +214,8 @@ class ShortenTokenLength : public Transform {
         : newNameMap(newNameMap) {}
     static ordered_map<cstring, cstring> origNameMap;
 
-    const IR::Node *preorder(IR::Member *m) override {
+    using Base::preorder;
+    const IR::Node *preorder(IR::Member *m) {
         if (m->toString().startsWith("m.") || m->toString().startsWith("t."))
             m->member = shortenString(m->member);
         else
@@ -209,7 +223,7 @@ class ShortenTokenLength : public Transform {
         return m;
     }
 
-    const IR::Node *preorder(IR::DpdkStructType *s) override {
+    const IR::Node *preorder(IR::DpdkStructType *s) {
         if (s->getAnnotations()->getSingle("__packet_data__")) {
             s->name = shortenString(s->name);
             IR::IndexedVector<IR::StructField> changedFields;
@@ -232,7 +246,7 @@ class ShortenTokenLength : public Transform {
         return s;
     }
 
-    const IR::Node *preorder(IR::DpdkHeaderType *h) override {
+    const IR::Node *preorder(IR::DpdkHeaderType *h) {
         h->name = shortenString(h->name);
         IR::IndexedVector<IR::StructField> changedFields;
         for (auto field : h->fields) {
@@ -243,12 +257,12 @@ class ShortenTokenLength : public Transform {
         return new IR::DpdkHeaderType(h->srcInfo, h->name, h->annotations, changedFields);
     }
 
-    const IR::Node *preorder(IR::DpdkExternDeclaration *e) override {
+    const IR::Node *preorder(IR::DpdkExternDeclaration *e) {
         e->name = shortenString(e->name);
         return e;
     }
 
-    const IR::Node *preorder(IR::Declaration *g) override {
+    const IR::Node *preorder(IR::Declaration *g) {
         g->name = shortenString(g->name);
         return g;
     }
@@ -266,13 +280,13 @@ class ShortenTokenLength : public Transform {
         pl = IR::ParameterList{new_pl};
     }
 
-    const IR::Node *preorder(IR::DpdkAction *a) override {
+    const IR::Node *preorder(IR::DpdkAction *a) {
         a->name = shortenString(dropSuffixIfNoAction(a->name));
         shortenParamTypeName(a->para);
         return a;
     }
 
-    const IR::Node *preorder(IR::ActionList *al) override {
+    const IR::Node *preorder(IR::ActionList *al) {
         IR::IndexedVector<IR::ActionListElement> new_al;
         for (auto ale : al->actionList) {
             auto methodCallExpr = ale->expression->to<IR::MethodCallExpression>();
@@ -289,7 +303,7 @@ class ShortenTokenLength : public Transform {
         return new IR::ActionList(al->srcInfo, new_al);
     }
 
-    const IR::Node *preorder(IR::DpdkTable *t) override {
+    const IR::Node *preorder(IR::DpdkTable *t) {
         t->name = shortenString(t->name);
         auto methodCallExpr = t->default_action->to<IR::MethodCallExpression>();
         auto pathExpr = methodCallExpr->method->to<IR::PathExpression>();
@@ -302,37 +316,37 @@ class ShortenTokenLength : public Transform {
         return t;
     }
 
-    const IR::Node *preorder(IR::DpdkLearner *l) override {
+    const IR::Node *preorder(IR::DpdkLearner *l) {
         l->name = shortenString(l->name);
         return l;
     }
 
-    const IR::Node *preorder(IR::DpdkSelector *s) override {
+    const IR::Node *preorder(IR::DpdkSelector *s) {
         s->name = shortenString(s->name);
         return s;
     }
 
-    const IR::Node *preorder(IR::DpdkLearnStatement *ls) override {
+    const IR::Node *preorder(IR::DpdkLearnStatement *ls) {
         ls->action = shortenString(dropSuffixIfNoAction(ls->action));
         return ls;
     }
 
-    const IR::Node *preorder(IR::DpdkApplyStatement *as) override {
+    const IR::Node *preorder(IR::DpdkApplyStatement *as) {
         as->table = shortenString(as->table);
         return as;
     }
 
-    const IR::Node *preorder(IR::DpdkJmpStatement *j) override {
+    const IR::Node *preorder(IR::DpdkJmpStatement *j) {
         j->label = shortenString(j->label);
         return j;
     }
 
-    const IR::Node *preorder(IR::DpdkLabelStatement *ls) override {
+    const IR::Node *preorder(IR::DpdkLabelStatement *ls) {
         ls->label = shortenString(ls->label);
         return ls;
     }
 
-    const IR::Node *preorder(IR::DpdkJmpActionStatement *jas) override {
+    const IR::Node *preorder(IR::DpdkJmpActionStatement *jas) {
         jas->action = shortenString(dropSuffixIfNoAction(jas->action));
         return jas;
     }
@@ -565,7 +579,8 @@ class CollectUseDefInfo : public InspectorCRTP<CollectUseDefInfo> {
 };
 
 // This pass identifies redundant copies/moves and eliminates them.
-class CopyPropagationAndElimination : public Transform {
+class CopyPropagationAndElimination : public TransformCRTP<CopyPropagationAndElimination> {
+    using Base = TransformCRTP<CopyPropagationAndElimination>;
     std::unordered_map<cstring, int> newUsesInfo;
     P4::TypeMap *typeMap;
     CollectUseDefInfo *collectUseDef;
@@ -584,22 +599,25 @@ class CopyPropagationAndElimination : public Transform {
         collectUseDef->setCalledBy(this);
         return collectUseDef;
     }
-    const IR::Node *preorder(IR::DpdkAction *a) override {
+
+    using Base::preorder;
+    using Base::postorder;
+    const IR::Node *preorder(IR::DpdkAction *a) {
         a->apply(*calculateUseDef());
         return a;
     }
 
-    const IR::Node *preorder(IR::DpdkListStatement *l) override {
+    const IR::Node *preorder(IR::DpdkListStatement *l) {
         l->apply(*calculateUseDef());
         return l;
     }
 
-    const IR::Node *postorder(IR::DpdkAction *a) override {
+    const IR::Node *postorder(IR::DpdkAction *a) {
         a->statements = copyPropAndDeadCodeElim(a->statements);
         return a;
     }
 
-    const IR::Node *postorder(IR::DpdkListStatement *l) override {
+    const IR::Node *postorder(IR::DpdkListStatement *l) {
         return new IR::DpdkListStatement(copyPropAndDeadCodeElim(l->statements));
     }
 };

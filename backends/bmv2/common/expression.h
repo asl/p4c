@@ -36,17 +36,20 @@ namespace BMV2 {
    in P4-16 adding two 32-bit values should produce a 32-bit value, but using
    unbounded arithmetic, as in BMv2, it could produce a 33-bit value.
  */
-class ArithmeticFixup : public Transform {
+class ArithmeticFixup : public TransformCRTP<ArithmeticFixup> {
+    using Base = TransformCRTP<ArithmeticFixup>;
     P4::TypeMap *typeMap;
 
  public:
     const IR::Expression *fix(const IR::Expression *expr, const IR::Type_Bits *type);
     const IR::Node *updateType(const IR::Expression *expression);
-    const IR::Node *postorder(IR::Expression *expression) override;
-    const IR::Node *postorder(IR::Operation_Binary *expression) override;
-    const IR::Node *postorder(IR::Neg *expression) override;
-    const IR::Node *postorder(IR::Cmpl *expression) override;
-    const IR::Node *postorder(IR::Cast *expression) override;
+
+    using Base::postorder;
+    const IR::Node *postorder(IR::Expression *expression);
+    const IR::Node *postorder(IR::Operation_Binary *expression);
+    const IR::Node *postorder(IR::Neg *expression);
+    const IR::Node *postorder(IR::Cmpl *expression);
+    const IR::Node *postorder(IR::Cast *expression);
     explicit ArithmeticFixup(P4::TypeMap *typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
 };
 

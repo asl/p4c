@@ -35,7 +35,8 @@ is replaced with
 control c() { apply {} }
 control d() { @name("c") c() c_inst; { c_inst.apply(); }}
 */
-class DoInstantiateCalls : public Transform {
+class DoInstantiateCalls : public TransformCRTP<DoInstantiateCalls> {
+    using Base = TransformCRTP<DoInstantiateCalls>;
     ReferenceMap *refMap;
 
     IR::IndexedVector<IR::Declaration> insert;
@@ -45,9 +46,10 @@ class DoInstantiateCalls : public Transform {
         CHECK_NULL(refMap);
         setName("DoInstantiateCalls");
     }
-    const IR::Node *postorder(IR::P4Parser *parser) override;
-    const IR::Node *postorder(IR::P4Control *control) override;
-    const IR::Node *postorder(IR::MethodCallExpression *expression) override;
+    using Base::postorder;
+    const IR::Node *postorder(IR::P4Parser *parser);
+    const IR::Node *postorder(IR::P4Control *control);
+    const IR::Node *postorder(IR::MethodCallExpression *expression);
 };
 
 class InstantiateDirectCalls : public PassManager {

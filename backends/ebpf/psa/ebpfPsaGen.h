@@ -117,7 +117,8 @@ class PSAArchXDP : public PSAEbpfGenerator {
     void emitDummyProgram(CodeBuilder *builder) const;
 };
 
-class ConvertToEbpfPSA : public Transform {
+class ConvertToEbpfPSA : public TransformCRTP<ConvertToEbpfPSA> {
+    using Base = TransformCRTP<ConvertToEbpfPSA>;
     const EbpfOptions &options;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
@@ -128,7 +129,8 @@ class ConvertToEbpfPSA : public Transform {
         : options(options), typemap(typemap), refmap(refmap), ebpf_psa_arch(nullptr) {}
 
     const PSAEbpfGenerator *build(const IR::ToplevelBlock *prog);
-    const IR::Node *preorder(IR::ToplevelBlock *p) override;
+    using Base::preorder;
+    const IR::Node *preorder(IR::ToplevelBlock *p);
 
     const PSAEbpfGenerator *getPSAArchForEBPF() { return ebpf_psa_arch; }
 };

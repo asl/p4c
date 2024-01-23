@@ -43,7 +43,8 @@ namespace P4 {
  *      `IR::Declaration_Constant` nodes are initialized with
  *      compile-time known constants.
  */
-class DoConstantFolding : public Transform {
+class DoConstantFolding : public TransformCRTP<DoConstantFolding> {
+    using Base = TransformCRTP<DoConstantFolding>;
  protected:
     /// Used to resolve IR nodes to declarations.
     /// If `nullptr`, then `const` values cannot be resolved.
@@ -104,44 +105,46 @@ class DoConstantFolding : public Transform {
         assignmentTarget = false;
     }
 
-    const IR::Node *postorder(IR::Declaration_Constant *d) override;
-    const IR::Node *postorder(IR::PathExpression *e) override;
-    const IR::Node *postorder(IR::Cmpl *e) override;
-    const IR::Node *postorder(IR::Neg *e) override;
-    const IR::Node *postorder(IR::UPlus *e) override;
-    const IR::Node *postorder(IR::LNot *e) override;
-    const IR::Node *postorder(IR::LAnd *e) override;
-    const IR::Node *postorder(IR::LOr *e) override;
-    const IR::Node *postorder(IR::Slice *e) override;
-    const IR::Node *postorder(IR::Add *e) override;
-    const IR::Node *postorder(IR::AddSat *e) override;
-    const IR::Node *postorder(IR::Sub *e) override;
-    const IR::Node *postorder(IR::SubSat *e) override;
-    const IR::Node *postorder(IR::Mul *e) override;
-    const IR::Node *postorder(IR::Div *e) override;
-    const IR::Node *postorder(IR::Mod *e) override;
-    const IR::Node *postorder(IR::BXor *e) override;
-    const IR::Node *postorder(IR::BAnd *e) override;
-    const IR::Node *postorder(IR::BOr *e) override;
-    const IR::Node *postorder(IR::Equ *e) override;
-    const IR::Node *postorder(IR::Neq *e) override;
-    const IR::Node *postorder(IR::Lss *e) override;
-    const IR::Node *postorder(IR::Grt *e) override;
-    const IR::Node *postorder(IR::Leq *e) override;
-    const IR::Node *postorder(IR::Geq *e) override;
-    const IR::Node *postorder(IR::Shl *e) override;
-    const IR::Node *postorder(IR::Shr *e) override;
-    const IR::Node *postorder(IR::Concat *e) override;
-    const IR::Node *postorder(IR::Member *e) override;
-    const IR::Node *postorder(IR::Cast *e) override;
-    const IR::Node *postorder(IR::Mux *e) override;
-    const IR::Node *postorder(IR::Type_Bits *type) override;
-    const IR::Node *postorder(IR::Type_Varbits *type) override;
-    const IR::Node *postorder(IR::SelectExpression *e) override;
-    const IR::Node *postorder(IR::IfStatement *statement) override;
-    const IR::Node *preorder(IR::AssignmentStatement *statement) override;
-    const IR::Node *preorder(IR::ArrayIndex *e) override;
-    const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
+    using Base::preorder;
+    using Base::postorder;
+    const IR::Node *postorder(IR::Declaration_Constant *d);
+    const IR::Node *postorder(IR::PathExpression *e);
+    const IR::Node *postorder(IR::Cmpl *e);
+    const IR::Node *postorder(IR::Neg *e);
+    const IR::Node *postorder(IR::UPlus *e);
+    const IR::Node *postorder(IR::LNot *e);
+    const IR::Node *postorder(IR::LAnd *e);
+    const IR::Node *postorder(IR::LOr *e);
+    const IR::Node *postorder(IR::Slice *e);
+    const IR::Node *postorder(IR::Add *e);
+    const IR::Node *postorder(IR::AddSat *e);
+    const IR::Node *postorder(IR::Sub *e);
+    const IR::Node *postorder(IR::SubSat *e);
+    const IR::Node *postorder(IR::Mul *e);
+    const IR::Node *postorder(IR::Div *e);
+    const IR::Node *postorder(IR::Mod *e);
+    const IR::Node *postorder(IR::BXor *e);
+    const IR::Node *postorder(IR::BAnd *e);
+    const IR::Node *postorder(IR::BOr *e);
+    const IR::Node *postorder(IR::Equ *e);
+    const IR::Node *postorder(IR::Neq *e);
+    const IR::Node *postorder(IR::Lss *e);
+    const IR::Node *postorder(IR::Grt *e);
+    const IR::Node *postorder(IR::Leq *e);
+    const IR::Node *postorder(IR::Geq *e);
+    const IR::Node *postorder(IR::Shl *e);
+    const IR::Node *postorder(IR::Shr *e);
+    const IR::Node *postorder(IR::Concat *e);
+    const IR::Node *postorder(IR::Member *e);
+    const IR::Node *postorder(IR::Cast *e);
+    const IR::Node *postorder(IR::Mux *e);
+    const IR::Node *postorder(IR::Type_Bits *type);
+    const IR::Node *postorder(IR::Type_Varbits *type);
+    const IR::Node *postorder(IR::SelectExpression *e);
+    const IR::Node *postorder(IR::IfStatement *statement);
+    const IR::Node *preorder(IR::AssignmentStatement *statement);
+    const IR::Node *preorder(IR::ArrayIndex *e);
+    const IR::BlockStatement *preorder(IR::BlockStatement *bs) {
         if (bs->annotations->getSingle("disable_optimization")) prune();
         return bs;
     }

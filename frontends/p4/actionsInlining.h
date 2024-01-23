@@ -85,12 +85,17 @@ class InlineActions : public PassManager {
 namespace P4_14 {
 
 /// Special inliner which works directly on P4-14 representation
-class InlineActions : public Transform {
+class InlineActions : public TransformCRTP<InlineActions> {
+    using Base = TransformCRTP<InlineActions>;
+    friend Base;
     const IR::V1Program *global;
-    class SubstActionArgs : public Transform {
+    class SubstActionArgs : public TransformCRTP<SubstActionArgs> {
+        using Base = TransformCRTP<SubstActionArgs>;
+        friend Base;
         const IR::ActionFunction *function;
         const IR::Primitive *callsite;
-        const IR::Node *postorder(IR::ActionArg *arg) override {
+        using Base::postorder;
+        const IR::Node *postorder(IR::ActionArg *arg) {
             for (unsigned i = 0; i < function->args.size(); ++i)
                 if (function->args[i] == getOriginal()) return callsite->operands[i];
             BUG("Action arg not argument of action");
@@ -101,8 +106,9 @@ class InlineActions : public Transform {
         SubstActionArgs(const IR::ActionFunction *f, const IR::Primitive *c)
             : function(f), callsite(c) {}
     };
-    const IR::V1Program *preorder(IR::V1Program *gl) override { return global = gl; }
-    const IR::Node *preorder(IR::Primitive *p) override {
+    using Base::preorder;
+    const IR::V1Program *preorder(IR::V1Program *gl) { return global = gl; }
+    const IR::Node *preorder(IR::Primitive *p) {
         if (auto af = global->get<IR::ActionFunction>(p->name)) {
             SubstActionArgs saa(af, p);
             saa.setCalledBy(this);

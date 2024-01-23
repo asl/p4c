@@ -184,7 +184,8 @@ class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {
 
 // Similar to class ConvertToEbpfPSA in backends/ebpf/psa/ebpfPsaGen.h
 
-class ConvertToEbpfPNA : public Transform {
+class ConvertToEbpfPNA : public TransformCRTP<ConvertToEbpfPNA> {
+    using Base = TransformCRTP<ConvertToEbpfPNA>;
     const EbpfOptions &options;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
@@ -197,7 +198,8 @@ class ConvertToEbpfPNA : public Transform {
         : options(options), typemap(typemap), refmap(refmap), ebpf_program(nullptr), tcIR(tcIR) {}
 
     const PNAEbpfGenerator *build(const IR::ToplevelBlock *prog);
-    const IR::Node *preorder(IR::ToplevelBlock *p) override;
+    using Base::preorder;
+    const IR::Node *preorder(IR::ToplevelBlock *p);
     const PNAEbpfGenerator *getEBPFProgram() { return ebpf_program; }
 };
 

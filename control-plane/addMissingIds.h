@@ -8,7 +8,9 @@
 
 namespace P4 {
 
-class MissingIdAssigner : public Transform {
+class MissingIdAssigner : public TransformCRTP<MissingIdAssigner> {
+    using Base = TransformCRTP<MissingIdAssigner>;
+    friend Base;
     /// The reference map. This is needed to identify the correct references for
     /// some extern constructs.
     ReferenceMap *refMap;
@@ -31,12 +33,14 @@ class MissingIdAssigner : public Transform {
     /// particular architecture.
     const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface &archBuilder;
 
-    const IR::P4Program *preorder(IR::P4Program *program) override;
-    const IR::Property *postorder(IR::Property *property) override;
-    const IR::P4Table *postorder(IR::P4Table *table) override;
-    const IR::Type_Header *postorder(IR::Type_Header *hdr) override;
-    const IR::P4ValueSet *postorder(IR::P4ValueSet *valueSet) override;
-    const IR::P4Action *postorder(IR::P4Action *action) override;
+    using Base::preorder;
+    using Base::postorder;
+    const IR::P4Program *preorder(IR::P4Program *program);
+    const IR::Property *postorder(IR::Property *property);
+    const IR::P4Table *postorder(IR::P4Table *table);
+    const IR::Type_Header *postorder(IR::Type_Header *hdr);
+    const IR::P4ValueSet *postorder(IR::P4ValueSet *valueSet);
+    const IR::P4Action *postorder(IR::P4Action *action);
 
  public:
     explicit MissingIdAssigner(

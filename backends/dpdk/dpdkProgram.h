@@ -35,7 +35,8 @@ limitations under the License.
 
 namespace DPDK {
 
-class ConvertToDpdkProgram : public Transform {
+class ConvertToDpdkProgram : public TransformCRTP<ConvertToDpdkProgram> {
+    using Base = TransformCRTP<ConvertToDpdkProgram>;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
@@ -52,7 +53,8 @@ class ConvertToDpdkProgram : public Transform {
     IR::IndexedVector<IR::DpdkAsmStatement> create_psa_preamble();
     IR::IndexedVector<IR::DpdkAsmStatement> create_pna_postamble();
     IR::IndexedVector<IR::DpdkAsmStatement> create_psa_postamble();
-    const IR::Node *preorder(IR::P4Program *p) override;
+    using Base::preorder;
+    const IR::Node *preorder(IR::P4Program *p);
     const IR::DpdkAsmProgram *getDpdkProgram() { return dpdk_program; }
     IR::IndexedVector<IR::DpdkStructType> UpdateHeaderMetadata(IR::P4Program *prog,
                                                                IR::Type_Struct *metadata);
@@ -151,13 +153,15 @@ class CollectActionUses : public InspectorCRTP<CollectActionUses> {
     }
 };
 
-class ElimUnusedActions : public Transform {
+class ElimUnusedActions : public TransformCRTP<ElimUnusedActions> {
+    using Base = TransformCRTP<ElimUnusedActions>;
     const ordered_set<cstring> &used_actions;
     std::set<cstring> kept_actions;
 
  public:
     explicit ElimUnusedActions(const ordered_set<cstring> &a) : used_actions(a) {}
-    const IR::Node *postorder(IR::DpdkAction *a) override {
+    using Base::postorder;
+    const IR::Node *postorder(IR::DpdkAction *a) {
         if (kept_actions.count(a->name.name) != 0) return nullptr;
         if (used_actions.find(a->name.name) != used_actions.end()) {
             kept_actions.insert(a->name.name);

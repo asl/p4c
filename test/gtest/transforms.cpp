@@ -25,10 +25,12 @@ namespace Test {
 class P4C_IR : public P4CTest {};
 
 TEST_F(P4C_IR, Transform) {
-    struct TestTrans : public Transform {
+    struct TestTrans : public TransformCRTP<TestTrans> {
+        using Base = TransformCRTP<TestTrans>;
         explicit TestTrans(IR::Constant *c) : c(c) {}
 
-        IR::Node *postorder(IR::Add *a) override {
+        using Base::postorder;
+        IR::Node *postorder(IR::Add *a) {
             EXPECT_EQ(c, a->left);
             EXPECT_EQ(c, a->right);
             return a;

@@ -148,34 +148,38 @@ bool Taint::hasTaint(const IR::Expression *expr) {
     BUG("Taint checking is unsupported for %1% of type %2%", expr, expr->node_type_name());
 }
 
-class TaintPropagator : public Transform {
-    const IR::Node *postorder(IR::Expression *node) override {
+class TaintPropagator : public TransformCRTP<TaintPropagator> {
+    using Base = TransformCRTP<TaintPropagator>;
+    friend Base;
+    using Base::postorder;
+    using Base::preorder;
+    const IR::Node *postorder(IR::Expression *node) {
         P4C_UNIMPLEMENTED("Taint transformation not supported for node %1% of type %2%", node,
                           node->node_type_name());
     }
 
-    const IR::Node *postorder(IR::Type *type) override {
+    const IR::Node *postorder(IR::Type *type) {
         // Types can not have taint, just return them.
         return type;
     }
 
-    const IR::Node *postorder(IR::Literal *lit) override {
+    const IR::Node *postorder(IR::Literal *lit) {
         // Literals can also not have taint, just return them.
         return lit;
     }
 
-    const IR::Node *postorder(IR::TaintExpression *expr) override { return expr; }
+    const IR::Node *postorder(IR::TaintExpression *expr) { return expr; }
 
-    const IR::Node *postorder(IR::SymbolicVariable *var) override {
+    const IR::Node *postorder(IR::SymbolicVariable *var) {
         return IR::getMaxValueConstant(var->type);
     }
 
-    const IR::Node *postorder(IR::ConcolicVariable *var) override {
+    const IR::Node *postorder(IR::ConcolicVariable *var) {
         return IR::getMaxValueConstant(var->type);
     }
-    const IR::Node *postorder(IR::Operation_Unary *unary_op) override { return unary_op->expr; }
+    const IR::Node *postorder(IR::Operation_Unary *unary_op) { return unary_op->expr; }
 
-    const IR::Node *postorder(IR::Cast *cast) override {
+    const IR::Node *postorder(IR::Cast *cast) {
         if (Taint::hasTaint(cast->expr)) {
             // Try to cast the taint to whatever type is specified.
             auto *taintClone = cast->expr->clone();
@@ -187,21 +191,21 @@ class TaintPropagator : public Transform {
         return IR::getDefaultValue(cast->destType);
     }
 
-    const IR::Node *postorder(IR::Operation_Binary *bin_op) override {
+    const IR::Node *postorder(IR::Operation_Binary *bin_op) {
         if (Taint::hasTaint(bin_op->right)) {
             return bin_op->right;
         }
         return bin_op->left;
     }
 
-    const IR::Node *postorder(IR::Concat *concat) override { return concat; }
+    const IR::Node *postorder(IR::Concat *concat) { return concat; }
 
-    const IR::Node *postorder(IR::Operation_Ternary *ternary_op) override {
+    const IR::Node *postorder(IR::Operation_Ternary *ternary_op) {
         BUG("Operation ternary %1% of type %2% should not be encountered in the taint propagator.",
             ternary_op, ternary_op->node_type_name());
     }
 
-    const IR::Node *preorder(IR::Slice *slice) override {
+    const IR::Node *preorder(IR::Slice *slice) {
         // We assume a bit type here...
         BUG_CHECK(!slice->e0->is<IR::Type_Bits>(),
                   "Expected Type_Bits for the slice expression but received %1%",

@@ -52,17 +52,22 @@ class CollectMetadataHeaderInfo;
  * headers.header_name.field_name -> h.header_name.field_name The parameter
  * named for header and metadata are also updated to "h" and "m" respectively.
  */
-class ConvertToDpdkArch : public Transform {
+class ConvertToDpdkArch : public TransformCRTP<ConvertToDpdkArch> {
+    using Base = TransformCRTP<ConvertToDpdkArch>;
+    friend Base;
     P4::ReferenceMap *refMap;
     DpdkProgramStructure *structure;
 
     const IR::Type_Control *rewriteControlType(const IR::Type_Control *, cstring);
     const IR::Type_Parser *rewriteParserType(const IR::Type_Parser *, cstring);
     const IR::Type_Control *rewriteDeparserType(const IR::Type_Control *, cstring);
-    const IR::Node *postorder(IR::Type_Control *c) override;
-    const IR::Node *postorder(IR::Type_Parser *p) override;
-    const IR::Node *preorder(IR::Member *m) override;
-    const IR::Node *preorder(IR::PathExpression *pe) override;
+
+    using Base::postorder;
+    using Base::preorder;
+    const IR::Node *postorder(IR::Type_Control *c);
+    const IR::Node *postorder(IR::Type_Parser *p);
+    const IR::Node *preorder(IR::Member *m);
+    const IR::Node *preorder(IR::PathExpression *pe);
 
  public:
     ConvertToDpdkArch(P4::ReferenceMap *refMap, DpdkProgramStructure *structure)
@@ -175,16 +180,19 @@ struct ConvertLookahead : public PassManager {
         void postorder(const IR::AssignmentStatement *statement);
     };
 
-    class Replace : public Transform {
+    class Replace : public TransformCRTP<Replace> {
+        using Base = TransformCRTP<Replace>;
         DpdkProgramStructure *structure;
         ReplacementMap *repl;
 
      public:
         Replace(DpdkProgramStructure *structure, ReplacementMap *repl)
             : structure(structure), repl(repl) {}
-        const IR::Node *postorder(IR::AssignmentStatement *as) override;
-        const IR::Node *postorder(IR::Type_Struct *s) override;
-        const IR::Node *postorder(IR::P4Parser *parser) override;
+
+        using Base::postorder;
+        const IR::Node *postorder(IR::AssignmentStatement *as);
+        const IR::Node *postorder(IR::Type_Struct *s);
+        const IR::Node *postorder(IR::P4Parser *parser);
     };
 
     ConvertLookahead(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, DpdkProgramStructure *s) {
@@ -217,30 +225,37 @@ class CollectMetadataHeaderInfo : public InspectorCRTP<CollectMetadataHeaderInfo
 // Previously, we have collected the information about how the single metadata
 // struct looks like in CollectMetadataHeaderInfo. This pass finds a suitable
 // place to inject this struct.
-class InjectJumboStruct : public Transform {
+class InjectJumboStruct : public TransformCRTP<InjectJumboStruct> {
+    using Base = TransformCRTP<InjectJumboStruct>;
     DpdkProgramStructure *structure;
 
  public:
     explicit InjectJumboStruct(DpdkProgramStructure *structure) : structure(structure) {}
-    const IR::Node *preorder(IR::Type_Struct *s) override;
+
+    using Base::preorder;
+    const IR::Node *preorder(IR::Type_Struct *s);
 };
 
 // This pass injects metadata field which is used as port for 'tx' instruction
 // into the single metadata struct.
 // This pass has to be applied after CollectMetadataHeaderInfo fills
 // local_metadata_type field in DpdkProgramStructure which is passed to the constructor.
-class InjectFixedMetadataField : public Transform {
+class InjectFixedMetadataField : public TransformCRTP<InjectFixedMetadataField> {
+    using Base = TransformCRTP<InjectFixedMetadataField>;
     DpdkProgramStructure *structure;
 
  public:
     explicit InjectFixedMetadataField(DpdkProgramStructure *structure) : structure(structure) {}
-    const IR::Node *preorder(IR::Type_Struct *s) override;
+
+    using Base::preorder;
+    const IR::Node *preorder(IR::Type_Struct *s);
 };
 
 /// This pass replaces unaligned header fields with aligned header fields
 /// by combining few contiguous header fields and replaces uses with slices
 /// to preserve the behavior
-class AlignHdrMetaField : public Transform {
+class AlignHdrMetaField : public TransformCRTP<AlignHdrMetaField> {
+    using Base = TransformCRTP<AlignHdrMetaField>;
     DpdkProgramStructure *structure;
 
     ordered_map<cstring, struct fieldInfo> field_name_list;
@@ -249,8 +264,10 @@ class AlignHdrMetaField : public Transform {
     explicit AlignHdrMetaField(DpdkProgramStructure *structure) : structure(structure) {
         CHECK_NULL(structure);
     }
-    const IR::Node *preorder(IR::Type_StructLike *st) override;
-    const IR::Node *preorder(IR::Member *m) override;
+
+    using Base::preorder;
+    const IR::Node *preorder(IR::Type_StructLike *st);
+    const IR::Node *preorder(IR::Member *m);
 };
 
 struct ByteAlignment : public PassManager {
@@ -273,9 +290,11 @@ struct ByteAlignment : public PassManager {
     }
 };
 
-class ReplaceHdrMetaField : public Transform {
+class ReplaceHdrMetaField : public TransformCRTP<ReplaceHdrMetaField> {
+    using Base = TransformCRTP<ReplaceHdrMetaField>;
  public:
-    const IR::Node *postorder(IR::Type_Struct *st) override;
+    using Base::postorder;
+    const IR::Node *postorder(IR::Type_Struct *st);
 };
 
 struct fieldInfo {
@@ -340,7 +359,8 @@ class DeclarationInjector {
  * have a separate pass for it, because IfStatement does not want to unroll
  * logical expression(dpdk asm has conditional jmp for these cases)
  */
-class StatementUnroll : public Transform {
+class StatementUnroll : public TransformCRTP<StatementUnroll> {
+    using Base = TransformCRTP<StatementUnroll>;
  private:
     P4::ReferenceMap *refMap;
     DpdkProgramStructure *structure;
@@ -349,9 +369,12 @@ class StatementUnroll : public Transform {
  public:
     StatementUnroll(P4::ReferenceMap *refMap, DpdkProgramStructure *structure)
         : refMap(refMap), structure(structure) {}
-    const IR::Node *preorder(IR::AssignmentStatement *a) override;
-    const IR::Node *postorder(IR::P4Control *a) override;
-    const IR::Node *postorder(IR::P4Parser *a) override;
+
+    using Base::preorder;
+    using Base::postorder;
+    const IR::Node *preorder(IR::AssignmentStatement *a);
+    const IR::Node *postorder(IR::P4Control *a);
+    const IR::Node *postorder(IR::P4Parser *a);
 };
 
 /* This pass helps StatementUnroll to unroll expressions inside statements.
@@ -387,7 +410,8 @@ class ExpressionUnroll : public InspectorCRTP<ExpressionUnroll> {
 // This pass is similiar to StatementUnroll pass, the difference is that this
 // pass will call LogicalExpressionUnroll to unroll the expression, which treat
 // logical expression differently.
-class IfStatementUnroll : public Transform {
+class IfStatementUnroll : public TransformCRTP<IfStatementUnroll> {
+    using Base = TransformCRTP<IfStatementUnroll>;
  private:
     P4::ReferenceMap *refMap;
     DeclarationInjector injector;
@@ -396,10 +420,12 @@ class IfStatementUnroll : public Transform {
     explicit IfStatementUnroll(P4::ReferenceMap *refMap) : refMap(refMap) {
         setName("IfStatementUnroll");
     }
-    const IR::Node *postorder(IR::SwitchStatement *a) override;
-    const IR::Node *postorder(IR::IfStatement *a) override;
-    const IR::Node *postorder(IR::P4Control *a) override;
-    const IR::Node *postorder(IR::P4Parser *a) override;
+
+    using Base::postorder;
+    const IR::Node *postorder(IR::SwitchStatement *a);
+    const IR::Node *postorder(IR::IfStatement *a);
+    const IR::Node *postorder(IR::P4Control *a);
+    const IR::Node *postorder(IR::P4Parser *a);
 };
 
 /* Assume one logical expression looks like this: a && (b + c > d), this pass
@@ -439,15 +465,18 @@ class LogicalExpressionUnroll : public InspectorCRTP<LogicalExpressionUnroll> {
 // According to dpdk spec, Binary Operation will only have two parameters, which
 // looks like: a = a + b. Therefore, this pass transform all AssignStatement
 // that has Binary_Operation to become two-parameter form.
-class ConvertBinaryOperationTo2Params : public Transform {
+class ConvertBinaryOperationTo2Params : public TransformCRTP<ConvertBinaryOperationTo2Params> {
+    using Base = TransformCRTP<ConvertBinaryOperationTo2Params>;
     DeclarationInjector injector;
     P4::ReferenceMap *refMap;
 
  public:
     explicit ConvertBinaryOperationTo2Params(P4::ReferenceMap *refMap) : refMap(refMap) {}
-    const IR::Node *postorder(IR::AssignmentStatement *a) override;
-    const IR::Node *postorder(IR::P4Control *a) override;
-    const IR::Node *postorder(IR::P4Parser *a) override;
+
+    using Base::postorder;
+    const IR::Node *postorder(IR::AssignmentStatement *a);
+    const IR::Node *postorder(IR::P4Control *a);
+    const IR::Node *postorder(IR::P4Parser *a);
 };
 
 // Since in dpdk asm, there is no local variable declaration, we need to collect
@@ -455,7 +484,8 @@ class ConvertBinaryOperationTo2Params : public Transform {
 // Local variables which are of header types are injected into headers struct
 // instead of metadata struct, so that they can be instantiated as headers in the
 // resulting dpdk asm file.
-class CollectLocalVariables : public Transform {
+class CollectLocalVariables : public TransformCRTP<CollectLocalVariables> {
+    using Base = TransformCRTP<CollectLocalVariables>;
     ordered_map<const IR::Declaration_Variable *, const cstring> localsMap;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
@@ -477,12 +507,15 @@ class CollectLocalVariables : public Transform {
     CollectLocalVariables(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                           DpdkProgramStructure *structure)
         : refMap(refMap), typeMap(typeMap), structure(structure) {}
-    const IR::Node *preorder(IR::P4Program *p) override;
-    const IR::Node *postorder(IR::Type_Struct *s) override;
-    const IR::Node *postorder(IR::Member *m) override;
-    const IR::Node *postorder(IR::PathExpression *path) override;
-    const IR::Node *postorder(IR::P4Control *c) override;
-    const IR::Node *postorder(IR::P4Parser *p) override;
+
+    using Base::preorder;
+    using Base::postorder;
+    const IR::Node *preorder(IR::P4Program *p);
+    const IR::Node *postorder(IR::Type_Struct *s);
+    const IR::Node *postorder(IR::Member *m);
+    const IR::Node *postorder(IR::PathExpression *path);
+    const IR::Node *postorder(IR::P4Control *c);
+    const IR::Node *postorder(IR::P4Parser *p);
 };
 
 // According to dpdk spec, action parameters should prepend a p. In order to
@@ -493,7 +526,8 @@ class CollectLocalVariables : public Transform {
 // front of action parameters. Please note that it is possible that the user
 // defines a struct paremeter himself or define multiple struct parameters in
 // action parameterlist. Current implementation does not support this.
-class PrependPDotToActionArgs : public Transform {
+class PrependPDotToActionArgs : public TransformCRTP<PrependPDotToActionArgs> {
+    using Base = TransformCRTP<PrependPDotToActionArgs>;
     P4::TypeMap *typeMap;
     P4::ReferenceMap *refMap;
     DpdkProgramStructure *structure;
@@ -502,10 +536,13 @@ class PrependPDotToActionArgs : public Transform {
     PrependPDotToActionArgs(P4::TypeMap *typeMap, P4::ReferenceMap *refMap,
                             DpdkProgramStructure *structure)
         : typeMap(typeMap), refMap(refMap), structure(structure) {}
-    const IR::Node *postorder(IR::P4Action *a) override;
-    const IR::Node *postorder(IR::P4Program *s) override;
-    const IR::Node *preorder(IR::PathExpression *path) override;
-    const IR::Node *preorder(IR::MethodCallExpression *) override;
+    
+    using Base::postorder;
+    using Base::preorder;
+    const IR::Node *postorder(IR::P4Action *a);
+    const IR::Node *postorder(IR::P4Program *s);
+    const IR::Node *preorder(IR::PathExpression *path);
+    const IR::Node *preorder(IR::MethodCallExpression *);
 };
 
 /* This class is used to process the default action
@@ -530,7 +567,8 @@ class DefActionValue : public InspectorCRTP<DefActionValue> {
 // dpdk does not support ternary operator so we need to translate ternary operator
 // to corresponding if else statement
 // Taken from frontend pass DoSimplifyExpressions in sideEffects.h
-class DismantleMuxExpressions : public Transform {
+class DismantleMuxExpressions : public TransformCRTP<DismantleMuxExpressions> {
+    using Base = TransformCRTP<DismantleMuxExpressions>;
     P4::TypeMap *typeMap;
     P4::ReferenceMap *refMap;
     IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
@@ -543,12 +581,15 @@ class DismantleMuxExpressions : public Transform {
  public:
     DismantleMuxExpressions(P4::TypeMap *typeMap, P4::ReferenceMap *refMap)
         : typeMap(typeMap), refMap(refMap) {}
-    const IR::Node *preorder(IR::Mux *expression) override;
-    const IR::Node *postorder(IR::P4Parser *parser) override;
-    const IR::Node *postorder(IR::Function *function) override;
-    const IR::Node *postorder(IR::P4Control *control) override;
-    const IR::Node *postorder(IR::P4Action *action) override;
-    const IR::Node *postorder(IR::AssignmentStatement *statement) override;
+
+    using Base::preorder;
+    using Base::postorder;
+    const IR::Node *preorder(IR::Mux *expression);
+    const IR::Node *postorder(IR::P4Parser *parser);
+    const IR::Node *postorder(IR::Function *function);
+    const IR::Node *postorder(IR::P4Control *control);
+    const IR::Node *postorder(IR::P4Action *action);
+    const IR::Node *postorder(IR::AssignmentStatement *statement);
 };
 
 // For dpdk asm, there is not object-oriented. Therefore, we cannot define a
@@ -588,7 +629,8 @@ class CollectInternetChecksumInstance : public InspectorCRTP<CollectInternetChec
 // This pass will inject checksum states into header. The reason why we inject
 // state into header instead of metadata is due to the implementation of dpdk
 // side(a question related to endianness)
-class InjectInternetChecksumIntermediateValue : public Transform {
+class InjectInternetChecksumIntermediateValue : public TransformCRTP<InjectInternetChecksumIntermediateValue> {
+    using Base = TransformCRTP<InjectInternetChecksumIntermediateValue>;
     DpdkProgramStructure *structure;
     std::vector<cstring> *csum_vec;
 
@@ -597,7 +639,8 @@ class InjectInternetChecksumIntermediateValue : public Transform {
                                             std::vector<cstring> *csum_vec)
         : structure(structure), csum_vec(csum_vec) {}
 
-    const IR::Node *postorder(IR::P4Program *p) override {
+    using Base::postorder;
+    const IR::Node *postorder(IR::P4Program *p) {
         auto new_objs = new IR::Vector<IR::Node>;
         bool inserted = false;
         for (auto obj : p->objects) {
@@ -618,7 +661,7 @@ class InjectInternetChecksumIntermediateValue : public Transform {
         return p;
     }
 
-    const IR::Node *postorder(IR::Type_Struct *s) override {
+    const IR::Node *postorder(IR::Type_Struct *s) {
         if (s->name.name == structure->header_type) {
             if (structure->csum_map.size() > 0)
                 s->fields.push_back(new IR::StructField(
@@ -715,8 +758,10 @@ class CollectExternDeclaration : public InspectorCRTP<CollectExternDeclaration> 
 // optimization. This pass breaks parenthesis looks liks this: (a && b) && c.
 // After this pass, the expression looks like this: a && b && c. (The AST is
 // different).
-class BreakLogicalExpressionParenthesis : public Transform {
+class BreakLogicalExpressionParenthesis : public TransformCRTP<BreakLogicalExpressionParenthesis> {
+    using Base = TransformCRTP<BreakLogicalExpressionParenthesis>;
  public:
+    using Base::postorder;
     const IR::Node *postorder(IR::LAnd *land) {
         if (auto land2 = land->left->to<IR::LAnd>()) {
             auto sub = new IR::LAnd(land2->right, land->right);
@@ -748,7 +793,8 @@ class BreakLogicalExpressionParenthesis : public Transform {
 // expression. Note that even for a subexpression of a logical expression, we
 // will swap it as well. For example, a && ((b && c) || d), will become
 // a && (d || (b && c))
-class SwapSimpleExpressionToFrontOfLogicalExpression : public Transform {
+class SwapSimpleExpressionToFrontOfLogicalExpression : public TransformCRTP<SwapSimpleExpressionToFrontOfLogicalExpression> {
+    using Base = TransformCRTP<SwapSimpleExpressionToFrontOfLogicalExpression>;
     bool is_simple(const IR::Node *n) {
         if (n->is<IR::Equ>() || n->is<IR::Neq>() || n->is<IR::Lss>() || n->is<IR::Grt>() ||
             n->is<IR::Geq>() || n->is<IR::Leq>() || n->is<IR::MethodCallExpression>() ||
@@ -762,6 +808,7 @@ class SwapSimpleExpressionToFrontOfLogicalExpression : public Transform {
     }
 
  public:
+    using Base::postorder;
     const IR::Node *postorder(IR::LAnd *land) {
         if (!is_simple(land->left) && is_simple(land->right)) {
             return new IR::LAnd(land->right, land->left);
@@ -985,11 +1032,13 @@ class SplitActionProfileTable : public SplitP4TableCommon {
  * constant values for each action.
  *
  */
-class UpdateActionForSwitch : public Transform {
+class UpdateActionForSwitch : public TransformCRTP<UpdateActionForSwitch> {
+    using Base = TransformCRTP<UpdateActionForSwitch>;
     SwitchHandler &sw;
 
  public:
     explicit UpdateActionForSwitch(SwitchHandler &sw) : sw(sw) { setName("UpdateActionForSwitch"); }
+    using Base::postorder;
     const IR::Node *postorder(IR::P4Action *action) { return sw.setSwitchVarInAction(action); }
 };
 /**
@@ -1186,7 +1235,8 @@ class CollectErrors : public InspectorCRTP<CollectErrors> {
  * hdr.ethernet.etherType = hdr.outer_ethernet.etherType
  *
  */
-class ElimHeaderCopy : public Transform {
+class ElimHeaderCopy : public TransformCRTP<ElimHeaderCopy> {
+    using Base = TransformCRTP<ElimHeaderCopy>;
     P4::TypeMap *typeMap;
     /// It's for populating replacement map by keeping temporary header name as key
     /// and source of assignment statement as value.
@@ -1201,9 +1251,12 @@ class ElimHeaderCopy : public Transform {
  public:
     explicit ElimHeaderCopy(P4::TypeMap *typeMap) : typeMap{typeMap} {}
     bool isHeader(const IR::Expression *e);
-    const IR::Node *preorder(IR::AssignmentStatement *as) override;
-    const IR::Node *preorder(IR::MethodCallStatement *mcs) override;
-    const IR::Node *postorder(IR::Member *m) override;
+
+    using Base::preorder;
+    using Base::postorder;
+    const IR::Node *preorder(IR::AssignmentStatement *as);
+    const IR::Node *preorder(IR::MethodCallStatement *mcs);
+    const IR::Node *postorder(IR::Member *m);
 };
 
 class EliminateHeaderCopy : public PassManager {
@@ -1299,7 +1352,8 @@ class HaveNonHeaderChecksumArgs : public InspectorCRTP<HaveNonHeaderChecksumArgs
 /// It adds a type decl like below
 /// @__pseudo_header__ header dpdk_pseudo_header_t {
 /// }
-class DpdkAddPseudoHeaderDecl : public Transform {
+class DpdkAddPseudoHeaderDecl : public TransformCRTP<DpdkAddPseudoHeaderDecl> {
+    using Base = TransformCRTP<DpdkAddPseudoHeaderDecl>;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     bool &is_all_args_header;
@@ -1317,8 +1371,9 @@ class DpdkAddPseudoHeaderDecl : public Transform {
         (void)this->refMap;
     }
 
-    const IR::Node *preorder(IR::P4Program *program) override;
-    const IR::Node *preorder(IR::Type_Struct *st) override;
+    using Base::preorder;
+    const IR::Node *preorder(IR::P4Program *program);
+    const IR::Node *preorder(IR::Type_Struct *st);
 };
 
 /// @brief This pass identifies and collects statement which requires it's operand to be
@@ -1336,7 +1391,8 @@ class DpdkAddPseudoHeaderDecl : public Transform {
 ///    f1 = h.dpdk_pseudo_header.pseudo_0,f2 = h.dpdk_pseudo_header.pseudo_1,
 ///    f3 = h.dpdk_pseudo_header.pseudo_2,f4 = h.dpdk_pseudo_header.pseudo_3});
 
-class MoveNonHeaderFieldsToPseudoHeader : public Transform {
+class MoveNonHeaderFieldsToPseudoHeader : public TransformCRTP<MoveNonHeaderFieldsToPseudoHeader> {
+    using Base = TransformCRTP<MoveNonHeaderFieldsToPseudoHeader>;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     bool &is_all_args_header;
@@ -1349,7 +1405,8 @@ class MoveNonHeaderFieldsToPseudoHeader : public Transform {
         : refMap(refMap), typeMap(typeMap), is_all_args_header(is_all_args_header) {}
     std::pair<IR::AssignmentStatement *, IR::Member *> addAssignmentStmt(const IR::Expression *ne);
 
-    const IR::Node *postorder(IR::P4Program *p) override {
+    using Base::postorder;
+    const IR::Node *postorder(IR::P4Program *p) {
         if (newStructTypes.size() > 0) {
             IR::Vector<IR::Node> allTypeDecls;
             allTypeDecls.append(newStructTypes);
@@ -1358,13 +1415,14 @@ class MoveNonHeaderFieldsToPseudoHeader : public Transform {
         }
         return p;
     }
-    const IR::Node *postorder(IR::MethodCallStatement *statement) override;
-    const IR::Node *postorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *postorder(IR::MethodCallStatement *statement);
+    const IR::Node *postorder(IR::AssignmentStatement *statement);
 };
 
 /// @brief This pass finally adds all the collected fields to pseudo header
 /// add collected pseudo header fields into dpdk_pseudo_header_t
-class AddFieldsToPseudoHeader : public Transform {
+class AddFieldsToPseudoHeader : public TransformCRTP<AddFieldsToPseudoHeader> {
+    using Base = TransformCRTP<AddFieldsToPseudoHeader>;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     bool &is_all_args_header;
@@ -1376,7 +1434,8 @@ class AddFieldsToPseudoHeader : public Transform {
         (void)this->typeMap;
         (void)this->refMap;
     }
-    const IR::Node *preorder(IR::Type_Header *h) override;
+    using Base::preorder;
+    const IR::Node *preorder(IR::Type_Header *h);
 };
 
 struct DpdkAddPseudoHeader : public PassManager {
@@ -1434,27 +1493,35 @@ class CollectProgramStructure : public PassManager {
 
 // Add collected local struct variable decls as a field in metadata
 // struct
-class MoveCollectedStructLocalVariableToMetadata : public Transform {
+class MoveCollectedStructLocalVariableToMetadata : public TransformCRTP<MoveCollectedStructLocalVariableToMetadata> {
+    using Base = TransformCRTP<MoveCollectedStructLocalVariableToMetadata>;
     P4::TypeMap *typeMap;
 
  public:
     explicit MoveCollectedStructLocalVariableToMetadata(P4::TypeMap *typeMap) : typeMap(typeMap) {}
-    const IR::Node *preorder(IR::Type_Struct *s) override;
-    const IR::Node *postorder(IR::P4Control *c) override;
-    const IR::Node *postorder(IR::P4Program *p) override;
-    const IR::Node *postorder(IR::P4Parser *c) override;
+
+    using Base::preorder;
+    using Base::postorder;
+    const IR::Node *preorder(IR::Type_Struct *s);
+    const IR::Node *postorder(IR::P4Control *c);
+    const IR::Node *postorder(IR::P4Program *p);
+    const IR::Node *postorder(IR::P4Parser *c);
 };
 
 // Collect all local struct variable and metadata struct type
-class CollectStructLocalVariables : public Transform {
+class CollectStructLocalVariables : public TransformCRTP<CollectStructLocalVariables> {
+    using Base = TransformCRTP<CollectStructLocalVariables>;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
 
  public:
     CollectStructLocalVariables(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
         : refMap(refMap), typeMap(typeMap) {}
-    const IR::Node *postorder(IR::P4Parser *c) override;
-    const IR::Node *preorder(IR::PathExpression *path) override;
+
+    using Base::preorder;
+    using Base::postorder;
+    const IR::Node *postorder(IR::P4Parser *c);
+    const IR::Node *preorder(IR::PathExpression *path);
     static const IR::Type_Struct *metadataStrct;
     static std::map<cstring, const IR::Type *> fieldNameType;
     static IR::Vector<IR::Node> type_tobe_moved_at_top;
@@ -1534,7 +1601,8 @@ class CollectIPSecInfo : public InspectorCRTP<CollectIPSecInfo> {
  * insert required registers and a pseudo header for enabling IPSec encryption and decryption. It
  * also handles setting of output port in the deparser.
  */
-class InsertReqDeclForIPSec : public Transform {
+class InsertReqDeclForIPSec : public TransformCRTP<InsertReqDeclForIPSec> {
+    using Base = TransformCRTP<InsertReqDeclForIPSec>;
     P4::ReferenceMap *refMap;
     DpdkProgramStructure *structure;
     bool &is_ipsec_used;
@@ -1555,9 +1623,10 @@ class InsertReqDeclForIPSec : public Transform {
         setName("InsertReqDeclForIPSec");
     }
 
-    const IR::Node *preorder(IR::P4Program *program) override;
-    const IR::Node *preorder(IR::Type_Struct *s) override;
-    const IR::Node *preorder(IR::P4Control *c) override;
+    using Base::preorder;
+    const IR::Node *preorder(IR::P4Program *program);
+    const IR::Node *preorder(IR::Type_Struct *s);
+    const IR::Node *preorder(IR::P4Control *c);
     IR::IndexedVector<IR::StatOrDecl> *addRegDeclInstance(std::vector<cstring> portRegs);
 };
 
