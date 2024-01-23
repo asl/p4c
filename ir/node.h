@@ -30,6 +30,7 @@ limitations under the License.
 class Visitor;
 struct Visitor_Context;
 class Inspector;
+template <class T> class InspectorCRTP;
 class Modifier;
 class Transform;
 class JSONGenerator;
@@ -113,6 +114,7 @@ class Node : public virtual INode {
     virtual void visit_children(Visitor &) const {}
     friend class ::Visitor;
     friend class ::Inspector;
+    template <class T> friend class ::InspectorCRTP;
     friend class ::Modifier;
     friend class ::Transform;
     cstring prepareSourceInfoForJSON(Util::SourceInfo &si, unsigned *lineNumber,

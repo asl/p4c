@@ -363,6 +363,7 @@ class Visitor {
     const Context *ctxt = nullptr;  // should be readonly to subclasses
     bool *visitCurrentOnce = nullptr;
     friend class Inspector;
+    template <class T> friend class InspectorCRTP;
     friend class Modifier;
     friend class Transform;
     friend class ControlFlowVisitor;
@@ -470,7 +471,9 @@ class Modifier : public virtual Visitor {
     bool visit_in_progress(const IR::Node *) const;
 };
 
-class Inspector : public virtual Visitor {
+class Inspector_base : public virtual Visitor {
+    friend class Inspector;
+    template <class T> friend class InspectorCRTP;
     struct info_t {
         bool done, visitOnce;
     };
@@ -480,6 +483,16 @@ class Inspector : public virtual Visitor {
 
  public:
     profile_t init_apply(const IR::Node *root) override;
+
+    void revisit_visited();
+    bool visit_in_progress(const IR::Node *n) const {
+        if (visited->count(n)) return !visited->at(n).done;
+        return false;
+    }
+};
+
+class Inspector : public Inspector_base {
+ public:
     const IR::Node *apply_visitor(const IR::Node *, const char *name = 0) override;
     virtual bool preorder(const IR::Node *) { return true; }  // return 'false' to prune
     virtual void postorder(const IR::Node *) {}
@@ -492,13 +505,122 @@ class Inspector : public virtual Visitor {
     virtual void loop_revisit(const IR::CLASS *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
-    void revisit_visited();
-    bool visit_in_progress(const IR::Node *n) const {
-        if (visited->count(n)) return !visited->at(n).done;
-        return false;
+};
+
+template <class Derived>
+class InspectorCRTP : public Inspector_base {
+    bool call_preorder(const IR::Node *);
+    void call_postorder(const IR::Node *);
+    void call_revisit(const IR::Node *);
+    void call_loop_revisit(const IR::Node *);
+ public:
+    bool preorder(const IR::Node *) { return true; }  // return 'false' to prune
+    void postorder(const IR::Node *) {}
+    void revisit(const IR::Node *) {}
+    void loop_revisit(const IR::Node *) { BUG("IR loop detected"); }
+
+#define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                              \
+    bool preorder(const IR::CLASS *n) {                                                  \
+        return static_cast<Derived *>(this)->preorder(static_cast<const IR::BASE *>(n)); \
+    }                                                                                    \
+    void postorder(const IR::CLASS *n) {                                                 \
+        static_cast<Derived *>(this)->postorder(static_cast<const IR::BASE *>(n));       \
+    }                                                                                    \
+    void revisit(const IR::CLASS *n) {                                                   \
+        static_cast<Derived *>(this)->revisit(static_cast<const IR::BASE *>(n));         \
+    }                                                                                    \
+    void loop_revisit(const IR::CLASS *n) {                                              \
+        static_cast<Derived *>(this)->loop_revisit(static_cast<const IR::BASE *>(n));    \
+    }
+    IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
+#undef DEFINE_VISIT_FUNCTIONS
+
+    const IR::Node *apply_visitor(const IR::Node *n, const char *name = 0) override {
+        if (ctxt) ctxt->child_name = name;
+        if (n && !join_flows(n)) {
+            PushContext local(ctxt, n);
+            auto vp = visited->emplace(n, info_t{false, visitDagOnce});
+            if (!vp.second && !vp.first->second.done) {
+                call_loop_revisit(n);
+            } else if (!vp.second && vp.first->second.visitOnce) {
+                call_revisit(n);
+            } else {
+                vp.first->second.done = false;
+                visitCurrentOnce = &vp.first->second.visitOnce;
+                if (call_preorder(n)) {
+                    n->visit_children(*this);
+                    visitCurrentOnce = &vp.first->second.visitOnce;
+                    call_postorder(n);
+                }
+                if (vp.first != visited->find(n)) BUG("visitor state tracker corrupted");
+                vp.first->second.done = true;
+            }
+            post_join_flows(n, n);
+        }
+        if (ctxt)
+            ctxt->child_index++;
+        else {
+            visited.reset();
+        }
+        return n;
     }
 };
 
+template <class Derived>
+bool InspectorCRTP<Derived>::call_preorder(const IR::Node *n) {
+    //! TODO: Support Vector<*> and IndexedVector<*> nodes.
+    switch (n->typeId()) {
+#define DECLARE_NODE_CASE(CLASS, BASE) \
+    case IR::CLASS::static_typeId():   \
+        return static_cast<Derived *>(this)->preorder(static_cast<const IR::CLASS *>(n));
+    IRNODE_ALL_NON_TEMPLATE_SUBCLASSES(DECLARE_NODE_CASE)
+#undef DECLARE_NODE_CASE
+    default:
+        return static_cast<Derived *>(this)->preorder(n);
+    }
+}
+
+template <class Derived>
+void InspectorCRTP<Derived>::call_postorder(const IR::Node *n) {
+    //! TODO: Support Vector<*> and IndexedVector<*> nodes.
+    switch (n->typeId()) {
+#define DECLARE_NODE_CASE(CLASS, BASE) \
+    case IR::CLASS::static_typeId():   \
+        return static_cast<Derived *>(this)->postorder(static_cast<const IR::CLASS *>(n));
+    IRNODE_ALL_NON_TEMPLATE_SUBCLASSES(DECLARE_NODE_CASE)
+#undef DECLARE_NODE_CASE
+    default:
+        return static_cast<Derived *>(this)->postorder(n);
+    }
+}
+
+template <class Derived>
+void InspectorCRTP<Derived>::call_revisit(const IR::Node *n) {
+    //! TODO: Support Vector<*> and IndexedVector<*> nodes.
+    switch (n->typeId()) {
+#define DECLARE_NODE_CASE(CLASS, BASE) \
+    case IR::CLASS::static_typeId():   \
+        return static_cast<Derived *>(this)->revisit(static_cast<const IR::CLASS *>(n));
+    IRNODE_ALL_NON_TEMPLATE_SUBCLASSES(DECLARE_NODE_CASE)
+#undef DECLARE_NODE_CASE
+    default:
+        return static_cast<Derived *>(this)->revisit(n);
+    }
+}
+
+template <class Derived>
+void InspectorCRTP<Derived>::call_loop_revisit(const IR::Node *n) {
+    //! TODO: Support Vector<*> and IndexedVector<*> nodes.
+    switch (n->typeId()) {
+#define DECLARE_NODE_CASE(CLASS, BASE) \
+    case IR::CLASS::static_typeId():   \
+        return static_cast<Derived *>(this)->loop_revisit(static_cast<const IR::CLASS *>(n));
+    IRNODE_ALL_NON_TEMPLATE_SUBCLASSES(DECLARE_NODE_CASE)
+#undef DECLARE_NODE_CASE
+    default:
+        return static_cast<Derived *>(this)->loop_revisit(n);
+    }
+}
 class Transform : public virtual Visitor {
     std::shared_ptr<ChangeTracker> visited;
     bool prune_flag = false;

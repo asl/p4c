@@ -142,7 +142,7 @@ Visitor::profile_t Modifier::init_apply(const IR::Node *root) {
     visited = std::make_shared<ChangeTracker>();
     return rv;
 }
-Visitor::profile_t Inspector::init_apply(const IR::Node *root) {
+Visitor::profile_t Inspector_base::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
     visited = std::make_shared<visited_t>();
     return rv;
@@ -371,7 +371,7 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
     return n;
 }
 
-void Inspector::revisit_visited() {
+void Inspector_base::revisit_visited() {
     for (auto it = visited->begin(); it != visited->end();) {
         if (it->second.done)
             it = visited->erase(it);
@@ -501,8 +501,8 @@ void ControlFlowVisitor::post_join_flows(const IR::Node *n, const IR::Node *) {
     status.vclone->flow_copy(*this);
 }
 
-bool Inspector::check_clone(const Visitor *v) {
-    auto *t = dynamic_cast<const Inspector *>(v);
+bool Inspector_base::check_clone(const Visitor *v) {
+    auto *t = dynamic_cast<const Inspector_base *>(v);
     BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
     return Visitor::check_clone(v);
 }
