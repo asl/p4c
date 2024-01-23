@@ -30,6 +30,7 @@ limitations under the License.
 #include <utility>
 
 #include "ir/gen-tree-macro.h"
+#include "ir/ir-generated.h"
 #include "ir/ir-tree-macros.h"
 #include "ir/node.h"
 #include "ir/vector.h"
@@ -365,6 +366,85 @@ class Visitor {
     friend class Modifier;
     friend class Transform;
     friend class ControlFlowVisitor;
+};
+
+/** @class Visitor::ChangeTracker
+ *  @brief Assists visitors in traversing the IR.
+
+ *  A ChangeTracker object assists visitors traversing the IR by tracking each
+ *  node.  The `start` method begins tracking, and `finish` ends it.  The
+ *  `done` method determines whether the node has been visited, and `result`
+ *  returns the new IR if it changed.
+ */
+class Visitor::ChangeTracker {
+    struct visit_info_t {
+        bool visit_in_progress;
+        bool visitOnce;
+        const IR::Node *result;
+    };
+    typedef std::unordered_map<const IR::Node *, visit_info_t> visited_t;
+    visited_t visited;
+
+ public:
+    /** Begin tracking @n during a visiting pass.  Use `finish(@n)` to mark @n as
+     * visited once the pass completes.
+     */
+    void start(const IR::Node *n, bool defaultVisitOnce);
+
+    /** Mark the process of visiting @orig as finished, with @final being the
+     * final state of the node, or nullptr if the node was removed from the
+     * tree.  `done(@orig)` will return true, and `result(@orig)` will return
+     * the resulting node, if any.
+     *
+     * If @final is a new node, that node is marked as finished as well, as if
+     * `start(@final); finish(@final);` were invoked.
+     *
+     * @return true if the node has changed or been removed or coalesced.
+     *
+     * @exception Util::CompilerBug This method fails if `start(@orig)` has not
+     * previously been invoked.
+     */
+    bool finish(const IR::Node *orig, const IR::Node *final);
+
+    /** Return a pointer to the visitOnce flag for node @n so that it can be changed
+     */
+    bool *refVisitOnce(const IR::Node *n);
+
+    /** Forget nodes that have already been visited, allowing them to be visited
+     * again. */
+    void revisit_visited();
+
+    /** Determine whether @n is currently being visited and the visitor has not finished
+     * That is, `start(@n)` has been invoked, and `finish(@n)` has not,
+     *
+     * @return true if @n is being visited and has not finished
+     */
+    bool busy(const IR::Node *n) const;
+
+    /** Determine whether @n has been visited and the visitor has finished
+     *  and we don't want to visit @n again the next time we see it.
+     * That is, `start(@n)` has been invoked, followed by `finish(@n)`,
+     * and the visitOnce field is true.
+     *
+     * @return true if @n has been visited and the visitor is finished and visitOnce is true
+     */
+    bool done(const IR::Node *n) const;
+
+    /** Produce the result of visiting @n.
+     *
+     * @return The result of visiting @n, or the intermediate result of
+     * visiting @n if `start(@n)` has been invoked but not `finish(@n)`, or @n
+     * if `start(@n)` has not been invoked.
+     */
+    const IR::Node *result(const IR::Node *n) const;
+};
+
+struct PushContext {
+    Visitor::Context current;
+    const Visitor::Context *&stack;
+    bool saved_logging_disable;
+    PushContext(const Visitor::Context *&stck, const IR::Node *node);
+    ~PushContext();
 };
 
 class Modifier : public virtual Visitor {
