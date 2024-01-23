@@ -22,10 +22,12 @@ limitations under the License.
 namespace P4 {
 
 /// Checks some possible misuses of the table size property
-class CheckTableSize : public Modifier {
+class CheckTableSize : public ModifierCRTP<CheckTableSize> {
+    using Base = ModifierCRTP<CheckTableSize>;
  public:
     CheckTableSize() { setName("CheckTableSize"); }
-    bool preorder(IR::P4Table *table) override {
+    using Base::preorder;
+    bool preorder(IR::P4Table *table) {
         auto size = table->getSizeProperty();
         if (size == nullptr) return false;
 

@@ -27,9 +27,11 @@ namespace P4 {
  * default: case and at least one action tag with no case) and add a default: {}
  * case that does nothing.
  */
-class SwitchAddDefault : public Modifier {
+class SwitchAddDefault : public ModifierCRTP<SwitchAddDefault> {
+    using Base = ModifierCRTP<SwitchAddDefault>;
  public:
-    void postorder(IR::SwitchStatement *) override;
+    using Base::postorder;
+    void postorder(IR::SwitchStatement *);
 };
 
 }  // namespace P4

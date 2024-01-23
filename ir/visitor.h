@@ -1248,9 +1248,11 @@ void forAllMatching(const IR::Node *root, Func &&function) {
  */
 template <typename NodeType, typename RootType, typename Func>
 const RootType *modifyAllMatching(const RootType *root, Func &&function) {
-    struct NodeVisitor : public Modifier {
+    struct NodeVisitor : public ModifierCRTP<NodeVisitor> {
+        using Base = ModifierCRTP<NodeVisitor>;
         explicit NodeVisitor(Func &&function) : function(function) {}
         Func function;
+        using Base::postorder;
         void postorder(NodeType *node) override { function(node); }
     };
     return root->apply(NodeVisitor(std::forward<Func>(function)));

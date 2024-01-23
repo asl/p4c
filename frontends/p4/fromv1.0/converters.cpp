@@ -487,17 +487,21 @@ const IR::Type_StructLike *TypeConverter::postorder(IR::Type_StructLike *str) {
 ///////////////////////////////////////////////////////////////
 
 namespace {
-class FixupExtern : public Modifier {
+class FixupExtern : public ModifierCRTP<FixupExtern> {
+    using Base = ModifierCRTP<FixupExtern>;
+    friend Base;
     ProgramStructure *structure;
     cstring origname, extname;
     IR::TypeParameters *typeParams = nullptr;
 
-    bool preorder(IR::Type_Extern *type) override {
+    using Base::preorder;
+    using Base::postorder;
+    bool preorder(IR::Type_Extern *type) {
         BUG_CHECK(!origname, "Nested extern");
         origname = type->name;
         return true;
     }
-    void postorder(IR::Type_Extern *type) override {
+    void postorder(IR::Type_Extern *type) {
         if (extname != type->name) {
             type->annotations = type->annotations->addAnnotationIfNew(
                 IR::Annotation::nameAnnotation, new IR::StringLiteral(type->name.name), false);
@@ -510,16 +514,16 @@ class FixupExtern : public Modifier {
                 type->name, new IR::Type_Method(new IR::ParameterList(), type->getName())));
         }
     }
-    void postorder(IR::Method *meth) override {
+    void postorder(IR::Method *meth) {
         if (meth->name == origname) meth->name = extname;
     }
     // Convert extern methods that take a field_list_calculation to take a type param instead
-    bool preorder(IR::Type_MethodBase *mtype) override {
+    bool preorder(IR::Type_MethodBase *mtype) {
         BUG_CHECK(!typeParams, "recursion failure");
         typeParams = mtype->typeParameters->clone();
         return true;
     }
-    bool preorder(IR::Parameter *param) override {
+    bool preorder(IR::Parameter *param) {
         BUG_CHECK(typeParams, "recursion failure");
         if (param->type->is<IR::Type_FieldListCalculation>()) {
             auto n = new IR::Type_Var(structure->makeUniqueName("FL"));
@@ -528,7 +532,7 @@ class FixupExtern : public Modifier {
         }
         return false;
     }
-    void postorder(IR::Type_MethodBase *mtype) override {
+    void postorder(IR::Type_MethodBase *mtype) {
         BUG_CHECK(typeParams, "recursion failure");
         if (*typeParams != *mtype->typeParameters) mtype->typeParameters = typeParams;
         typeParams = nullptr;
