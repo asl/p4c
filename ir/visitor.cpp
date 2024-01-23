@@ -147,7 +147,7 @@ Visitor::profile_t Inspector_base::init_apply(const IR::Node *root) {
     visited = std::make_shared<visited_t>();
     return rv;
 }
-Visitor::profile_t Transform::init_apply(const IR::Node *root) {
+Visitor::profile_t Transform_base::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
     visited = std::make_shared<ChangeTracker>();
     return rv;
@@ -210,7 +210,7 @@ void Modifier_base::visitor_const_error() {
     BUG("Modifier called const visit function -- missing template "
         "instantiation in gen-tree-macro.h?");
 }
-void Transform::visitor_const_error() {
+void Transform_base::visitor_const_error() {
     BUG("Transform called const visit function -- missing template "
         "instantiation in gen-tree-macro.h?");
 }
@@ -246,6 +246,13 @@ class ForwardChildren : public Visitor {
 }  // namespace
 
 void Modifier_base::maybe_forward_children(IR::Node *n) {
+    if (!dontForwardChildrenBeforePreorder) {
+        ForwardChildren forward_children(*visited);
+        n->visit_children(forward_children);
+    }
+}
+
+void Transform_base::maybe_forward_children(IR::Node *n) {
     if (!dontForwardChildrenBeforePreorder) {
         ForwardChildren forward_children(*visited);
         n->visit_children(forward_children);
@@ -329,10 +336,7 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
             visited->start(n, visitDagOnce);
             auto copy = n->clone();
             local.current.node = copy;
-            if (!dontForwardChildrenBeforePreorder) {
-                ForwardChildren forward_children(*visited);
-                copy->visit_children(forward_children);
-            }
+            maybe_forward_children(copy);
             bool save_prune_flag = prune_flag;
             prune_flag = false;
             visitCurrentOnce = visited->refVisitOnce(n);
@@ -385,8 +389,8 @@ void Inspector_base::revisit_visited() {
 }
 void Modifier_base::revisit_visited() { visited->revisit_visited(); }
 bool Modifier_base::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
-void Transform::revisit_visited() { visited->revisit_visited(); }
-bool Transform::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
+void Transform_base::revisit_visited() { visited->revisit_visited(); }
+bool Transform_base::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
 
 #define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                                        \
     bool Modifier::preorder(IR::CLASS *n) { return preorder(static_cast<IR::BASE *>(n)); }         \
@@ -515,8 +519,8 @@ bool Modifier_base::check_clone(const Visitor *v) {
     BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
     return Visitor::check_clone(v);
 }
-bool Transform::check_clone(const Visitor *v) {
-    auto *t = dynamic_cast<const Transform *>(v);
+bool Transform_base::check_clone(const Visitor *v) {
+    auto *t = dynamic_cast<const Transform_base *>(v);
     BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
     return Visitor::check_clone(v);
 }
