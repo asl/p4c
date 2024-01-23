@@ -32,7 +32,8 @@ namespace BMV2 {
 
 class Backend;
 
-class HeaderConverter : public Inspector {
+class HeaderConverter : public InspectorCRTP<HeaderConverter> {
+    using Base = InspectorCRTP<HeaderConverter>;
     ConversionContext *ctxt;
     cstring scalarsName;
     cstring scalarsTypeName;
@@ -56,7 +57,8 @@ class HeaderConverter : public Inspector {
     Visitor::profile_t init_apply(const IR::Node *node) override;
     void end_apply(const IR::Node *node) override;
 
-    bool preorder(const IR::Parameter *param) override;
+    using Base::preorder;
+    bool preorder(const IR::Parameter *param);
 
     HeaderConverter(ConversionContext *ctxt, cstring scalarsName);
 };

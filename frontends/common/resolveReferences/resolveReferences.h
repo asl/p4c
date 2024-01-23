@@ -102,7 +102,8 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
  * @post: produces an up-to-date `refMap`
  *
  */
-class ResolveReferences : public Inspector, private ResolutionContext {
+class ResolveReferences : public InspectorCRTP<ResolveReferences>, private ResolutionContext {
+    using Base = InspectorCRTP<ResolveReferences>;
     /// Reference map -- essentially from paths to declarations.
     ReferenceMap *refMap;
 
@@ -120,33 +121,35 @@ class ResolveReferences : public Inspector, private ResolutionContext {
     Visitor::profile_t init_apply(const IR::Node *node) override;
     void end_apply(const IR::Node *node) override;
 
-    bool preorder(const IR::Type_Name *type) override;
-    bool preorder(const IR::PathExpression *path) override;
-    bool preorder(const IR::KeyElement *path) override;
-    bool preorder(const IR::This *pointer) override;
-    bool preorder(const IR::Declaration_Instance *decl) override;
+    using Base::preorder;
+    using Base::postorder;
+    bool preorder(const IR::Type_Name *type);
+    bool preorder(const IR::PathExpression *path);
+    bool preorder(const IR::KeyElement *path);
+    bool preorder(const IR::This *pointer);
+    bool preorder(const IR::Declaration_Instance *decl);
 
-    bool preorder(const IR::P4Program *t) override;
-    void postorder(const IR::P4Program *t) override;
-    bool preorder(const IR::P4Control *t) override;
-    bool preorder(const IR::P4Parser *t) override;
-    bool preorder(const IR::P4Action *t) override;
-    bool preorder(const IR::Function *t) override;
-    bool preorder(const IR::TableProperties *t) override;
-    bool preorder(const IR::Type_Method *t) override;
-    bool preorder(const IR::ParserState *t) override;
-    bool preorder(const IR::Type_Extern *t) override;
-    bool preorder(const IR::Type_ArchBlock *t) override;
-    void postorder(const IR::Type_ArchBlock *t) override;
-    bool preorder(const IR::Type_StructLike *t) override;
-    bool preorder(const IR::BlockStatement *t) override;
+    bool preorder(const IR::P4Program *t);
+    void postorder(const IR::P4Program *t);
+    bool preorder(const IR::P4Control *t);
+    bool preorder(const IR::P4Parser *t);
+    bool preorder(const IR::P4Action *t);
+    bool preorder(const IR::Function *t);
+    bool preorder(const IR::TableProperties *t);
+    bool preorder(const IR::Type_Method *t);
+    bool preorder(const IR::ParserState *t);
+    bool preorder(const IR::Type_Extern *t);
+    bool preorder(const IR::Type_ArchBlock *t);
+    void postorder(const IR::Type_ArchBlock *t);
+    bool preorder(const IR::Type_StructLike *t);
+    bool preorder(const IR::BlockStatement *t);
 
-    bool preorder(const IR::P4Table *table) override;
-    bool preorder(const IR::Declaration *d) override {
+    bool preorder(const IR::P4Table *table);
+    bool preorder(const IR::Declaration *d) {
         refMap->usedName(d->getName().name);
         return true;
     }
-    bool preorder(const IR::Type_Declaration *d) override {
+    bool preorder(const IR::Type_Declaration *d) {
         refMap->usedName(d->getName().name);
         return true;
     }

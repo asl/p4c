@@ -134,8 +134,11 @@ class BranchingInstructionGeneration {
     bool generate(const IR::Expression *, cstring, cstring, bool);
 };
 
-class TypeWidthValidator : public Inspector {
-    void postorder(const IR::Type_Varbits *type) override {
+class TypeWidthValidator : public InspectorCRTP<TypeWidthValidator> {
+    using Base = InspectorCRTP<TypeWidthValidator>;
+    friend Base;
+    using Base::postorder;
+    void postorder(const IR::Type_Varbits *type) {
         LOG3("Validating Type_Varbits: " << type);
         if (type->size % 8 != 0) {
             ::error(ErrorType::ERR_UNSUPPORTED, "%1% varbit width (%2%) not aligned to 8 bits",
@@ -144,7 +147,8 @@ class TypeWidthValidator : public Inspector {
     }
 };
 
-class ConvertStatementToDpdk : public Inspector {
+class ConvertStatementToDpdk : public InspectorCRTP<ConvertStatementToDpdk> {
+    using Base = InspectorCRTP<ConvertStatementToDpdk>;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
@@ -174,10 +178,11 @@ class ConvertStatementToDpdk : public Inspector {
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }
     void branchingInstructionGeneration(cstring true_label, cstring false_label,
                                         const IR::Expression *expr);
-    bool preorder(const IR::AssignmentStatement *a) override;
-    bool preorder(const IR::IfStatement *a) override;
-    bool preorder(const IR::MethodCallStatement *a) override;
-    bool preorder(const IR::SwitchStatement *a) override;
+    using Base::preorder;
+    bool preorder(const IR::AssignmentStatement *a);
+    bool preorder(const IR::IfStatement *a);
+    bool preorder(const IR::MethodCallStatement *a);
+    bool preorder(const IR::SwitchStatement *a);
 
     void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     IR::IndexedVector<IR::DpdkAsmStatement> &get_instr() { return instructions; }

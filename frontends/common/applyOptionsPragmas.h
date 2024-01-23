@@ -51,11 +51,13 @@ class IOptionPragmaParser {
  * specific to a certain program construct should be handled using a different
  * approach.
  */
-class ApplyOptionsPragmas : public Inspector {
+class ApplyOptionsPragmas : public InspectorCRTP<ApplyOptionsPragmas> {
+    using Base = InspectorCRTP<ApplyOptionsPragmas>;
  public:
     explicit ApplyOptionsPragmas(IOptionPragmaParser &parser);
 
-    bool preorder(const IR::Annotation *annotation) override;
+    using Base::preorder;
+    bool preorder(const IR::Annotation *annotation);
     void end_apply() override;
 
  private:

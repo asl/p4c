@@ -28,18 +28,20 @@ Detect whether a Select expression is too complicated for BMv2.
 Also used to detect complex expressions that are arguments
 to method calls.
 */
-class ComplexExpression : public Inspector {
+class ComplexExpression : public InspectorCRTP<ComplexExpression> {
+    using Base = InspectorCRTP<ComplexExpression>;
  public:
     bool isComplex = false;
     ComplexExpression() { setName("ComplexExpression"); }
 
-    void postorder(const IR::ArrayIndex *) override {}
-    void postorder(const IR::TypeNameExpression *) override {}
-    void postorder(const IR::PathExpression *) override {}
-    void postorder(const IR::Member *) override {}
-    void postorder(const IR::Literal *) override {}
+    using Base::postorder;
+    void postorder(const IR::ArrayIndex *) {}
+    void postorder(const IR::TypeNameExpression *) {}
+    void postorder(const IR::PathExpression *) {}
+    void postorder(const IR::Member *) {}
+    void postorder(const IR::Literal *) {}
     // all other expressions are complex
-    void postorder(const IR::Expression *) override { isComplex = true; }
+    void postorder(const IR::Expression *) { isComplex = true; }
 };
 
 }  // namespace

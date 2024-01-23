@@ -101,7 +101,8 @@ class PsaProgramStructure : public ProgramStructure {
     }
 };
 
-class ParsePsaArchitecture : public Inspector {
+class ParsePsaArchitecture : public InspectorCRTP<ParsePsaArchitecture> {
+    using Base = InspectorCRTP<ParsePsaArchitecture>;
     PsaProgramStructure *structure;
 
  public:
@@ -115,18 +116,20 @@ class ParsePsaArchitecture : public Inspector {
                 node->getNode());
     }
 
-    bool preorder(const IR::ToplevelBlock *block) override;
-    bool preorder(const IR::PackageBlock *block) override;
-    bool preorder(const IR::ExternBlock *block) override;
+    using Base::preorder;
+    bool preorder(const IR::ToplevelBlock *block);
+    bool preorder(const IR::PackageBlock *block);
+    bool preorder(const IR::ExternBlock *block);
 
-    profile_t init_apply(const IR::Node *root) override {
+    profile_t init_apply(const IR::Node *root) {
         structure->block_type.clear();
         structure->globals.clear();
-        return Inspector::init_apply(root);
+        return Base::init_apply(root);
     }
 };
 
-class InspectPsaProgram : public Inspector {
+class InspectPsaProgram : public InspectorCRTP<InspectPsaProgram> {
+    using Base = InspectorCRTP<InspectPsaProgram>;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     PsaProgramStructure *pinfo;
@@ -140,16 +143,18 @@ class InspectPsaProgram : public Inspector {
         setName("InspectPsaProgram");
     }
 
-    void postorder(const IR::P4Parser *p) override;
-    void postorder(const IR::P4Control *c) override;
-    void postorder(const IR::Declaration_Instance *di) override;
+    using Base::preorder;
+    using Base::postorder;
+    void postorder(const IR::P4Parser *p);
+    void postorder(const IR::P4Control *c);
+    void postorder(const IR::Declaration_Instance *di);
 
     bool isHeaders(const IR::Type_StructLike *st);
     void addTypesAndInstances(const IR::Type_StructLike *type, bool meta);
     void addHeaderType(const IR::Type_StructLike *st);
     void addHeaderInstance(const IR::Type_StructLike *st, cstring name);
-    bool preorder(const IR::Declaration_Variable *dv) override;
-    bool preorder(const IR::Parameter *parameter) override;
+    bool preorder(const IR::Declaration_Variable *dv);
+    bool preorder(const IR::Parameter *parameter);
 };
 
 }  // namespace BMV2

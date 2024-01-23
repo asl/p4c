@@ -38,7 +38,8 @@ class TypeMap;
  * Example class which inherits from this base class can be seen
  * in backends/dpdk/dpdkCheckExternInvocation.h.
  */
-class CheckExternInvocationCommon : public Inspector {
+class CheckExternInvocationCommon : public InspectorCRTP<CheckExternInvocationCommon> {
+    using Base = InspectorCRTP<CheckExternInvocationCommon>;
  protected:
     ReferenceMap *refMap;
     TypeMap *typeMap;
@@ -153,7 +154,8 @@ class CheckExternInvocationCommon : public Inspector {
         : refMap(refMap), typeMap(typeMap) {}
 
  public:
-    bool preorder(const IR::MethodCallExpression *expr) override {
+    using Base::preorder;
+    bool preorder(const IR::MethodCallExpression *expr) {
         auto mi = MethodInstance::resolve(expr, refMap, typeMap);
         if (auto extMethod = mi->to<ExternMethod>()) {
             checkExtern(extMethod, expr);

@@ -113,7 +113,8 @@ class PsaCodeGenerator : public PsaProgramStructure {
     cstring convertHashAlgorithm(cstring algo);
 };
 
-class ConvertPsaToJson : public Inspector {
+class ConvertPsaToJson : public InspectorCRTP<ConvertPsaToJson> {
+    using Base = InspectorCRTP<ConvertPsaToJson>;
  public:
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
@@ -132,7 +133,8 @@ class ConvertPsaToJson : public Inspector {
         CHECK_NULL(structure);
     }
 
-    void postorder(UNUSED const IR::P4Program *program) override {
+    using Base::postorder;
+    void postorder(UNUSED const IR::P4Program *program) {
         cstring scalarsName = "scalars";
         // This visitor is used in multiple passes to convert expression to json
         auto conv = new PsaSwitchExpressionConverter(refMap, typeMap, structure, scalarsName);

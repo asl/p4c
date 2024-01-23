@@ -153,7 +153,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
         return true;
     };
 
-    std::function<Inspector *(cstring)> validateTableProperties = [=](cstring arch) -> Inspector * {
+    std::function<Visitor *(cstring)> validateTableProperties = [=](cstring arch) -> Visitor * {
         if (arch == "pna") {
             return new P4::ValidateTableProperties(
                 {"pna_implementation", "pna_direct_counter", "pna_direct_meter", "pna_idle_timeout",

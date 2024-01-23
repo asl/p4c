@@ -22,13 +22,17 @@ limitations under the License.
 
 namespace BMV2 {
 
-class ActionConverter : public Inspector {
+class ActionConverter : public InspectorCRTP<ActionConverter> {
+    using Base = InspectorCRTP<ActionConverter>;
+    friend Base;
     ConversionContext *ctxt;
 
     void convertActionBody(const IR::Vector<IR::StatOrDecl> *body, Util::JsonArray *result);
     void convertActionParams(const IR::ParameterList *parameters, Util::JsonArray *params);
     cstring jsonAssignment(const IR::Type *type);
-    void postorder(const IR::P4Action *action) override;
+
+    using Base::postorder;
+    void postorder(const IR::P4Action *action);
 
  public:
     const bool emitExterns;

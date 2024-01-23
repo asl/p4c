@@ -29,7 +29,8 @@ namespace P4 {
  * @pre none
  * @post raise an error if there are invalid table properties in P4 program.
  */
-class ValidateTableProperties : public Inspector {
+class ValidateTableProperties : public InspectorCRTP<ValidateTableProperties> {
+    using Base = InspectorCRTP<ValidateTableProperties>;
     std::set<cstring> legalProperties;
 
  public:
@@ -43,9 +44,11 @@ class ValidateTableProperties : public Inspector {
             legalProperties.emplace(l);
         }
     }
-    void postorder(const IR::Property *property) override;
+    using Base::postorder;
+    using Base::preorder;
+    void postorder(const IR::Property *property);
     // don't check properties in externs (Declaration_Instances)
-    bool preorder(const IR::Declaration_Instance * /*instance*/) override { return false; }
+    bool preorder(const IR::Declaration_Instance * /*instance*/) { return false; }
 };
 
 }  // namespace P4

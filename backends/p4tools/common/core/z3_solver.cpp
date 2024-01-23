@@ -50,55 +50,57 @@ const char *toString(z3::model m) { return Z3_model_to_string(m.ctx(), m); }
 #endif  // NDEBUG
 
 /// Translates P4 expressions into Z3. Any variables encountered are declared to a Z3 instance.
-class Z3Translator : public virtual Inspector {
+class Z3Translator : public virtual InspectorCRTP<Z3Translator> {
+    using Base = InspectorCRTP<Z3Translator>;
  public:
     /// Creates a Z3 translator. Any variables encountered during translation will be declared to
     /// the Z3 instance encapsulated within the given solver.
     explicit Z3Translator(Z3Solver &solver);
 
+    using Base::preorder;
     /// Handles unexpected nodes.
-    bool preorder(const IR::Node *node) override;
+    bool preorder(const IR::Node *node);
 
     /// Translates casts.
-    bool preorder(const IR::Cast *cast) override;
+    bool preorder(const IR::Cast *cast);
 
     /// Translates constants.
-    bool preorder(const IR::Constant *constant) override;
-    bool preorder(const IR::BoolLiteral *boolLiteral) override;
-    bool preorder(const IR::StringLiteral *stringLiteral) override;
+    bool preorder(const IR::Constant *constant);
+    bool preorder(const IR::BoolLiteral *boolLiteral);
+    bool preorder(const IR::StringLiteral *stringLiteral);
 
     /// Translates variables.
-    bool preorder(const IR::SymbolicVariable *var) override;
+    bool preorder(const IR::SymbolicVariable *var);
 
     // Translations for unary operations.
-    bool preorder(const IR::Neg *op) override;
-    bool preorder(const IR::Cmpl *op) override;
-    bool preorder(const IR::LNot *op) override;
+    bool preorder(const IR::Neg *op);
+    bool preorder(const IR::Cmpl *op);
+    bool preorder(const IR::LNot *op);
 
     // Translations for binary operations.
-    bool preorder(const IR::Equ *op) override;
-    bool preorder(const IR::Neq *op) override;
-    bool preorder(const IR::Lss *op) override;
-    bool preorder(const IR::Leq *op) override;
-    bool preorder(const IR::Grt *op) override;
-    bool preorder(const IR::Geq *op) override;
-    bool preorder(const IR::Mod *op) override;
-    bool preorder(const IR::Add *op) override;
-    bool preorder(const IR::Sub *op) override;
-    bool preorder(const IR::Mul *op) override;
-    bool preorder(const IR::Div *op) override;
-    bool preorder(const IR::Shl *op) override;
-    bool preorder(const IR::Shr *op) override;
-    bool preorder(const IR::BAnd *op) override;
-    bool preorder(const IR::BOr *op) override;
-    bool preorder(const IR::BXor *op) override;
-    bool preorder(const IR::LAnd *op) override;
-    bool preorder(const IR::LOr *op) override;
-    bool preorder(const IR::Concat *op) override;
+    bool preorder(const IR::Equ *op);
+    bool preorder(const IR::Neq *op);
+    bool preorder(const IR::Lss *op);
+    bool preorder(const IR::Leq *op);
+    bool preorder(const IR::Grt *op);
+    bool preorder(const IR::Geq *op);
+    bool preorder(const IR::Mod *op);
+    bool preorder(const IR::Add *op);
+    bool preorder(const IR::Sub *op);
+    bool preorder(const IR::Mul *op);
+    bool preorder(const IR::Div *op);
+    bool preorder(const IR::Shl *op);
+    bool preorder(const IR::Shr *op);
+    bool preorder(const IR::BAnd *op);
+    bool preorder(const IR::BOr *op);
+    bool preorder(const IR::BXor *op);
+    bool preorder(const IR::LAnd *op);
+    bool preorder(const IR::LOr *op);
+    bool preorder(const IR::Concat *op);
 
     // Translations for ternary operations.
-    bool preorder(const IR::Mux *op) override;
-    bool preorder(const IR::Slice *op) override;
+    bool preorder(const IR::Mux *op);
+    bool preorder(const IR::Slice *op);
 
     /// @returns the result of the translation.
     z3::expr getResult() { return result; }

@@ -53,13 +53,15 @@ class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
 
 // Similar to class PSAErrorCodesGen in backends/ebpf/psa/ebpfPsaGen.cpp
 
-class PNAErrorCodesGen : public Inspector {
+class PNAErrorCodesGen : public InspectorCRTP<PNAErrorCodesGen> {
+    using Base = InspectorCRTP<PNAErrorCodesGen>;
     EBPF::CodeBuilder *builder;
 
  public:
     explicit PNAErrorCodesGen(EBPF::CodeBuilder *builder) : builder(builder) {}
 
-    bool preorder(const IR::Type_Error *errors) override {
+    using Base::preorder;
+    bool preorder(const IR::Type_Error *errors) {
         int id = -1;
         for (auto decl : errors->members) {
             ++id;
@@ -201,7 +203,8 @@ class ConvertToEbpfPNA : public Transform {
 
 // Similar to class ConvertToEbpfPipeline in backends/ebpf/psa/ebpfPsaGen.h
 
-class ConvertToEbpfPipelineTC : public Inspector {
+class ConvertToEbpfPipelineTC : public InspectorCRTP<ConvertToEbpfPipelineTC> {
+    using Base = InspectorCRTP<ConvertToEbpfPipelineTC>;
     const cstring name;
     const EBPF::pipeline_type type;
     const EbpfOptions &options;
@@ -230,13 +233,15 @@ class ConvertToEbpfPipelineTC : public Inspector {
           pipeline(nullptr),
           tcIR(tcIR) {}
 
-    bool preorder(const IR::PackageBlock *block) override;
+    using Base::preorder;
+    bool preorder(const IR::PackageBlock *block);
     EBPF::EBPFPipeline *getEbpfPipeline() { return pipeline; }
 };
 
 // Similar to class ConvertToEBPFParserPSA in backends/ebpf/psa/ebpfPsaGen.h
 
-class ConvertToEBPFParserPNA : public Inspector {
+class ConvertToEBPFParserPNA : public InspectorCRTP<ConvertToEBPFParserPNA> {
+    using Base = InspectorCRTP<ConvertToEBPFParserPNA>;
     EBPF::EBPFProgram *program;
     P4::TypeMap *typemap;
     TC::EBPFPnaParser *parser;
@@ -245,14 +250,16 @@ class ConvertToEBPFParserPNA : public Inspector {
     ConvertToEBPFParserPNA(EBPF::EBPFProgram *program, P4::TypeMap *typemap)
         : program(program), typemap(typemap), parser(nullptr) {}
 
-    bool preorder(const IR::ParserBlock *prsr) override;
-    bool preorder(const IR::P4ValueSet *pvs) override;
+    using Base::preorder;
+    bool preorder(const IR::ParserBlock *prsr);
+    bool preorder(const IR::P4ValueSet *pvs);
     EBPF::EBPFParser *getEBPFParser() { return parser; }
 };
 
 // Similar to class ConvertToEBPFControlPSA in backends/ebpf/psa/ebpfPsaGen.h
 
-class ConvertToEBPFControlPNA : public Inspector {
+class ConvertToEBPFControlPNA : public InspectorCRTP<ConvertToEBPFControlPNA> {
+    using Base = InspectorCRTP<ConvertToEBPFControlPNA>;
     EBPF::EBPFProgram *program;
     EBPF::pipeline_type type;
     EBPF::EBPFControlPSA *control;
@@ -273,19 +280,21 @@ class ConvertToEBPFControlPNA : public Inspector {
           refmap(refmap),
           tcIR(tcIR) {}
 
-    bool preorder(const IR::TableBlock *) override;
-    bool preorder(const IR::ControlBlock *) override;
-    bool preorder(const IR::Declaration_Variable *) override;
-    bool preorder(const IR::Member *m) override;
-    bool preorder(const IR::IfStatement *a) override;
-    bool preorder(const IR::ExternBlock *instance) override;
+    using Base::preorder;
+    bool preorder(const IR::TableBlock *);
+    bool preorder(const IR::ControlBlock *);
+    bool preorder(const IR::Declaration_Variable *);
+    bool preorder(const IR::Member *m);
+    bool preorder(const IR::IfStatement *a);
+    bool preorder(const IR::ExternBlock *instance);
     bool checkPnaTimestampMem(const IR::Member *m);
     EBPF::EBPFControlPSA *getEBPFControl() { return control; }
 };
 
 // Similar to class ConvertToEBPFDeparserPSA in backends/ebpf/psa/ebpfPsaGen.h
 
-class ConvertToEBPFDeparserPNA : public Inspector {
+class ConvertToEBPFDeparserPNA : public InspectorCRTP<ConvertToEBPFDeparserPNA> {
+    using Base = InspectorCRTP<ConvertToEBPFDeparserPNA>;
     EBPF::EBPFProgram *program;
     const IR::Parameter *parserHeaders;
     const IR::Parameter *istd;
@@ -296,8 +305,9 @@ class ConvertToEBPFDeparserPNA : public Inspector {
                              const IR::Parameter *istd)
         : program(program), parserHeaders(parserHeaders), istd(istd), deparser(nullptr) {}
 
-    bool preorder(const IR::ControlBlock *) override;
-    bool preorder(const IR::Declaration_Instance *) override;
+    using Base::preorder;
+    bool preorder(const IR::ControlBlock *);
+    bool preorder(const IR::Declaration_Instance *);
     EBPF::EBPFDeparserPSA *getEBPFDeparser() { return deparser; }
 };
 

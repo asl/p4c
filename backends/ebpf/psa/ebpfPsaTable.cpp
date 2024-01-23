@@ -281,7 +281,8 @@ class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
 };
 
 // Generate mask for whole table key
-class EBPFTablePSATernaryTableMaskGenerator : public Inspector {
+class EBPFTablePSATernaryTableMaskGenerator : public InspectorCRTP<EBPFTablePSATernaryTableMaskGenerator> {
+    using Base = InspectorCRTP<EBPFTablePSATernaryTableMaskGenerator>;
  protected:
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
@@ -299,13 +300,14 @@ class EBPFTablePSATernaryTableMaskGenerator : public Inspector {
         return mask;
     }
 
-    bool preorder(const IR::Constant *expr) override {
+    using Base::preorder;
+    bool preorder(const IR::Constant *expr) {
         // exact match, set all bits as 'care'
         unsigned bytes = ROUNDUP(EBPFInitializerUtils::ebpfTypeWidth(typeMap, expr), 8);
         for (unsigned i = 0; i < bytes; ++i) mask += "ff";
         return false;
     }
-    bool preorder(const IR::Mask *expr) override {
+    bool preorder(const IR::Mask *expr) {
         // Available value and mask, so use only this mask
         BUG_CHECK(expr->right->is<IR::Constant>(), "%1%: Expected a constant value", expr->right);
         auto &value = expr->right->to<IR::Constant>()->value;

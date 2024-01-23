@@ -43,7 +43,9 @@ class ReferenceMap;
 namespace ControlPlaneAPI {
 
 /// Generates the appropriate p4.P4DataTypeSpec for a given IR::Type node.
-class TypeSpecConverter : public Inspector {
+class TypeSpecConverter : public InspectorCRTP<TypeSpecConverter> {
+    using Base = InspectorCRTP<TypeSpecConverter>;
+    friend Base;
  private:
     const P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
@@ -57,27 +59,28 @@ class TypeSpecConverter : public Inspector {
     TypeSpecConverter(const P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                       ::p4::config::v1::P4TypeInfo *p4RtTypeInfo);
 
+    using Base::preorder;
     // fallback for unsupported types, should be unreachable
-    bool preorder(const IR::Type *type) override;
+    bool preorder(const IR::Type *type);
 
     // anonymous types
-    bool preorder(const IR::Type_Bits *type) override;
-    bool preorder(const IR::Type_Varbits *type) override;
-    bool preorder(const IR::Type_Boolean *type) override;
-    bool preorder(const IR::Type_BaseList *type) override;
-    bool preorder(const IR::Type_Stack *type) override;
+    bool preorder(const IR::Type_Bits *type);
+    bool preorder(const IR::Type_Varbits *type);
+    bool preorder(const IR::Type_Boolean *type);
+    bool preorder(const IR::Type_BaseList *type);
+    bool preorder(const IR::Type_Stack *type);
 
-    bool preorder(const IR::Type_Name *type) override;
-    bool preorder(const IR::Type_Newtype *type) override;
+    bool preorder(const IR::Type_Name *type);
+    bool preorder(const IR::Type_Newtype *type);
 
     // these methods do not update the "map", but update p4RtTypeInfo if it is
     // not null.
-    bool preorder(const IR::Type_Struct *type) override;
-    bool preorder(const IR::Type_Header *type) override;
-    bool preorder(const IR::Type_HeaderUnion *type) override;
-    bool preorder(const IR::Type_Enum *type) override;
-    bool preorder(const IR::Type_SerEnum *type) override;
-    bool preorder(const IR::Type_Error *type) override;
+    bool preorder(const IR::Type_Struct *type);
+    bool preorder(const IR::Type_Header *type);
+    bool preorder(const IR::Type_HeaderUnion *type);
+    bool preorder(const IR::Type_Enum *type);
+    bool preorder(const IR::Type_SerEnum *type);
+    bool preorder(const IR::Type_Error *type);
 
  public:
     /// Generates the appropriate p4.P4DataTypeSpec message for @type. If

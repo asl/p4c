@@ -162,7 +162,8 @@ struct ConvertLookahead : public PassManager {
 
     ReplacementMap repl;
 
-    class Collect : public Inspector {
+    class Collect : public InspectorCRTP<Collect> {
+        using Base = InspectorCRTP<Collect>;
         P4::ReferenceMap *refMap;
         P4::TypeMap *typeMap;
         ReplacementMap *repl;
@@ -170,7 +171,8 @@ struct ConvertLookahead : public PassManager {
      public:
         Collect(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, ReplacementMap *repl)
             : refMap(refMap), typeMap(typeMap), repl(repl) {}
-        void postorder(const IR::AssignmentStatement *statement) override;
+        using Base::postorder;
+        void postorder(const IR::AssignmentStatement *statement);
     };
 
     class Replace : public Transform {
@@ -197,7 +199,8 @@ struct ConvertLookahead : public PassManager {
 // And it collects every field of metadata and renames all fields with a prefix
 // according to the metadata struct name. Eventually, the reference of a fields
 // will become m.$(struct_name)_$(field_name).
-class CollectMetadataHeaderInfo : public Inspector {
+class CollectMetadataHeaderInfo : public InspectorCRTP<CollectMetadataHeaderInfo> {
+    using Base = InspectorCRTP<CollectMetadataHeaderInfo>;
     DpdkProgramStructure *structure;
 
     void pushMetadata(const IR::Parameter *p);
@@ -205,8 +208,10 @@ class CollectMetadataHeaderInfo : public Inspector {
 
  public:
     explicit CollectMetadataHeaderInfo(DpdkProgramStructure *structure) : structure(structure) {}
-    bool preorder(const IR::P4Program *p) override;
-    bool preorder(const IR::Type_Struct *s) override;
+
+    using Base::preorder;
+    bool preorder(const IR::P4Program *p);
+    bool preorder(const IR::Type_Struct *s);
 };
 
 // Previously, we have collected the information about how the single metadata
@@ -358,7 +363,8 @@ class StatementUnroll : public Transform {
  * PathExpression(tmp), decl contains tmp's declaration and stmt contains:
  * tmp = c * d, which will be injected in front of the AssignmentStatement.
  */
-class ExpressionUnroll : public Inspector {
+class ExpressionUnroll : public InspectorCRTP<ExpressionUnroll> {
+    using Base = InspectorCRTP<ExpressionUnroll>;
     P4::ReferenceMap *refMap;
 
  public:
@@ -368,13 +374,14 @@ class ExpressionUnroll : public Inspector {
     ExpressionUnroll(P4::ReferenceMap *refMap, DpdkProgramStructure *) : refMap(refMap) {
         setName("ExpressionUnroll");
     }
-    bool preorder(const IR::Operation_Unary *a) override;
-    bool preorder(const IR::Operation_Binary *a) override;
-    bool preorder(const IR::MethodCallExpression *a) override;
-    bool preorder(const IR::Member *a) override;
-    bool preorder(const IR::PathExpression *a) override;
-    bool preorder(const IR::Constant *a) override;
-    bool preorder(const IR::BoolLiteral *a) override;
+    using Base::preorder;
+    bool preorder(const IR::Operation_Unary *a);
+    bool preorder(const IR::Operation_Binary *a);
+    bool preorder(const IR::MethodCallExpression *a);
+    bool preorder(const IR::Member *a);
+    bool preorder(const IR::PathExpression *a);
+    bool preorder(const IR::Constant *a);
+    bool preorder(const IR::BoolLiteral *a);
 };
 
 // This pass is similiar to StatementUnroll pass, the difference is that this
@@ -399,7 +406,8 @@ class IfStatementUnroll : public Transform {
  * will unroll the expression to {tmp = b + c; if(a && (tmp > d))}. Logical
  * calculation will be unroll in a dedicated pass.
  */
-class LogicalExpressionUnroll : public Inspector {
+class LogicalExpressionUnroll : public InspectorCRTP<LogicalExpressionUnroll> {
+    using Base = InspectorCRTP<LogicalExpressionUnroll>;
     P4::ReferenceMap *refMap;
 
  public:
@@ -418,13 +426,14 @@ class LogicalExpressionUnroll : public Inspector {
     explicit LogicalExpressionUnroll(P4::ReferenceMap *refMap) : refMap(refMap) {
         visitDagOnce = false;
     }
-    bool preorder(const IR::Operation_Unary *a) override;
-    bool preorder(const IR::Operation_Binary *a) override;
-    bool preorder(const IR::MethodCallExpression *a) override;
-    bool preorder(const IR::Member *a) override;
-    bool preorder(const IR::PathExpression *a) override;
-    bool preorder(const IR::Constant *a) override;
-    bool preorder(const IR::BoolLiteral *a) override;
+    using Base::preorder;
+    bool preorder(const IR::Operation_Unary *a);
+    bool preorder(const IR::Operation_Binary *a);
+    bool preorder(const IR::MethodCallExpression *a);
+    bool preorder(const IR::Member *a);
+    bool preorder(const IR::PathExpression *a);
+    bool preorder(const IR::Constant *a);
+    bool preorder(const IR::BoolLiteral *a);
 };
 
 // According to dpdk spec, Binary Operation will only have two parameters, which
@@ -505,7 +514,8 @@ class PrependPDotToActionArgs : public Transform {
    properties and then used for generating instruction
    for default action in each table.
 */
-class DefActionValue : public Inspector {
+class DefActionValue : public InspectorCRTP<DefActionValue> {
+    using Base = InspectorCRTP<DefActionValue>;
     P4::TypeMap *typeMap;
     P4::ReferenceMap *refMap;
     DpdkProgramStructure *structure;
@@ -513,7 +523,8 @@ class DefActionValue : public Inspector {
  public:
     DefActionValue(P4::TypeMap *typeMap, P4::ReferenceMap *refMap, DpdkProgramStructure *structure)
         : typeMap(typeMap), refMap(refMap), structure(structure) {}
-    void postorder(const IR::P4Table *t) override;
+    using Base::postorder;
+    void postorder(const IR::P4Table *t);
 };
 
 // dpdk does not support ternary operator so we need to translate ternary operator
@@ -547,7 +558,8 @@ class DismantleMuxExpressions : public Transform {
 // initilized to 0. And for cksum.add(x), it will be translated to ckadd state
 // x. For dst = cksum.get(), it will be translated to mov dst state. This pass
 // collects checksum instances and index them.
-class CollectInternetChecksumInstance : public Inspector {
+class CollectInternetChecksumInstance : public InspectorCRTP<CollectInternetChecksumInstance> {
+    using Base = InspectorCRTP<CollectInternetChecksumInstance>;
     P4::TypeMap *typeMap;
     DpdkProgramStructure *structure;
     std::vector<cstring> *csum_vec;
@@ -557,7 +569,9 @@ class CollectInternetChecksumInstance : public Inspector {
     CollectInternetChecksumInstance(P4::TypeMap *typeMap, DpdkProgramStructure *structure,
                                     std::vector<cstring> *csum_vec)
         : typeMap(typeMap), structure(structure), csum_vec(csum_vec) {}
-    bool preorder(const IR::Declaration_Instance *d) override {
+
+    using Base::preorder;
+    bool preorder(const IR::Declaration_Instance *d) {
         auto type = typeMap->getType(d, true);
         if (auto extn = type->to<IR::Type_Extern>()) {
             if (extn->name == "InternetChecksum") {
@@ -626,12 +640,14 @@ class ConvertInternetChecksum : public PassManager {
 
 /* This pass collects PSA extern meter, counter and register declaration instances and
    push them to a vector for emitting to the .spec file later */
-class CollectExternDeclaration : public Inspector {
+class CollectExternDeclaration : public InspectorCRTP<CollectExternDeclaration> {
+    using Base = InspectorCRTP<CollectExternDeclaration>;
     DpdkProgramStructure *structure;
 
  public:
     explicit CollectExternDeclaration(DpdkProgramStructure *structure) : structure(structure) {}
-    bool preorder(const IR::Declaration_Instance *d) override {
+    using Base::preorder;
+    bool preorder(const IR::Declaration_Instance *d) {
         if (auto type = d->type->to<IR::Type_Name>()) {
             auto externTypeName = type->path->name.name;
             if (externTypeName == "DirectMeter") {
@@ -792,14 +808,16 @@ class ConvertLogicalExpression : public PassManager {
 // This Pass collects infomation about the table keys for each table. This information
 // is later used for generating the context JSON output for use by the control plane
 // software.
-class CollectTableInfo : public Inspector {
+class CollectTableInfo : public InspectorCRTP<CollectTableInfo> {
+    using Base = InspectorCRTP<CollectTableInfo>;
     DpdkProgramStructure *structure;
 
  public:
     explicit CollectTableInfo(DpdkProgramStructure *structure) : structure(structure) {
         setName("CollectTableInfo");
     }
-    bool preorder(const IR::Key *key) override;
+    using Base::preorder;
+    bool preorder(const IR::Key *key);
 };
 
 // This pass transforms the tables such that all the Match keys are part of the same
@@ -997,7 +1015,8 @@ class ConvertActionSelectorAndProfile : public PassManager {
 /* Collect size information from the owner table for direct counter and meter extern objects
  * and validate some of the constraints on usage of Direct Meter and Direct Counter extern
  * methods */
-class CollectDirectCounterMeter : public Inspector {
+class CollectDirectCounterMeter : public InspectorCRTP<CollectDirectCounterMeter> {
+    using Base = InspectorCRTP<CollectDirectCounterMeter>;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     DpdkProgramStructure *structure;
@@ -1025,13 +1044,15 @@ class CollectDirectCounterMeter : public Inspector {
         methodCallFound = false;
     }
 
-    bool preorder(const IR::MethodCallStatement *mcs) override;
-    bool preorder(const IR::AssignmentStatement *assn) override;
-    bool preorder(const IR::P4Action *a) override;
-    bool preorder(const IR::P4Table *t) override;
+    using Base::preorder;
+    bool preorder(const IR::MethodCallStatement *mcs);
+    bool preorder(const IR::AssignmentStatement *assn);
+    bool preorder(const IR::P4Action *a);
+    bool preorder(const IR::P4Table *t);
 };
 
-class ValidateDirectCounterMeter : public Inspector {
+class ValidateDirectCounterMeter : public InspectorCRTP<ValidateDirectCounterMeter> {
+    using Base = InspectorCRTP<ValidateDirectCounterMeter>;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     DpdkProgramStructure *structure;
@@ -1042,11 +1063,13 @@ class ValidateDirectCounterMeter : public Inspector {
                                DpdkProgramStructure *structure)
         : refMap(refMap), typeMap(typeMap), structure(structure) {}
 
-    void postorder(const IR::AssignmentStatement *) override;
-    void postorder(const IR::MethodCallStatement *) override;
+    using Base::postorder;
+    void postorder(const IR::AssignmentStatement *);
+    void postorder(const IR::MethodCallStatement *);
 };
 
-class CollectAddOnMissTable : public Inspector {
+class CollectAddOnMissTable : public InspectorCRTP<CollectAddOnMissTable> {
+    using Base = InspectorCRTP<CollectAddOnMissTable>;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     DpdkProgramStructure *structure;
@@ -1056,11 +1079,13 @@ class CollectAddOnMissTable : public Inspector {
                           DpdkProgramStructure *structure)
         : refMap(refMap), typeMap(typeMap), structure(structure) {}
 
-    void postorder(const IR::P4Table *t) override;
-    void postorder(const IR::MethodCallStatement *) override;
+    using Base::postorder;
+    void postorder(const IR::P4Table *t);
+    void postorder(const IR::MethodCallStatement *);
 };
 
-class ValidateAddOnMissExterns : public Inspector {
+class ValidateAddOnMissExterns : public InspectorCRTP<ValidateAddOnMissExterns> {
+    using Base = InspectorCRTP<ValidateAddOnMissExterns>;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     DpdkProgramStructure *structure;
@@ -1070,7 +1095,8 @@ class ValidateAddOnMissExterns : public Inspector {
                              DpdkProgramStructure *structure)
         : refMap(refMap), typeMap(typeMap), structure(structure) {}
 
-    void postorder(const IR::MethodCallStatement *) override;
+    using Base::postorder;
+    void postorder(const IR::MethodCallStatement *);
     cstring getDefActionName(const IR::P4Table *t) {
         auto act = t->getDefaultAction();
         BUG_CHECK(act != nullptr, "%1%: default action does not exist", t);
@@ -1084,7 +1110,8 @@ class ValidateAddOnMissExterns : public Inspector {
 
 // Dpdk does not allow operations (arithmetic, logical, bitwise, relational etc) on operands
 // greater than 64-bit.
-class ValidateOperandSize : public Inspector {
+class ValidateOperandSize : public InspectorCRTP<ValidateOperandSize> {
+    using Base = InspectorCRTP<ValidateOperandSize>;
  public:
     ValidateOperandSize() { setName("ValidateOperandSize"); }
     void isValidOperandSize(const IR::Expression *e) {
@@ -1097,32 +1124,35 @@ class ValidateOperandSize : public Inspector {
         }
     }
 
-    void postorder(const IR::Operation_Binary *binop) override {
+    using Base::postorder;
+    void postorder(const IR::Operation_Binary *binop) {
         isValidOperandSize(binop->left);
         isValidOperandSize(binop->right);
     }
 
     // Reject all operations except typecast if the operand size is beyond the supported limit
-    void postorder(const IR::Operation_Unary *unop) override {
+    void postorder(const IR::Operation_Unary *unop) {
         if (unop->is<IR::Cast>()) return;
         isValidOperandSize(unop->expr);
     }
 
-    void postorder(const IR::Operation_Ternary *top) override {
+    void postorder(const IR::Operation_Ternary *top) {
         isValidOperandSize(top->e0);
         isValidOperandSize(top->e1);
         isValidOperandSize(top->e2);
     }
 };
 
-class CollectErrors : public Inspector {
+class CollectErrors : public InspectorCRTP<CollectErrors> {
+    using Base = InspectorCRTP<CollectErrors>;
     DpdkProgramStructure *structure;
 
  public:
     explicit CollectErrors(DpdkProgramStructure *structure) : structure(structure) {
         CHECK_NULL(structure);
     }
-    void postorder(const IR::Type_Error *error) override {
+    using Base::postorder;
+    void postorder(const IR::Type_Error *error) {
         int id = 0;
         for (auto err : error->members) {
             if (structure->error_map.count(err->name.name) == 0) {
@@ -1190,13 +1220,16 @@ class EliminateHeaderCopy : public PassManager {
 /// This pass checks whether an assignment statement has large operands (>64-bit).
 // If one operand is >64-bit and other is <= 64-bit, the smaller operand should be a header field
 // to maintain the endianness for copy. This pass detects if these conditions are satisfied or not.
-class HaveNonHeaderLargeOperandAssignment : public Inspector {
+class HaveNonHeaderLargeOperandAssignment : public InspectorCRTP<HaveNonHeaderLargeOperandAssignment> {
+    using Base = InspectorCRTP<HaveNonHeaderLargeOperandAssignment>;
     bool &is_all_arg_header_fields;
 
  public:
     explicit HaveNonHeaderLargeOperandAssignment(bool &is_all_arg_header_fields)
         : is_all_arg_header_fields(is_all_arg_header_fields) {}
-    bool preorder(const IR::AssignmentStatement *assn) override {
+
+    using Base::preorder;
+    bool preorder(const IR::AssignmentStatement *assn) {
         if (!is_all_arg_header_fields) return false;
         if ((isLargeFieldOperand(assn->left) && !isLargeFieldOperand(assn->right) &&
              !isInsideHeader(assn->right)) ||
@@ -1212,14 +1245,16 @@ class HaveNonHeaderLargeOperandAssignment : public Inspector {
 
 /// This pass checks whether program uses InternetChecksum and
 /// all arguments to the method add or sub have non header fields expression
-class HaveNonHeaderChecksumArgs : public Inspector {
+class HaveNonHeaderChecksumArgs : public InspectorCRTP<HaveNonHeaderChecksumArgs> {
+    using Base = InspectorCRTP<HaveNonHeaderChecksumArgs>;
     P4::TypeMap *typeMap;
     bool &is_all_arg_header_fields;
 
  public:
     HaveNonHeaderChecksumArgs(P4::TypeMap *typeMap, bool &is_all_arg_header_fields)
         : typeMap(typeMap), is_all_arg_header_fields(is_all_arg_header_fields) {}
-    bool preorder(const IR::MethodCallExpression *mce) override {
+    using Base::preorder;
+    bool preorder(const IR::MethodCallExpression *mce) {
         if (!is_all_arg_header_fields) return false;
         if (auto *m = mce->method->to<IR::Member>()) {
             if (auto *type = typeMap->getType(m->expr)->to<IR::Type_Extern>()) {
@@ -1445,7 +1480,8 @@ class CollectLocalStructAndFlatten : public PassManager {
 };
 
 /* Helper class to detect use of IPSec accelerator */
-class CollectIPSecInfo : public Inspector {
+class CollectIPSecInfo : public InspectorCRTP<CollectIPSecInfo> {
+    using Base = InspectorCRTP<CollectIPSecInfo>;
     bool &is_ipsec_used;
     int &sa_id_width;
     P4::ReferenceMap *refMap;
@@ -1460,7 +1496,8 @@ class CollectIPSecInfo : public Inspector {
           refMap(refMap),
           typeMap(typeMap),
           structure(structure) {}
-    bool preorder(const IR::MethodCallStatement *mcs) override {
+    using Base::preorder;
+    bool preorder(const IR::MethodCallStatement *mcs) {
         auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
         if (auto a = mi->to<P4::ExternMethod>()) {
             if (a->originalExternType->getName().name == "ipsec_accelerator") {

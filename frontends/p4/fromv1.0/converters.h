@@ -174,7 +174,8 @@ class PrimitiveConverter {
 
 ///////////////////////////////////////////////////////////////
 
-class DiscoverStructure : public Inspector {
+class DiscoverStructure : public InspectorCRTP<DiscoverStructure> {
+    using Base = InspectorCRTP<DiscoverStructure>;
     ProgramStructure *structure;
 
     // These names can only be used for very specific purposes
@@ -198,81 +199,82 @@ class DiscoverStructure : public Inspector {
         setName("DiscoverStructure");
     }
 
-    void postorder(const IR::ParserException *ex) override {
+    using Base::postorder;
+    void postorder(const IR::ParserException *ex) {
         warn(ErrorType::WARN_UNSUPPORTED, "%1%: parser exception is not translated to P4-16", ex);
     }
-    void postorder(const IR::Metadata *md) override {
+    void postorder(const IR::Metadata *md) {
         structure->metadata.emplace(md);
         checkReserved(md, md->name, "metadata");
     }
-    void postorder(const IR::Header *hd) override {
+    void postorder(const IR::Header *hd) {
         structure->headers.emplace(hd);
         checkReserved(hd, hd->name);
     }
-    void postorder(const IR::Type_StructLike *t) override {
+    void postorder(const IR::Type_StructLike *t) {
         structure->types.emplace(t);
         checkReserved(t, t->name, "type");
     }
-    void postorder(const IR::V1Control *control) override {
+    void postorder(const IR::V1Control *control) {
         structure->controls.emplace(control);
         checkReserved(control, control->name, "control");
     }
-    void postorder(const IR::V1Parser *parser) override {
+    void postorder(const IR::V1Parser *parser) {
         structure->parserStates.emplace(parser);
         checkReserved(parser, parser->name);
     }
-    void postorder(const IR::V1Table *table) override {
+    void postorder(const IR::V1Table *table) {
         structure->tables.emplace(table);
         checkReserved(table, table->name);
     }
-    void postorder(const IR::ActionFunction *action) override {
+    void postorder(const IR::ActionFunction *action) {
         structure->actions.emplace(action);
         checkReserved(action, action->name);
     }
-    void postorder(const IR::HeaderStack *stack) override {
+    void postorder(const IR::HeaderStack *stack) {
         structure->stacks.emplace(stack);
         checkReserved(stack, stack->name);
     }
-    void postorder(const IR::Counter *count) override {
+    void postorder(const IR::Counter *count) {
         structure->counters.emplace(count);
         checkReserved(count, count->name);
     }
-    void postorder(const IR::Register *reg) override {
+    void postorder(const IR::Register *reg) {
         structure->registers.emplace(reg);
         checkReserved(reg, reg->name);
     }
-    void postorder(const IR::ActionProfile *ap) override {
+    void postorder(const IR::ActionProfile *ap) {
         structure->action_profiles.emplace(ap);
         checkReserved(ap, ap->name);
     }
-    void postorder(const IR::FieldList *fl) override {
+    void postorder(const IR::FieldList *fl) {
         structure->field_lists.emplace(fl);
         checkReserved(fl, fl->name);
     }
-    void postorder(const IR::FieldListCalculation *flc) override {
+    void postorder(const IR::FieldListCalculation *flc) {
         structure->field_list_calculations.emplace(flc);
         checkReserved(flc, flc->name);
     }
-    void postorder(const IR::CalculatedField *cf) override {
+    void postorder(const IR::CalculatedField *cf) {
         structure->calculated_fields.push_back(cf);
     }
-    void postorder(const IR::Meter *m) override {
+    void postorder(const IR::Meter *m) {
         structure->meters.emplace(m);
         checkReserved(m, m->name);
     }
-    void postorder(const IR::ActionSelector *as) override {
+    void postorder(const IR::ActionSelector *as) {
         structure->action_selectors.emplace(as);
         checkReserved(as, as->name);
     }
-    void postorder(const IR::Type_Extern *ext) override {
+    void postorder(const IR::Type_Extern *ext) {
         structure->extern_types.emplace(ext);
         checkReserved(ext, ext->name);
     }
-    void postorder(const IR::Declaration_Instance *ext) override {
+    void postorder(const IR::Declaration_Instance *ext) {
         structure->externs.emplace(ext);
         checkReserved(ext, ext->name);
     }
-    void postorder(const IR::ParserValueSet *pvs) override {
+    void postorder(const IR::ParserValueSet *pvs) {
         structure->value_sets.emplace(pvs);
         checkReserved(pvs, pvs->name);
     }

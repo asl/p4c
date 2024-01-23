@@ -28,7 +28,8 @@ typedef SimpleCallInfo<IR::P4Action, IR::MethodCallStatement> ActionCallInfo;
 typedef SimpleInlineWorkList<IR::P4Action, IR::MethodCallStatement, ActionCallInfo> AInlineWorkList;
 typedef SimpleInlineList<IR::P4Action, ActionCallInfo, AInlineWorkList> ActionsInlineList;
 
-class DiscoverActionsInlining : public Inspector {
+class DiscoverActionsInlining : public InspectorCRTP<DiscoverActionsInlining> {
+    using Base = InspectorCRTP<DiscoverActionsInlining>;
     ActionsInlineList *toInline;  // output
     P4::ReferenceMap *refMap;     // input
     P4::TypeMap *typeMap;         // input
@@ -41,8 +42,10 @@ class DiscoverActionsInlining : public Inspector {
         CHECK_NULL(typeMap);
         setName("DiscoverActionsInlining");
     }
-    bool preorder(const IR::P4Parser *) override { return false; }  // skip
-    void postorder(const IR::MethodCallStatement *mcs) override;
+    using Base::preorder;
+    using Base::postorder;
+    bool preorder(const IR::P4Parser *) { return false; }  // skip
+    void postorder(const IR::MethodCallStatement *mcs);
 };
 
 // General-purpose actions inliner.

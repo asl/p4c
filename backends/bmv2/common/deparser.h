@@ -26,7 +26,8 @@ limitations under the License.
 
 namespace BMV2 {
 
-class DeparserConverter : public Inspector {
+class DeparserConverter : public InspectorCRTP<DeparserConverter> {
+    using Base = InspectorCRTP<DeparserConverter>;
     ConversionContext *ctxt;
     cstring name;
     P4::P4CoreLibrary &corelib;
@@ -37,7 +38,8 @@ class DeparserConverter : public Inspector {
                              Util::JsonArray *primitives);
 
  public:
-    bool preorder(const IR::P4Control *ctrl) override;
+    using Base::preorder;
+    bool preorder(const IR::P4Control *ctrl);
 
     explicit DeparserConverter(ConversionContext *ctxt, cstring name = "deparser")
         : ctxt(ctxt), name(name), corelib(P4::P4CoreLibrary::instance()) {

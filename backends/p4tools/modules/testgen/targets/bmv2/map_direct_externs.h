@@ -14,7 +14,8 @@ using DirectExternMap = std::map<const IR::IDeclaration *, const IR::P4Table *>;
 /// A lightweight visitor, which collects all the declarations in the program then checks whether a
 /// table is referencing the declaration as an direct extern. The direct externs are collected in a
 /// map. Currently checks for "counters" or "meters" properties in the table.
-class MapDirectExterns : public Inspector {
+class MapDirectExterns : public InspectorCRTP<MapDirectExterns> {
+    using Base = InspectorCRTP<MapDirectExterns>;
  private:
     /// List of the declared instances in the program.
     std::map<cstring, const IR::Declaration_Instance *> declaredExterns;
@@ -23,9 +24,10 @@ class MapDirectExterns : public Inspector {
     DirectExternMap directExternMap;
 
  public:
-    bool preorder(const IR::Declaration_Instance *declInstance) override;
+    using Base::preorder;
+    bool preorder(const IR::Declaration_Instance *declInstance);
 
-    bool preorder(const IR::P4Table *table) override;
+    bool preorder(const IR::P4Table *table);
 
     /// @returns the list of direct externs and their corresponding table.
     const std::map<const IR::IDeclaration *, const IR::P4Table *> &getdirectExternMap();

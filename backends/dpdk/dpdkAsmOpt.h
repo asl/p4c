@@ -142,13 +142,16 @@ class RemoveLabelAfterLabel : public Transform {
 };
 
 // This pass Collects all metadata struct member used in program
-class CollectUsedMetadataField : public Inspector {
+class CollectUsedMetadataField : public InspectorCRTP<CollectUsedMetadataField> {
+    using Base = InspectorCRTP<CollectUsedMetadataField>;
     ordered_set<cstring> &used_fields;
 
  public:
     explicit CollectUsedMetadataField(ordered_set<cstring> &used_fields)
         : used_fields(used_fields) {}
-    bool preorder(const IR::Member *m) override {
+
+    using Base::preorder;
+    bool preorder(const IR::Member *m) {
         // metadata struct field used like m.<field_name> in expressions
         if (m->expr->toString() == "m") used_fields.insert(m->member.toString());
         return true;
@@ -337,7 +340,8 @@ class ShortenTokenLength : public Transform {
 
 /// This pass collect use def info by analysing all possible
 /// source and destinations, this info will be used by copy elimination pass
-class CollectUseDefInfo : public Inspector {
+class CollectUseDefInfo : public InspectorCRTP<CollectUseDefInfo> {
+    using Base = InspectorCRTP<CollectUseDefInfo>;
     P4::TypeMap *typeMap;
 
  public:
@@ -355,13 +359,14 @@ class CollectUseDefInfo : public Inspector {
         dontEliminate["m.psa_ingress_output_metadata_egress_port"] = true;
     }
 
-    bool preorder(const IR::DpdkJmpCondStatement *b) override {
+    using Base::preorder;
+    bool preorder(const IR::DpdkJmpCondStatement *b) {
         usesInfo[b->src1->toString()]++;
         usesInfo[b->src2->toString()]++;
         return false;
     }
 
-    bool preorder(const IR::DpdkLearnStatement *b) override {
+    bool preorder(const IR::DpdkLearnStatement *b) {
         usesInfo[b->timeout->toString()]++;
         dontEliminate[b->timeout->toString()] = true;
         if (b->argument) {
@@ -373,7 +378,7 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkUnaryStatement *u) override {
+    bool preorder(const IR::DpdkUnaryStatement *u) {
         usesInfo[u->src->toString()]++;
         defInfo[u->dst->toString()]++;
         // do not eliminate the destination
@@ -381,7 +386,7 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkBinaryStatement *b) override {
+    bool preorder(const IR::DpdkBinaryStatement *b) {
         usesInfo[b->src1->toString()]++;
         usesInfo[b->src2->toString()]++;
         defInfo[b->dst->toString()]++;
@@ -392,21 +397,21 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkMovStatement *mv) override {
+    bool preorder(const IR::DpdkMovStatement *mv) {
         defInfo[mv->dst->toString()]++;
         usesInfo[mv->src->toString()]++;
         replacementMap[mv->dst->toString()] = mv->src;
         return false;
     }
 
-    bool preorder(const IR::DpdkCastStatement *c) override {
+    bool preorder(const IR::DpdkCastStatement *c) {
         usesInfo[c->src->toString()]++;
         defInfo[c->dst->toString()]++;
         replacementMap[c->dst->toString()] = c->src;
         return false;
     }
 
-    bool preorder(const IR::DpdkMirrorStatement *m) override {
+    bool preorder(const IR::DpdkMirrorStatement *m) {
         usesInfo[m->slotId->toString()]++;
         usesInfo[m->sessionId->toString()]++;
         // dpdk expect it as metadata struct member
@@ -415,7 +420,7 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkEmitStatement *e) override {
+    bool preorder(const IR::DpdkEmitStatement *e) {
         auto type = typeMap->getType(e->header)->to<IR::Type_Header>();
         if (type)
             for (auto f : type->fields) {
@@ -425,7 +430,7 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkExtractStatement *e) override {
+    bool preorder(const IR::DpdkExtractStatement *e) {
         auto type = typeMap->getType(e->header)->to<IR::Type_Header>();
         if (type)
             for (auto f : type->fields) {
@@ -440,7 +445,7 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkLookaheadStatement *l) override {
+    bool preorder(const IR::DpdkLookaheadStatement *l) {
         auto type = typeMap->getType(l->header)->to<IR::Type_Header>();
         if (type)
             for (auto f : type->fields) {
@@ -450,28 +455,28 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkRxStatement *r) override {
+    bool preorder(const IR::DpdkRxStatement *r) {
         usesInfo[r->port->toString()]++;
         // always required
         dontEliminate[r->port->toString()] = true;
         return false;
     }
 
-    bool preorder(const IR::DpdkTxStatement *t) override {
+    bool preorder(const IR::DpdkTxStatement *t) {
         usesInfo[t->port->toString()]++;
         // always required
         dontEliminate[t->port->toString()] = true;
         return false;
     }
 
-    bool preorder(const IR::DpdkRecircidStatement *t) override {
+    bool preorder(const IR::DpdkRecircidStatement *t) {
         usesInfo[t->pass->toString()]++;
         // uses standard metadata fields
         dontEliminate[t->pass->toString()] = true;
         return false;
     }
 
-    bool preorder(const IR::DpdkRearmStatement *r) override {
+    bool preorder(const IR::DpdkRearmStatement *r) {
         if (r->timeout) {
             usesInfo[r->timeout->toString()]++;
             // dpdk requires it in metadata struct
@@ -480,7 +485,7 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkChecksumAddStatement *c) override {
+    bool preorder(const IR::DpdkChecksumAddStatement *c) {
         usesInfo[c->field->toString()]++;
         // dpdk requires it in header
         if (auto m = c->field->to<IR::Member>())
@@ -488,7 +493,7 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkChecksumSubStatement *c) override {
+    bool preorder(const IR::DpdkChecksumSubStatement *c) {
         usesInfo[c->field->toString()]++;
         // dpdk requires it in header
         if (auto m = c->field->to<IR::Member>())
@@ -496,14 +501,14 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkGetHashStatement *c) override {
+    bool preorder(const IR::DpdkGetHashStatement *c) {
         usesInfo[c->dst->toString()]++;
         // dpdk requires it in metadata struct
         dontEliminate[c->dst->toString()] = true;
         return false;
     }
 
-    bool preorder(const IR::DpdkVerifyStatement *v) override {
+    bool preorder(const IR::DpdkVerifyStatement *v) {
         usesInfo[v->condition->toString()]++;
         usesInfo[v->error->toString()]++;
         // dpdk requires it in metadata struct
@@ -512,12 +517,12 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkMeterDeclStatement *c) override {
+    bool preorder(const IR::DpdkMeterDeclStatement *c) {
         usesInfo[c->size->toString()]++;
         return false;
     }
 
-    bool preorder(const IR::DpdkMeterExecuteStatement *e) override {
+    bool preorder(const IR::DpdkMeterExecuteStatement *e) {
         usesInfo[e->index->toString()]++;
         if (e->length) usesInfo[e->length->toString()]++;
         usesInfo[e->color_in->toString()]++;
@@ -525,29 +530,29 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkCounterCountStatement *c) override {
+    bool preorder(const IR::DpdkCounterCountStatement *c) {
         usesInfo[c->index->toString()]++;
         if (c->incr) usesInfo[c->incr->toString()]++;
         return false;
     }
 
-    bool preorder(const IR::DpdkRegisterDeclStatement *r) override {
+    bool preorder(const IR::DpdkRegisterDeclStatement *r) {
         usesInfo[r->size->toString()]++;
         return false;
     }
 
-    bool preorder(const IR::DpdkRegisterReadStatement *r) override {
+    bool preorder(const IR::DpdkRegisterReadStatement *r) {
         usesInfo[r->index->toString()]++;
         defInfo[r->dst->toString()]++;
         return false;
     }
 
-    bool preorder(const IR::DpdkRegisterWriteStatement *r) override {
+    bool preorder(const IR::DpdkRegisterWriteStatement *r) {
         usesInfo[r->index->toString()]++;
         return false;
     }
 
-    bool preorder(const IR::DpdkTable *t) override {
+    bool preorder(const IR::DpdkTable *t) {
         auto keys = t->match_keys;
         if (keys)
             for (auto ke : keys->keyElements) {
@@ -602,7 +607,8 @@ class CopyPropagationAndElimination : public Transform {
 // This Pass emits Table config consumed by dpdk target in a text file if
 // const entries are present in p4 program.
 // Most of the code taken from control-plane/p4RuntimeSerializer.h/.cpp
-class EmitDpdkTableConfig : public Inspector {
+class EmitDpdkTableConfig : public InspectorCRTP<EmitDpdkTableConfig> {
+    using Base = InspectorCRTP<EmitDpdkTableConfig>;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     ordered_map<cstring, cstring> &newNameMap;
@@ -631,7 +637,8 @@ class EmitDpdkTableConfig : public Inspector {
     EmitDpdkTableConfig(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                         ordered_map<cstring, cstring> &newNameMap)
         : refMap(refMap), typeMap(typeMap), newNameMap(newNameMap) {}
-    void postorder(const IR::DpdkTable *table) override;
+    using Base::postorder;
+    void postorder(const IR::DpdkTable *table);
 };
 
 // Instructions can only appear in actions and apply block of .spec file.

@@ -23,13 +23,15 @@ limitations under the License.
 
 namespace DPDK {
 
-class IsDirectionMetadataUsed : public Inspector {
+class IsDirectionMetadataUsed : public InspectorCRTP<IsDirectionMetadataUsed> {
+    using Base = InspectorCRTP<IsDirectionMetadataUsed>;
     bool &is_direction_used;
 
  public:
     explicit IsDirectionMetadataUsed(bool &is_direction_used)
         : is_direction_used(is_direction_used) {}
-    bool preorder(const IR::Member *m) override {
+    using Base::preorder;
+    bool preorder(const IR::Member *m) {
         if (!is_direction_used && isDirection(m)) {
             is_direction_used = true;
         }

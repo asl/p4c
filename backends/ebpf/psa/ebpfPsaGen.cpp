@@ -29,13 +29,15 @@ limitations under the License.
 
 namespace EBPF {
 
-class PSAErrorCodesGen : public Inspector {
+class PSAErrorCodesGen : public InspectorCRTP<PSAErrorCodesGen> {
+    using Base = InspectorCRTP<PSAErrorCodesGen>;
     CodeBuilder *builder;
 
  public:
     explicit PSAErrorCodesGen(CodeBuilder *builder) : builder(builder) {}
 
-    bool preorder(const IR::Type_Error *errors) override {
+    using Base::preorder;
+    bool preorder(const IR::Type_Error *errors) {
         int id = -1;
         for (auto decl : errors->members) {
             ++id;
