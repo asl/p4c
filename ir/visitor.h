@@ -365,6 +365,7 @@ class Visitor {
     friend class Inspector;
     template <class T> friend class InspectorCRTP;
     friend class Modifier;
+    template <class T> friend class ModifierCRTP;
     friend class Transform;
     friend class ControlFlowVisitor;
 };
@@ -448,13 +449,22 @@ struct PushContext {
     ~PushContext();
 };
 
-class Modifier : public virtual Visitor {
+class Modifier_base : public virtual Visitor {
+    friend class Modifier;
+    template <class T> friend class ModifierCRTP;
     std::shared_ptr<ChangeTracker> visited;
     void visitor_const_error() override;
     bool check_clone(const Visitor *) override;
+    void maybe_forward_children(IR::Node *n);
 
  public:
     profile_t init_apply(const IR::Node *root) override;
+    void revisit_visited();
+    bool visit_in_progress(const IR::Node *) const;
+};
+
+class Modifier : public Modifier_base {
+ public:
     const IR::Node *apply_visitor(const IR::Node *n, const char *name = 0) override;
     virtual bool preorder(IR::Node *) { return true; }
     virtual void postorder(IR::Node *) {}
@@ -467,9 +477,126 @@ class Modifier : public virtual Visitor {
     virtual void loop_revisit(const IR::CLASS *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
-    void revisit_visited();
-    bool visit_in_progress(const IR::Node *) const;
 };
+
+template <class Derived>
+class ModifierCRTP : public Modifier_base {
+    bool call_preorder(IR::Node *);
+    void call_postorder(IR::Node *);
+    void call_revisit(const IR::Node *, const IR::Node *);
+    void call_loop_revisit(const IR::Node *);
+ public:
+    bool preorder(IR::Node *) { return true; }
+    void postorder(IR::Node *) {}
+    void revisit(const IR::Node *, const IR::Node *) {}
+    void loop_revisit(const IR::Node *) { BUG("IR loop detected"); }
+
+#define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                           \
+    bool preorder(IR::CLASS *n) {                                                     \
+        return static_cast<Derived *>(this)->preorder(static_cast<IR::BASE *>(n));    \
+    }                                                                                 \
+    void postorder(IR::CLASS *n) {                                                    \
+        static_cast<Derived *>(this)->postorder(static_cast<IR::BASE *>(n));          \
+    }                                                                                 \
+    void revisit(const IR::CLASS *n, const IR::CLASS *r) {                            \
+        static_cast<Derived *>(this)->revisit(                                        \
+            static_cast<const IR::BASE *>(n), static_cast<const IR::BASE *>(r));      \
+    }                                                                                 \
+    void loop_revisit(const IR::CLASS *n) {                                           \
+        static_cast<Derived *>(this)->loop_revisit(static_cast<const IR::BASE *>(n)); \
+    }
+    IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
+#undef DEFINE_VISIT_FUNCTIONS
+
+    const IR::Node *apply_visitor(const IR::Node *n, const char *name = 0) override {
+        if (ctxt) ctxt->child_name = name;
+        if (n) {
+            PushContext local(ctxt, n);
+            if (visited->busy(n)) {
+                call_loop_revisit(n);
+                // FIXME -- should have a way of updating the node?  Needs to be decided
+                // by the visitor somehow, but it is tough
+            } else if (visited->done(n)) {
+                call_revisit(n, visited->result(n));
+                n = visited->result(n);
+            } else {
+                visited->start(n, visitDagOnce);
+                IR::Node *copy = n->clone();
+                local.current.node = copy;
+                maybe_forward_children(copy);
+                visitCurrentOnce = visited->refVisitOnce(n);
+                if (call_preorder(copy)) {
+                    copy->visit_children(*this);
+                    visitCurrentOnce = visited->refVisitOnce(n);
+                    call_postorder(copy);
+                }
+                if (visited->finish(n, copy)) (n = copy)->validate();
+            }
+        }
+        if (ctxt)
+            ctxt->child_index++;
+        else
+            visited.reset();
+        return n;
+    }
+};
+
+template <class Derived>
+bool ModifierCRTP<Derived>::call_preorder(IR::Node *n) {
+    //! TODO: Support Vector<*> and IndexedVector<*> nodes.
+    switch (n->typeId()) {
+#define DECLARE_NODE_CASE(CLASS, BASE) \
+    case IR::CLASS::static_typeId():   \
+        return static_cast<Derived *>(this)->preorder(static_cast<IR::CLASS *>(n));
+    IRNODE_ALL_NON_TEMPLATE_SUBCLASSES(DECLARE_NODE_CASE)
+#undef DECLARE_NODE_CASE
+    default:
+        return static_cast<Derived *>(this)->preorder(n);
+    }
+}
+
+template <class Derived>
+void ModifierCRTP<Derived>::call_postorder(IR::Node *n) {
+    //! TODO: Support Vector<*> and IndexedVector<*> nodes.
+    switch (n->typeId()) {
+#define DECLARE_NODE_CASE(CLASS, BASE) \
+    case IR::CLASS::static_typeId():   \
+        return static_cast<Derived *>(this)->postorder(static_cast<IR::CLASS *>(n));
+    IRNODE_ALL_NON_TEMPLATE_SUBCLASSES(DECLARE_NODE_CASE)
+#undef DECLARE_NODE_CASE
+    default:
+        return static_cast<Derived *>(this)->postorder(n);
+    }
+}
+
+template <class Derived>
+void ModifierCRTP<Derived>::call_revisit(const IR::Node *n, const IR::Node *r) {
+    //! TODO: Support Vector<*> and IndexedVector<*> nodes.
+    switch (n->typeId()) {
+#define DECLARE_NODE_CASE(CLASS, BASE) \
+    case IR::CLASS::static_typeId():   \
+        return static_cast<Derived *>(this)->revisit( \
+            static_cast<const IR::CLASS *>(n), static_cast<const IR::CLASS *>(r));
+    IRNODE_ALL_NON_TEMPLATE_SUBCLASSES(DECLARE_NODE_CASE)
+#undef DECLARE_NODE_CASE
+    default:
+        return static_cast<Derived *>(this)->revisit(n, r);
+    }
+}
+
+template <class Derived>
+void ModifierCRTP<Derived>::call_loop_revisit(const IR::Node *n) {
+    //! TODO: Support Vector<*> and IndexedVector<*> nodes.
+    switch (n->typeId()) {
+#define DECLARE_NODE_CASE(CLASS, BASE) \
+    case IR::CLASS::static_typeId():   \
+        return static_cast<Derived *>(this)->loop_revisit(static_cast<const IR::CLASS *>(n));
+    IRNODE_ALL_NON_TEMPLATE_SUBCLASSES(DECLARE_NODE_CASE)
+#undef DECLARE_NODE_CASE
+    default:
+        return static_cast<Derived *>(this)->loop_revisit(n);
+    }
+}
 
 class Inspector_base : public virtual Visitor {
     friend class Inspector;

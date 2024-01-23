@@ -31,7 +31,9 @@ class Visitor;
 struct Visitor_Context;
 class Inspector;
 template <class T> class InspectorCRTP;
+class Modifier_base;
 class Modifier;
+template <class T> class ModifierCRTP;
 class Transform;
 class JSONGenerator;
 class JSONLoader;
@@ -115,7 +117,9 @@ class Node : public virtual INode {
     friend class ::Visitor;
     friend class ::Inspector;
     template <class T> friend class ::InspectorCRTP;
+    friend class ::Modifier_base;
     friend class ::Modifier;
+    template <class T> friend class ::ModifierCRTP;
     friend class ::Transform;
     cstring prepareSourceInfoForJSON(Util::SourceInfo &si, unsigned *lineNumber,
                                      unsigned *columnNumber) const;
