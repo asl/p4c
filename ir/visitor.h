@@ -362,6 +362,7 @@ class Visitor {
     virtual void visitor_const_error();
     const Context *ctxt = nullptr;  // should be readonly to subclasses
     bool *visitCurrentOnce = nullptr;
+    friend class Inspector_base;
     friend class Inspector;
     template <class T> friend class InspectorCRTP;
     friend class Modifier;
@@ -608,6 +609,7 @@ class Inspector_base : public virtual Visitor {
     typedef std::unordered_map<const IR::Node *, info_t> visited_t;
     std::shared_ptr<visited_t> visited;
     bool check_clone(const Visitor *) override;
+    void visit_node_children(const IR::Node *n);
 
  public:
     profile_t init_apply(const IR::Node *root) override;
@@ -676,7 +678,7 @@ class InspectorCRTP : public Inspector_base {
                 vp.first->second.done = false;
                 visitCurrentOnce = &vp.first->second.visitOnce;
                 if (call_preorder(n)) {
-                    n->visit_children(*this);
+                    visit_node_children(n);
                     visitCurrentOnce = &vp.first->second.visitOnce;
                     call_postorder(n);
                 }

@@ -29,6 +29,7 @@ limitations under the License.
 
 class Visitor;
 struct Visitor_Context;
+class Inspector_base;
 class Inspector;
 template <class T> class InspectorCRTP;
 class Modifier_base;
@@ -117,8 +118,7 @@ class Node : public virtual INode {
     virtual void visit_children(Visitor &) {}
     virtual void visit_children(Visitor &) const {}
     friend class ::Visitor;
-    friend class ::Inspector;
-    template <class T> friend class ::InspectorCRTP;
+    friend class ::Inspector_base;
     friend class ::Modifier_base;
     friend class ::Modifier;
     template <class T> friend class ::ModifierCRTP;

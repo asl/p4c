@@ -259,6 +259,54 @@ void Transform_base::maybe_forward_children(IR::Node *n) {
     }
 }
 
+void Inspector_base::visit_node_children(const IR::Node *n) {
+    if (dynamic_cast<ControlFlowVisitor *>(static_cast<Visitor *>(this))) {
+        //! TODO: support visitors derived from ControlFlowVisitor.
+        // Some implementations of visit_children() use SplitFlowVisit or SplitFlowVisitVector to
+        // control how descendants of ControlFlowVisitor handle child nodes. At this time, only
+        // DoLocalCopyPropagation inherits ControlFlowVisitor, but it is a Transform visitor, not an
+        // Inspector. Nevertheless, provide a fallback for visitors that are both Inspector and
+        // ControlFlowVisitor, in case they exist somewhere outside the repository.
+        n->visit_children(*this);
+        return;
+    }
+    struct CollectChildren : public Visitor {
+        std::vector<std::tuple<const IR::Node *, const char *>> children;
+        // PushContext provides a temporary context and ensures that:
+        //  * Visitor::ctxt points to an object and not nullptr; this is important
+        //    for visit(,,cidx) methods as they do not check ctxt for nullptr;
+        //  * ctxt->child_index starts from 0;
+        //  * The context of the main visitor stays intact during the traversal.
+        PushContext push_ctxt;
+        const IR::Node *apply_visitor(const IR::Node *n, const char * name) override {
+            // Note: ctxt->child_index can be explicitly set by calling one of the
+            // visit() methods which accepts 3rd argument. In the repository, only
+            // SplitFlowVisit<T>::do_visit() and SplitFlowVisitVector<N>::do_visit()
+            // can do that for this class, and they are expected to provide child
+            // nodes in order.
+            // Note that the only other case (in the repository) that calls such visit()
+            // methods is DoLocalCopyPropagation::preorder(), but there is no way those
+            // calls could end up here.
+            BUG_CHECK(ctxt->child_index == int(children.size()),
+                "out of order children traversal is not supported");
+            children.emplace_back(n, name);
+            ctxt->child_index++;
+            return n;
+        }
+        CollectChildren(const IR::Node *n) : push_ctxt(ctxt, n) { }
+    };
+    CollectChildren collect(n);
+    n->visit_children(collect);
+    for (auto [node, name] : collect.children) {
+        // Note 1: apply_vesitor() will update ctxt->child_index.
+        // Note 2: ctxt->child_index may differ from the real index of the children
+        // in cases where a preorder() method of the visitor implements its own traversal
+        // of the children, such as calls one of the visit() methods. See
+        // ExpressionEvaluator::preorder() for an example.
+        this->apply_visitor(node, name);
+    }
+}
+
 const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n) {
@@ -304,7 +352,7 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
             vp.first->second.done = false;
             visitCurrentOnce = &vp.first->second.visitOnce;
             if (n->apply_visitor_preorder(*this)) {
-                n->visit_children(*this);
+                visit_node_children(n);
                 visitCurrentOnce = &vp.first->second.visitOnce;
                 n->apply_visitor_postorder(*this);
             }
