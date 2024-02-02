@@ -252,6 +252,7 @@ class Constant : Literal {
         return Util::toString(value, width, sign, base);
     }
     visit_children { v.visit(type, "type"); }
+    fill_children { out.push_back({ {type, "type"} }); }
 }
 
 class BoolLiteral : Literal {
@@ -358,6 +359,9 @@ class Mux : Operation_Ternary {
     visit_children {
         v.visit(e0, "e0");
         SplitFlowVisit<Expression>(v, e1, e2).run_visit(); }
+    fill_children {
+        out.push_back({ {e0, "e0"} });
+        out.push_back({ {e1, nullptr}, {e2, nullptr} }); }
     Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
 }
 
@@ -395,6 +399,9 @@ class SelectExpression : Expression {
     visit_children {
         v.visit(select, "select");
         SplitFlowVisitVector<SelectCase>(v, selectCases).run_visit(); }
+    fill_children {
+        out.push_back({ {select, "select"} });
+        selectCases.fill_children(out); }
 }
 
 class MethodCallExpression : Expression {

@@ -75,6 +75,7 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
     virtual cstring node_type_name() const = 0;
     virtual void validate() const {}
     virtual const Annotation *getAnnotation(cstring) const { return nullptr; }
+    
 
     // default checkedTo implementation for nodes: just fallback to generic ICastable method
     template <typename T>
@@ -96,6 +97,16 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
 };
 
 class Node : public virtual INode {
+ public:
+    using ChildInfo = std::tuple<const Node *, const char *>;
+    using ChildrenGroup = std::vector<ChildInfo>;
+    using Children = std::vector<ChildrenGroup>;
+    virtual void fill_children(Children &) const { }
+    Children get_children() const {
+        Children out;
+        this->fill_children(out);
+        return out;
+    }
  public:
     virtual bool apply_visitor_preorder(Modifier &v);
     virtual void apply_visitor_postorder(Modifier &v);

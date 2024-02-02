@@ -145,6 +145,7 @@ class NameMap : public Node {
     static cstring static_type_name() { return "NameMap<" + T::static_type_name() + ">"; }
     void visit_children(Visitor &v) override;
     void visit_children(Visitor &v) const override;
+    void fill_children(Children &out) const override;
     void toJSON(JSONGenerator &json) const override;
     static NameMap<T, MAP, COMP, ALLOC> *fromJSON(JSONLoader &json);
 

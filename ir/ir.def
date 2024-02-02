@@ -17,6 +17,7 @@
   void validate() const;
   const char *node_type_name() const;
   void visit_children(Visitor &v);
+  void fill_children(Children &out) const;
   void dump_fields(std::ostream& out) const;
 
   C comments are ignored.
@@ -452,6 +453,9 @@ class IfStatement : Statement {
     visit_children {
         v.visit(condition, "condition");
         SplitFlowVisit<Statement>(v, ifTrue, ifFalse).run_visit(); }
+    fill_children {
+        out.push_back({ {condition, "condition"} });
+        out.push_back({ {ifTrue, nullptr}, {ifFalse, nullptr} }); }
 }
 
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
@@ -498,6 +502,9 @@ class SwitchStatement : Statement {
         SplitFlowVisit<SwitchCase> split(v);
         for (auto &c : cases) split.addNode(c);
         split.run_visit(); }
+    fill_children {
+        out.push_back({ {expression, "expression"} });
+        cases.fill_children(out); }
 }
 
 class Function : Declaration, IFunctional, ISimpleNamespace, INestedNamespace {
@@ -544,6 +551,7 @@ abstract Block : CompileTimeValue {
         BUG_CHECK(it != constantValue.end(), "%1%: No such node %2%", this, node);
         return it->second; }
     visit_children { (void)v; }
+    fill_children { (void)out; }
     virtual const IDeclaration* getContainer() const { return nullptr; }
 }
 
