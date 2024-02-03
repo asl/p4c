@@ -454,8 +454,8 @@ class IfStatement : Statement {
         v.visit(condition, "condition");
         SplitFlowVisit<Statement>(v, ifTrue, ifFalse).run_visit(); }
     fill_children {
-        out.push_back({ {condition, "condition"} });
-        out.push_back({ {ifTrue, nullptr}, {ifFalse, nullptr} }); }
+        out.push_back({ GTK_Sequential, { {condition, "condition"} } });
+        out.push_back({ GTK_SplitFlow, { {ifTrue, nullptr}, {ifFalse, nullptr} } }); }
 }
 
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
@@ -503,7 +503,7 @@ class SwitchStatement : Statement {
         for (auto &c : cases) split.addNode(c);
         split.run_visit(); }
     fill_children {
-        out.push_back({ {expression, "expression"} });
+        out.push_back({ GTK_Sequential, { {expression, "expression"} } });
         cases.fill_children(out); }
 }
 

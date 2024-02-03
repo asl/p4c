@@ -179,8 +179,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               if (f->isInline)
                   buf << cl->indent << f->name << ".fill_children(out);" << std::endl;
               else
-                  buf << cl->indent << "out.push_back({ {" << f->name << ", \"" << f->name << "\"} });"
-                      << std::endl;
+                  buf << cl->indent << "out.push_back({ GTK_Sequential, { {" << f->name << ", \""
+                      << f->name << "\"} } });" << std::endl;
               needed = true;
           }
           buf << "}";

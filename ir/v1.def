@@ -147,8 +147,8 @@ class If :  Expression {
         Expression::visit_children(v);
     }
     fill_children {
-        out.push_back({ {pred, "pred"} });
-        out.push_back({ {ifTrue, nullptr}, {ifFalse, nullptr} });
+        out.push_back({ GTK_Sequential, { {pred, "pred"} } });
+        out.push_back({ GTK_SplitFlow, { {ifTrue, nullptr}, {ifFalse, nullptr} } });
         Expression::fill_children(out);
     }
 }
@@ -245,9 +245,9 @@ class CalculatedField : IAnnotated {
         for (auto &s : specs) v.visit(s.cond, s.name.name);
         v.visit(annotations, "annotations"); }
     fill_children {
-        out.push_back({ {field, "field"} });
-        for (auto &s : specs) out.push_back({ {s.cond, s.name.name} });
-        out.push_back({ {annotations, "annotations"} }); }
+        out.push_back({ GTK_Sequential, { {field, "field"} } });
+        for (auto &s : specs) out.push_back({ GTK_Sequential, { {s.cond, s.name.name} } });
+        out.push_back({ GTK_Sequential, { {annotations, "annotations"} } }); }
 }
 
 class ParserValueSet : IAnnotated {
@@ -378,11 +378,12 @@ class ActionFunction : IAnnotated {
     }
     fill_children {
         action.fill_children(out);
-        for (auto &info : out.back()) get<1>(info) = "action";
+        for (auto &info : std::get<1>(out.back()))
+            std::get<1>(info) = "action";
         // DANGER -- visiting action first so type inferencing will push types to
         // DANGER -- action args based on use.  This is immoral.
-        for (auto &a : args) out.push_back({ {a, "arg"} });
-        out.push_back({ {annotations, "annotations"} });
+        for (auto &a : args) out.push_back({ GTK_Sequential, { {a, "arg"} } });
+        out.push_back({ GTK_Sequential, { {annotations, "annotations"} } });
     }
     toString {
         return cstring("action ") + name + " {\n" +

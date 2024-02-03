@@ -133,10 +133,10 @@ void IR::Vector<T>::parallel_visit_children(Visitor &v) const {
 }
 template <class T>
 void IR::Vector<T>::fill_children(Children &out) const {
-    out.emplace_back();
-    out.back().reserve(vec.size());
+    out.push_back({ GTK_Sequential, {} });
+    std::get<1>(out.back()).reserve(vec.size());
     for (auto &a : vec)
-        out.back().emplace_back(a, nullptr);
+        std::get<1>(out.back()).emplace_back(a, nullptr);
 }
 IRNODE_DEFINE_APPLY_OVERLOAD(Vector, template <class T>, <T>)
 template <class T>
@@ -281,10 +281,10 @@ template <class T, template <class K, class V, class COMP, class ALLOC> class MA
           class COMP /*= std::less<cstring>*/,
           class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
 void IR::NameMap<T, MAP, COMP, ALLOC>::fill_children(Children &out) const {
-    out.emplace_back();
-    out.back().reserve(symbols.size());
+    out.push_back({ GTK_Sequential, {} });
+    std::get<1>(out.back()).reserve(symbols.size());
     for (auto &k : symbols)
-        out.back().emplace_back(k.second, k.first);
+        std::get<1>(out.back()).emplace_back(k.second, k.first);
 }
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
           class COMP /*= std::less<cstring>*/,
@@ -346,10 +346,9 @@ template <class KEY, class VALUE,
           class COMP /*= std::less<cstring>*/,
           class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
 void IR::NodeMap<KEY, VALUE, MAP, COMP, ALLOC>::fill_children(Children &out) const {
-    //! TODO: Add a flag for Transform and Modifier visitors to visit the second
-    //        node in each pair only if the first node is not erased.
-    //        See NodeMap::visit_children() (the one without `const`).
     for (auto &k : symbols)
-        out.emplace_back({ {k.first, nullptr}, {k.second, nullptr} });
+        out.emplace_back({
+            GTK_Conditional,
+            { {k.first, nullptr}, {k.second, nullptr} } });
 }
 #endif /* IR_IR_INLINE_H_ */

@@ -271,7 +271,7 @@ void Inspector_base::visit_node_children(const IR::Node *n) {
         return;
     }
     auto children = n->get_children();
-    for (const auto &group : children)
+    for (const auto &[_, group] : children)
         for (const auto &[node, name] : group)
             this->apply_visitor(node, name);
 }

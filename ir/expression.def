@@ -252,7 +252,7 @@ class Constant : Literal {
         return Util::toString(value, width, sign, base);
     }
     visit_children { v.visit(type, "type"); }
-    fill_children { out.push_back({ {type, "type"} }); }
+    fill_children { out.push_back({ GTK_Sequential, { {type, "type"} } }); }
 }
 
 class BoolLiteral : Literal {
@@ -360,8 +360,8 @@ class Mux : Operation_Ternary {
         v.visit(e0, "e0");
         SplitFlowVisit<Expression>(v, e1, e2).run_visit(); }
     fill_children {
-        out.push_back({ {e0, "e0"} });
-        out.push_back({ {e1, nullptr}, {e2, nullptr} }); }
+        out.push_back({ GTK_Sequential, { {e0, "e0"} } });
+        out.push_back({ GTK_SplitFlow, { {e1, nullptr}, {e2, nullptr} } }); }
     Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
 }
 
@@ -400,7 +400,7 @@ class SelectExpression : Expression {
         v.visit(select, "select");
         SplitFlowVisitVector<SelectCase>(v, selectCases).run_visit(); }
     fill_children {
-        out.push_back({ {select, "select"} });
+        out.push_back({ GTK_Sequential, { {select, "select"} } });
         selectCases.fill_children(out); }
 }
 

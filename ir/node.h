@@ -100,7 +100,13 @@ class Node : public virtual INode {
  public:
     using ChildInfo = std::tuple<const Node *, const char *>;
     using ChildrenGroup = std::vector<ChildInfo>;
-    using Children = std::vector<ChildrenGroup>;
+    enum GroupTraversalKind {
+        GTK_Sequential,
+        GTK_SplitFlow,
+        GTK_Conditional,
+    };
+    using ChildrenGroupInfo = std::tuple<GroupTraversalKind, ChildrenGroup>;
+    using Children = std::vector<ChildrenGroupInfo>;
     virtual void fill_children(Children &) const { }
     Children get_children() const {
         Children out;
