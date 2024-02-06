@@ -223,6 +223,7 @@ public:
 
     visit_children { v.visit(type, "type"); }
     fill_children { out.push_back({ GTK_Sequential, { {type, "type} } }); }
+    update_children { return (repl, start, type); }
 
     ConcolicVariable(const Type *type, cstring methodName,
                      const Vector<Argument> *arguments, int srcIdentifier, int concolicId,

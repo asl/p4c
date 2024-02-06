@@ -108,6 +108,7 @@ class Node : public virtual INode {
     using ChildrenGroupInfo = std::tuple<GroupTraversalKind, ChildrenGroup>;
     using Children = std::vector<ChildrenGroupInfo>;
     virtual void fill_children(Children &) const { }
+    virtual size_t update_children(const Children &, size_t start) { return start; }
     Children get_children() const {
         Children out;
         this->fill_children(out);
@@ -248,6 +249,33 @@ inline bool equiv(const INode *a, const INode *b) {
         v.end_apply(tmp);                                                                    \
         return tmp;                                                                          \
     }
+
+template <class T>
+static void update_node_field(const T *&n, const Node *t) {
+    n = (t ? t->to<T>() : nullptr);
+    if (t && !n) BUG("visitor returned a node of invalid type: %1%", t);
+}
+
+template <size_t I>
+static void update_node_fields_impl(const Node::ChildrenGroup &repl) {
+    BUG_CHECK(repl.size() == I, "unexpected child count in the current group");
+}
+
+template <size_t I, class T, class... U>
+static void update_node_fields_impl(const Node::ChildrenGroup &repl, const T *&n, const U*&... rest) {
+    update_node_field(n, std::get<0>(repl[I]));
+    update_node_fields_impl<I + 1>(repl, rest...);
+}
+
+template <Node::GroupTraversalKind ExpectedKind = Node::GTK_Sequential, class... T>
+static size_t update_node_fields(const Node::Children &repl, size_t start, const T *&...n) {
+    BUG_CHECK(start < repl.size(), "start index is out of bounds");
+    const auto &[kind, repl_children] = repl[start];
+    BUG_CHECK(kind == ExpectedKind, "unexpected group kind");
+    BUG_CHECK(repl_children.size() == sizeof...(T), "unexpected child count in the current group");
+    update_node_fields_impl<0>(repl_children, n...);
+    return start + 1;
+}
 
 }  // namespace IR
 

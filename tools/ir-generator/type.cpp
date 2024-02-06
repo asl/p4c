@@ -130,6 +130,11 @@ NamedType &NamedType::Children() {
     return nt;
 }
 
+NamedType &NamedType::SizeT() {
+    static NamedType nt("size_t");
+    return nt;
+}
+
 cstring NamedType::toString() const {
     if (resolved) return resolved->fullName();
     if (!lookup && name == "ID") return "IR::ID";  // hack -- ID is in namespace IR
@@ -164,6 +169,7 @@ ReferenceType ReferenceType::OstreamRef(&NamedType::Ostream()), ReferenceType::V
                                                                     &NamedType::Visitor());
 
 ReferenceType ReferenceType::ChildrenRef(&NamedType::Children());
+ReferenceType ReferenceType::ConstChildrenRef(&NamedType::Children(), true);
 
 cstring PointerType::toString() const {
     cstring rv = base->toString();

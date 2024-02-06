@@ -458,6 +458,7 @@ class Modifier_base : public virtual Visitor {
     void visitor_const_error() override;
     bool check_clone(const Visitor *) override;
     void maybe_forward_children(IR::Node *n);
+    void visit_node_children(IR::Node *n);
 
  public:
     profile_t init_apply(const IR::Node *root) override;
@@ -528,7 +529,7 @@ class ModifierCRTP : public Modifier_base {
                 maybe_forward_children(copy);
                 visitCurrentOnce = visited->refVisitOnce(n);
                 if (call_preorder(copy)) {
-                    copy->visit_children(*this);
+                    visit_node_children(copy);
                     visitCurrentOnce = visited->refVisitOnce(n);
                     call_postorder(copy);
                 }

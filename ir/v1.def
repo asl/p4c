@@ -151,6 +151,11 @@ class If :  Expression {
         out.push_back({ GTK_SplitFlow, { {ifTrue, nullptr}, {ifFalse, nullptr} } });
         Expression::fill_children(out);
     }
+    update_children {
+        start = update_node_fields(repl, start, pred);
+        start = update_node_fields<GTK_SplitFlow>(repl, start, ifTrue, ifFalse);
+        return Expression::update_children(repl, start);
+    }
 }
 
 // an if condition tagged with a name so we can refer to it
@@ -248,6 +253,11 @@ class CalculatedField : IAnnotated {
         out.push_back({ GTK_Sequential, { {field, "field"} } });
         for (auto &s : specs) out.push_back({ GTK_Sequential, { {s.cond, s.name.name} } });
         out.push_back({ GTK_Sequential, { {annotations, "annotations"} } }); }
+    update_children {
+        start = update_node_fields(repl, start, field);
+        for (auto &s : specs) start = update_node_fields(repl, start, s.cond);
+        return update_node_fields(repl, start, annotations);
+    }
 }
 
 class ParserValueSet : IAnnotated {
@@ -384,6 +394,11 @@ class ActionFunction : IAnnotated {
         // DANGER -- action args based on use.  This is immoral.
         for (auto &a : args) out.push_back({ GTK_Sequential, { {a, "arg"} } });
         out.push_back({ GTK_Sequential, { {annotations, "annotations"} } });
+    }
+    update_children {
+        start = action.update_children(repl, start);
+        for (auto &a : args) start = update_node_fields(repl, start, a);
+        return update_node_fields(repl, start, annotations);
     }
     toString {
         return cstring("action ") + name + " {\n" +

@@ -186,6 +186,34 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           buf << "}";
           return needed ? buf.str() : cstring();
       }}},
+    {"update_children",
+     {&NamedType::SizeT(),
+      {new IrField(&ReferenceType::ConstChildrenRef, "repl"),
+       new IrField(&NamedType::SizeT(), "start")},
+      IN_IMPL + OVERRIDE,
+      [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
+          bool needed = false;
+          std::stringstream buf;
+          buf << "{" << std::endl;
+          if (auto parent = cl->getParent())
+              buf << cl->indent << "start = " << parent->qualified_name(cl->containedIn)
+                  << "::update_children(repl, start);" << std::endl;
+          for (auto f : *cl->getFields()) {
+              if (f->type->resolve(cl->containedIn) == nullptr)
+                  // This is not an IR pointer
+                  continue;
+              if (f->isInline)
+                  buf << cl->indent << "start = " << f->name << ".update_children(repl, start);"
+                      << std::endl;
+              else
+                  buf << cl->indent << "start = update_node_fields(repl, start, " << f->name << ");"
+                      << std::endl;
+              needed = true;
+          }
+          buf << cl->indent << "return start;" << std::endl;
+          buf << "}";
+          return needed ? buf.str() : cstring();
+      }}},
     {"validate",
      {&NamedType::Void(),
       {},

@@ -253,6 +253,7 @@ class Constant : Literal {
     }
     visit_children { v.visit(type, "type"); }
     fill_children { out.push_back({ GTK_Sequential, { {type, "type"} } }); }
+    update_children { return update_node_fields(repl, start, type); }
 }
 
 class BoolLiteral : Literal {
@@ -362,6 +363,9 @@ class Mux : Operation_Ternary {
     fill_children {
         out.push_back({ GTK_Sequential, { {e0, "e0"} } });
         out.push_back({ GTK_SplitFlow, { {e1, nullptr}, {e2, nullptr} } }); }
+    update_children {
+        start = update_node_fields(repl, start, e0);
+        return update_node_fields<GTK_SplitFlow>(repl, start, e1, e2); }
     Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
 }
 
@@ -402,6 +406,9 @@ class SelectExpression : Expression {
     fill_children {
         out.push_back({ GTK_Sequential, { {select, "select"} } });
         selectCases.fill_children(out); }
+    update_children {
+        start = update_node_fields(repl, start, select);
+        return selectCases.update_children(repl, start); }
 }
 
 class MethodCallExpression : Expression {

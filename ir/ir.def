@@ -18,6 +18,7 @@
   const char *node_type_name() const;
   void visit_children(Visitor &v);
   void fill_children(Children &out) const;
+  size_t update_children(const Children &repl, size_t start);
   void dump_fields(std::ostream& out) const;
 
   C comments are ignored.
@@ -456,6 +457,9 @@ class IfStatement : Statement {
     fill_children {
         out.push_back({ GTK_Sequential, { {condition, "condition"} } });
         out.push_back({ GTK_SplitFlow, { {ifTrue, nullptr}, {ifFalse, nullptr} } }); }
+    update_children {
+        start = update_node_fields(repl, start, condition);
+        return update_node_fields<GTK_SplitFlow>(repl, start, ifTrue, ifFalse); }
 }
 
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
@@ -505,6 +509,9 @@ class SwitchStatement : Statement {
     fill_children {
         out.push_back({ GTK_Sequential, { {expression, "expression"} } });
         cases.fill_children(out); }
+    update_children {
+        start = update_node_fields(repl, start, expression);
+        return cases.update_children(repl, start); }
 }
 
 class Function : Declaration, IFunctional, ISimpleNamespace, INestedNamespace {
@@ -552,6 +559,7 @@ abstract Block : CompileTimeValue {
         return it->second; }
     visit_children { (void)v; }
     fill_children { (void)out; }
+    update_children { (void)repl; return start; }
     virtual const IDeclaration* getContainer() const { return nullptr; }
 }
 

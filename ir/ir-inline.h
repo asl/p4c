@@ -138,6 +138,40 @@ void IR::Vector<T>::fill_children(Children &out) const {
     for (auto &a : vec)
         std::get<1>(out.back()).emplace_back(a, nullptr);
 }
+template <class T>
+size_t IR::Vector<T>::update_children(const Children &repl, size_t start) {
+    BUG_CHECK(start < repl.size(), "start index is out of bounds");
+    const auto &[kind, repl_children] = repl[start];
+    BUG_CHECK(kind == GTK_Sequential, "unexpected group kind");
+    clear();
+    for (auto [n, _] : repl_children) {
+        if (!n)
+            continue;
+        if (auto l = n->template to<Vector<T>>()) {
+            insert(end(), l->begin(), l->end());
+            continue;
+        }
+        if (const auto *v = n->template to<VectorBase>()) {
+            for (const auto *el : *v) {
+                CHECK_NULL(el);
+                if (auto e = el->template to<T>()) {
+                    push_back(e);
+                } else {
+                    BUG("visitor returned invalid type %s for Vector<%s>", el->node_type_name(),
+                        T::static_type_name());
+                }
+            }
+            continue;
+        }
+        if (auto e = n->template to<T>()) {
+            push_back(e);
+            continue;
+        }
+        BUG("visitor returned invalid type %s for Vector<%s>", n->node_type_name(),
+            T::static_type_name());
+    }
+    return start + 1;
+}
 IRNODE_DEFINE_APPLY_OVERLOAD(Vector, template <class T>, <T>)
 template <class T>
 void IR::Vector<T>::toJSON(JSONGenerator &json) const {
@@ -187,6 +221,28 @@ void IR::IndexedVector<T>::visit_children(Visitor &v) {
 template <class T>
 void IR::IndexedVector<T>::visit_children(Visitor &v) const {
     for (auto &a : *this) v.visit(a);
+}
+template <class T>
+size_t IR::IndexedVector<T>::update_children(const Node::Children &repl, size_t start) {
+    BUG_CHECK(start < repl.size(), "start index is out of bounds");
+    const auto &[kind, repl_children] = repl[start];
+    BUG_CHECK(kind == Node::GTK_Sequential, "unexpected group kind");
+    clear();
+    for (auto [n, _] : repl_children) {
+        if (!n)
+            continue;
+        if (auto l = n->template to<Vector<T>>()) {
+            insert(end(), l->begin(), l->end());
+            continue;
+        }
+        if (auto e = n->template to<T>()) {
+            push_back(e);
+            continue;
+        }
+        BUG("visitor returned invalid type %s for IndexedVector<%s>", n->node_type_name(),
+            T::static_type_name());
+    }
+    return start + 1;
 }
 template <class T>
 void IR::IndexedVector<T>::toJSON(JSONGenerator &json) const {
@@ -289,6 +345,21 @@ void IR::NameMap<T, MAP, COMP, ALLOC>::fill_children(Children &out) const {
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
           class COMP /*= std::less<cstring>*/,
           class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
+size_t IR::NameMap<T, MAP, COMP, ALLOC>::update_children(const Children &repl, size_t start) {
+    BUG_CHECK(start < repl.size(), "start index is out of bounds");
+    const auto &[kind, repl_children] = repl[start];
+    BUG_CHECK(kind == GTK_Sequential, "unexpected group kind");
+    BUG_CHECK(repl_children.size() == symbols.size(), "wrong number of children");
+    // Note: we expect the node is not changed after the call to fill_children() so that
+    // symbols can be iterated in the same order and they can be update in place.
+    size_t i = 0;
+    for (auto &k : symbols)
+        update_node_field(k.second, std::get<0>(repl_children[i++]));
+    return start + 1;
+}
+template <class T, template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
+          class COMP /*= std::less<cstring>*/,
+          class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
 void IR::NameMap<T, MAP, COMP, ALLOC>::toJSON(JSONGenerator &json) const {
     const char *sep = "";
     Node::toJSON(json);
@@ -351,4 +422,25 @@ void IR::NodeMap<KEY, VALUE, MAP, COMP, ALLOC>::fill_children(Children &out) con
             GTK_Conditional,
             { {k.first, nullptr}, {k.second, nullptr} } });
 }
+template <class KEY, class VALUE,
+          template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
+          class COMP /*= std::less<cstring>*/,
+          class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
+size_t IR::NodeMap<KEY, VALUE, MAP, COMP, ALLOC>::update_children(const Children &repl, size_t start) {
+    size_t count = symbols.size();
+    BUG_CHECK(start + count <= repl.size(), "not enough records in the replacement list");
+    symbols.clear();
+    for (size_t i = 0; i < count; i++) {
+        auto &[kind, repl_children] = repl[start++];
+        BUG_CHECK(kind == GTK_Conditional, "unexpected group kind");
+        if (repl_children.empty())
+            continue;
+        BUG_CHECK(repl_children.size() == 2, "wrong number of children");
+        BUG_CHECK(std::get<0>(repl_children[0]) != nullptr, "replacement key node should not be empty");
+        BUG_CHECK(std::get<0>(repl_children[1]) != nullptr, "replacement value node should not be empty");
+        symbols.emplace(std::get<0>(repl_children[0]), std::get<0>(repl_children[1]));
+    }
+    return start;
+}
+
 #endif /* IR_IR_INLINE_H_ */

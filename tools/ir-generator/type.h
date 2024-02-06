@@ -107,6 +107,7 @@ class NamedType : public Type {
     static NamedType &JSONObject();
     static NamedType &SourceInfo();
     static NamedType &Children();
+    static NamedType &SizeT();
 };
 
 class TemplateInstantiation : public Type {
@@ -153,7 +154,7 @@ class ReferenceType : public Type {
     bool operator==(const ReferenceType &t) const override {
         return isConst == t.isConst && *base == *t.base;
     }
-    static ReferenceType OstreamRef, VisitorRef, ChildrenRef;
+    static ReferenceType OstreamRef, VisitorRef, ChildrenRef, ConstChildrenRef;
 };
 
 class PointerType : public Type {
