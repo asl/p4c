@@ -310,6 +310,38 @@ void Inspector_base::visit_node_children(const IR::Node *n) {
             this->apply_visitor(node, name);
 }
 
+void Transform_base::visit_node_children(IR::Node *n) {
+    if (dynamic_cast<ControlFlowVisitor *>(static_cast<Visitor *>(this))) {
+        //! TODO: support visitors derived from ControlFlowVisitor.
+        // Some implementations of visit_children() use SplitFlowVisit or SplitFlowVisitVector to
+        // control how descendants of ControlFlowVisitor handle child nodes. At this time, the only
+        // Transform visitor that inherits from ControlFlowVisitor is DoLocalCopyPropagation.
+        n->visit_children(*this);
+        return;
+    }
+    auto children = n->get_children();
+    IR::Node::Children repl;
+    repl.reserve(children.size());
+    bool need_update = false;
+    for (const auto &[kind, group] : children) {
+        repl.push_back({kind, {} });
+        auto &repl_group = std::get<1>(repl.back());
+        repl_group.reserve(group.size());
+        for (const auto &[node, name] : group) {
+            auto new_node = this->apply_visitor(node, name);
+            repl_group.push_back({new_node, name});
+            if (new_node != node)
+                need_update = true;
+            if (!new_node && kind == IR::Node::GTK_Conditional) {
+                repl_group.clear();
+                break;
+            }
+        }
+    }
+    if (need_update)
+        n->update_children(repl, 0);
+}
+
 const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n) {
@@ -411,7 +443,7 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
                 }
             }
             if (!prune_flag) {
-                copy->visit_children(*this);
+                visit_node_children(copy);
                 visitCurrentOnce = visited->refVisitOnce(n);
                 final_result = copy->apply_visitor_postorder(*this);
             }
