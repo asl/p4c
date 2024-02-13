@@ -386,19 +386,18 @@ static const IR::Type *inferTypeFromContext(const Visitor::Context *ctxt,
     if (!ctxt) return rv;
     if (auto parent = ctxt->node->to<IR::Expression>()) {
         if (auto p = parent->to<IR::Operation_Relation>()) {
-            const IR::Type::Bits *t, *ct = nullptr;
-            if (ctxt->child_index == 0) {
-                rv = p->right->type;
-                ct = p->left->type->to<IR::Type::Bits>();
-            } else if (ctxt->child_index == 1) {
+            // Return the type of the left child if:
+            // * Both types are IR::Type::Bits and the left is larger;
+            // * The type of the right child is IR::Type_InfInt.
+            // In all other cases, return the type of the right child.
+            if (p->right->type->is<IR::Type_InfInt>())
                 rv = p->left->type;
-                ct = p->right->type->to<IR::Type::Bits>();
-            } else {
-                BUG("Unepxected child index");
-            }
-            if (ct && (t = rv->to<IR::Type::Bits>()) && ct->size > t->size)
-                // if both children have bit types, use the larger
-                rv = ct;
+            else if (auto tl = p->left->type->to<IR::Type::Bits>(),
+                          tr = p->right->type->to<IR::Type::Bits>();
+                     tl && tr && tl->size > tr->size)
+                rv = p->left->type;
+            else
+                rv = p->right->type;
         } else if (parent->is<IR::Operation::Binary>()) {
             if ((parent->is<IR::Shl>() || parent->is<IR::Shr>()) && ctxt->child_index == 1) {
                 // don't propagate into shift count -- maybe should infer log2 bits?
