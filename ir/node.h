@@ -20,6 +20,8 @@ limitations under the License.
 #include <iosfwd>
 #include <typeinfo>
 
+#include <boost/container/small_vector.hpp>
+
 #include "ir-tree-macros.h"
 #include "ir/gen-tree-macro.h"
 #include "lib/castable.h"
@@ -99,14 +101,14 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
 class Node : public virtual INode {
  public:
     using ChildInfo = std::tuple<const Node *, const char *>;
-    using ChildrenGroup = std::vector<ChildInfo>;
+    using ChildrenGroup = boost::container::small_vector<ChildInfo, 8>;
     enum GroupTraversalKind {
         GTK_Sequential,
         GTK_SplitFlow,
         GTK_Conditional,
     };
     using ChildrenGroupInfo = std::tuple<GroupTraversalKind, ChildrenGroup>;
-    using Children = std::vector<ChildrenGroupInfo>;
+    using Children = boost::container::small_vector<ChildrenGroupInfo, 4>;
     virtual void fill_children(Children &) const { }
     virtual size_t update_children(const Children &, size_t start) { return start; }
     Children get_children() const {
