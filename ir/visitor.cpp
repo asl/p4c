@@ -253,7 +253,7 @@ void Modifier_base::maybe_forward_children(IR::Node *n) {
 }
 
 void Modifier_base::visit_node_children(IR::Node *n) {
-    if (dynamic_cast<ControlFlowVisitor *>(static_cast<Visitor *>(this))) {
+    if (this->is_control_flow_visitor()) {
         //! TODO: support visitors derived from ControlFlowVisitor.
         // Some implementations of visit_children() use SplitFlowVisit or SplitFlowVisitVector to
         // control how descendants of ControlFlowVisitor handle child nodes. At this time, only
@@ -294,7 +294,7 @@ void Transform_base::maybe_forward_children(IR::Node *n) {
 }
 
 void Inspector_base::visit_node_children(const IR::Node *n) {
-    if (dynamic_cast<ControlFlowVisitor *>(static_cast<Visitor *>(this))) {
+    if (this->is_control_flow_visitor()) {
         //! TODO: support visitors derived from ControlFlowVisitor.
         // Some implementations of visit_children() use SplitFlowVisit or SplitFlowVisitVector to
         // control how descendants of ControlFlowVisitor handle child nodes. At this time, only
@@ -311,7 +311,7 @@ void Inspector_base::visit_node_children(const IR::Node *n) {
 }
 
 void Transform_base::visit_node_children(IR::Node *n) {
-    if (dynamic_cast<ControlFlowVisitor *>(static_cast<Visitor *>(this))) {
+    if (this->is_control_flow_visitor()) {
         //! TODO: support visitors derived from ControlFlowVisitor.
         // Some implementations of visit_children() use SplitFlowVisit or SplitFlowVisitVector to
         // control how descendants of ControlFlowVisitor handle child nodes. At this time, the only

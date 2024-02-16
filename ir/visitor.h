@@ -199,6 +199,7 @@ class Visitor {
 
     // Functions for IR visit_children to call for ControlFlowVisitors.
     virtual Visitor &flow_clone() { return *this; }
+    virtual bool is_control_flow_visitor() const { return false; }
     // all flow_clones share a split_link chain to allow stack walking
     SplitFlowVisit_base *split_link_mem = nullptr, *&split_link;
     Visitor() : split_link(split_link_mem) {}
@@ -1004,6 +1005,7 @@ class ControlFlowVisitor : public virtual Visitor {
      */
     virtual bool filter_join_point(const IR::Node *) { return false; }
     ControlFlowVisitor &flow_clone() override;
+    bool is_control_flow_visitor() const override { return true; }
     void flow_merge(Visitor &) override = 0;
     virtual void flow_copy(ControlFlowVisitor &) = 0;
     ControlFlowVisitor() : globals(*new std::map<cstring, ControlFlowVisitor &>) {}
