@@ -125,13 +125,13 @@ NamedType &NamedType::SourceInfo() {
     return nt;
 }
 
-NamedType &NamedType::Children() {
-    static NamedType nt(new LookupScope("IR::Node"), "Children");
+NamedType &NamedType::NodeChildren() {
+    static NamedType nt(new LookupScope("IR"), "NodeChildren");
     return nt;
 }
 
-NamedType &NamedType::SizeT() {
-    static NamedType nt("size_t");
+NamedType &NamedType::ReplacementNodeChildren() {
+    static NamedType nt(new LookupScope("IR"), "ReplacementNodeChildren");
     return nt;
 }
 
@@ -168,8 +168,8 @@ cstring ReferenceType::toString() const {
 ReferenceType ReferenceType::OstreamRef(&NamedType::Ostream()), ReferenceType::VisitorRef(
                                                                     &NamedType::Visitor());
 
-ReferenceType ReferenceType::ChildrenRef(&NamedType::Children());
-ReferenceType ReferenceType::ConstChildrenRef(&NamedType::Children(), true);
+ReferenceType ReferenceType::NodeChildrenRef(&NamedType::NodeChildren());
+ReferenceType ReferenceType::ReplacementNodeChildrenRef(&NamedType::ReplacementNodeChildren());
 
 cstring PointerType::toString() const {
     cstring rv = base->toString();

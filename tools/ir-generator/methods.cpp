@@ -163,7 +163,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
       }}},
     {"fill_children",
      {&NamedType::Void(),
-      {new IrField(&ReferenceType::ChildrenRef, "out")},
+      {new IrField(&ReferenceType::NodeChildrenRef, "out")},
       CONST + IN_IMPL + OVERRIDE,
       [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           bool needed = false;
@@ -179,38 +179,34 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               if (f->isInline)
                   buf << cl->indent << f->name << ".fill_children(out);" << std::endl;
               else
-                  buf << cl->indent << "out.push_back({ GTK_Sequential, { {" << f->name << ", \""
-                      << f->name << "\"} } });" << std::endl;
+                  buf << cl->indent << "out.add_children(" << f->name << ", \"" << f->name << "\");"
+                      << std::endl;
               needed = true;
           }
           buf << "}";
           return needed ? buf.str() : cstring();
       }}},
     {"update_children",
-     {&NamedType::SizeT(),
-      {new IrField(&ReferenceType::ConstChildrenRef, "repl"),
-       new IrField(&NamedType::SizeT(), "start")},
+     {&NamedType::Void(),
+      {new IrField(&ReferenceType::ReplacementNodeChildrenRef, "repl")},
       IN_IMPL + OVERRIDE,
       [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           bool needed = false;
           std::stringstream buf;
           buf << "{" << std::endl;
           if (auto parent = cl->getParent())
-              buf << cl->indent << "start = " << parent->qualified_name(cl->containedIn)
-                  << "::update_children(repl, start);" << std::endl;
+              buf << cl->indent << parent->qualified_name(cl->containedIn)
+                  << "::update_children(repl);" << std::endl;
           for (auto f : *cl->getFields()) {
               if (f->type->resolve(cl->containedIn) == nullptr)
                   // This is not an IR pointer
                   continue;
               if (f->isInline)
-                  buf << cl->indent << "start = " << f->name << ".update_children(repl, start);"
-                      << std::endl;
+                  buf << cl->indent << f->name << ".update_children(repl);" << std::endl;
               else
-                  buf << cl->indent << "start = update_node_fields(repl, start, " << f->name << ");"
-                      << std::endl;
+                  buf << cl->indent << "repl.update_node_fields(" << f->name << ");" << std::endl;
               needed = true;
           }
-          buf << cl->indent << "return start;" << std::endl;
           buf << "}";
           return needed ? buf.str() : cstring();
       }}},

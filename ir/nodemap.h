@@ -93,8 +93,8 @@ class NodeMap : public Node {
     }
     void visit_children(Visitor &v) override;
     void visit_children(Visitor &v) const override;
-    void fill_children(Children &out) const override;
-    size_t update_children(const Children &repl, size_t start) override;
+    void fill_children(NodeChildren &out) const override;
+    void update_children(ReplacementNodeChildren &repl) override;
 
     DECLARE_TYPEINFO(NodeMap, Node);
 };

@@ -166,7 +166,7 @@ abstract Expression {
     optional Type type = Type::Unknown::get();
     visit_children { (void)v; }
     fill_children { (void)out; }
-    update_children { (void)repl; return start; }
+    update_children { (void)repl; }
 #apply
 }
 

@@ -263,27 +263,28 @@ void Modifier_base::visit_node_children(IR::Node *n) {
         n->visit_children(*this);
         return;
     }
-    auto children = n->get_children();
-    IR::Node::Children repl;
-    repl.reserve(children.size());
+    IR::NodeChildren children;
+    n->fill_children(children);
+    if (children.empty())
+        return;
+    IR::ReplacementNodeChildrenFill repl(children);
     bool need_update = false;
-    for (const auto &[kind, group] : children) {
-        repl.push_back({kind, {} });
-        auto &repl_group = std::get<1>(repl.back());
-        repl_group.reserve(group.size());
-        for (const auto &[node, name] : group) {
+    for (size_t gix = 0; gix < children.group_count(); gix++) {
+        auto kind = children.group_kind(gix);
+        for (const auto &[node, name] : children.group_children(gix)) {
             auto new_node = this->apply_visitor(node, name);
-            repl_group.push_back({new_node, name});
+            repl.add_child(new_node);
             if (new_node != node)
                 need_update = true;
-            if (!new_node && kind == IR::Node::GTK_Conditional) {
-                repl_group.clear();
+            if (!new_node && kind == IR::GroupTraversalKind::Conditional) {
+                repl.clear_unfinished_group();
                 break;
             }
         }
+        repl.finish_group();
     }
     if (need_update)
-        n->update_children(repl, 0);
+        n->update_children(repl);
 }
 
 void Transform_base::maybe_forward_children(IR::Node *n) {
@@ -304,10 +305,13 @@ void Inspector_base::visit_node_children(const IR::Node *n) {
         n->visit_children(*this);
         return;
     }
-    auto children = n->get_children();
-    for (const auto &[_, group] : children)
-        for (const auto &[node, name] : group)
+    IR::NodeChildren children;
+    n->fill_children(children);
+    for (size_t gix = 0; gix < children.group_count(); gix++) {
+        for (const auto &[node, name] : children.group_children(gix)) {
             this->apply_visitor(node, name);
+        }
+    }
 }
 
 void Transform_base::visit_node_children(IR::Node *n) {
@@ -319,27 +323,28 @@ void Transform_base::visit_node_children(IR::Node *n) {
         n->visit_children(*this);
         return;
     }
-    auto children = n->get_children();
-    IR::Node::Children repl;
-    repl.reserve(children.size());
+    IR::NodeChildren children;
+    n->fill_children(children);
+    if (children.empty())
+        return;
+    IR::ReplacementNodeChildrenFill repl(children);
     bool need_update = false;
-    for (const auto &[kind, group] : children) {
-        repl.push_back({kind, {} });
-        auto &repl_group = std::get<1>(repl.back());
-        repl_group.reserve(group.size());
-        for (const auto &[node, name] : group) {
+    for (size_t gix = 0; gix < children.group_count(); gix++) {
+        auto kind = children.group_kind(gix);
+        for (const auto &[node, name] : children.group_children(gix)) {
             auto new_node = this->apply_visitor(node, name);
-            repl_group.push_back({new_node, name});
+            repl.add_child(new_node);
             if (new_node != node)
                 need_update = true;
-            if (!new_node && kind == IR::Node::GTK_Conditional) {
-                repl_group.clear();
+            if (!new_node && kind == IR::GroupTraversalKind::Conditional) {
+                repl.clear_unfinished_group();
                 break;
             }
         }
+        repl.finish_group();
     }
     if (need_update)
-        n->update_children(repl, 0);
+        n->update_children(repl);
 }
 
 const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {

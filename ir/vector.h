@@ -197,8 +197,9 @@ class Vector : public VectorBase {
     static cstring static_type_name() { return "Vector<" + T::static_type_name() + ">"; }
     void visit_children(Visitor &v) override;
     void visit_children(Visitor &v) const override;
-    void fill_children(Children &out) const override;
-    size_t update_children(const Children &repl, size_t start) override;
+    void fill_children(NodeChildren &out) const override;
+    void fill_children(NodeChildren &out, const char *name) const;
+    void update_children(ReplacementNodeChildren &repl) override;
     virtual void parallel_visit_children(Visitor &v);
     virtual void parallel_visit_children(Visitor &v) const;
     void toJSON(JSONGenerator &json) const override;

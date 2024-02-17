@@ -17,8 +17,8 @@
   void validate() const;
   const char *node_type_name() const;
   void visit_children(Visitor &v);
-  void fill_children(Children &out) const;
-  size_t update_children(const Children &repl, size_t start);
+  void fill_children(NodeChildren &out) const;
+  void update_children(ReplacementNodeChildren &repl);
   void dump_fields(std::ostream& out) const;
 
   C comments are ignored.
@@ -455,11 +455,11 @@ class IfStatement : Statement {
         v.visit(condition, "condition");
         SplitFlowVisit<Statement>(v, ifTrue, ifFalse).run_visit(); }
     fill_children {
-        out.push_back({ GTK_Sequential, { {condition, "condition"} } });
-        out.push_back({ GTK_SplitFlow, { {ifTrue, nullptr}, {ifFalse, nullptr} } }); }
+        out.add_children(condition, "condition");
+        out.add_children<GroupTraversalKind::SplitFlow>(ifTrue, ifFalse); }
     update_children {
-        start = update_node_fields(repl, start, condition);
-        return update_node_fields<GTK_SplitFlow>(repl, start, ifTrue, ifFalse); }
+        repl.update_node_fields(condition);
+        repl.update_node_fields(ifTrue, ifFalse); }
 }
 
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
@@ -507,11 +507,11 @@ class SwitchStatement : Statement {
         for (auto &c : cases) split.addNode(c);
         split.run_visit(); }
     fill_children {
-        out.push_back({ GTK_Sequential, { {expression, "expression"} } });
+        out.add_children(expression, "expression");
         cases.fill_children(out); }
     update_children {
-        start = update_node_fields(repl, start, expression);
-        return cases.update_children(repl, start); }
+        repl.update_node_fields(expression);
+        cases.update_children(repl); }
 }
 
 class Function : Declaration, IFunctional, ISimpleNamespace, INestedNamespace {
@@ -559,7 +559,7 @@ abstract Block : CompileTimeValue {
         return it->second; }
     visit_children { (void)v; }
     fill_children { (void)out; }
-    update_children { (void)repl; return start; }
+    update_children { (void)repl; }
     virtual const IDeclaration* getContainer() const { return nullptr; }
 }
 
