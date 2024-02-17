@@ -34,7 +34,8 @@ namespace P4 {
  * to
  * f(a = 0);
  */
-class DoDefaultArguments : public Transform {
+class DoDefaultArguments : public TransformCRTP<DoDefaultArguments> {
+    using Base = TransformCRTP<DoDefaultArguments>;
     ReferenceMap *refMap;
     TypeMap *typeMap;
 
@@ -44,9 +45,10 @@ class DoDefaultArguments : public Transform {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
     }
-    const IR::Node *postorder(IR::MethodCallExpression *expression) override;
-    const IR::Node *postorder(IR::Declaration_Instance *inst) override;
-    const IR::Node *postorder(IR::ConstructorCallExpression *ccc) override;
+    using Base::postorder;
+    const IR::Node *postorder(IR::MethodCallExpression *expression);
+    const IR::Node *postorder(IR::Declaration_Instance *inst);
+    const IR::Node *postorder(IR::ConstructorCallExpression *ccc);
 };
 
 class DefaultArguments : public PassManager {

@@ -28,9 +28,11 @@ namespace DPDK {
 // PathExpression->path->name For Member, it returns toStr(Member->expr).Member->member etc.
 cstring toStr(const IR::Node *const);
 
-class ConvertToString : public Inspector {
+class ConvertToString : public InspectorCRTP<ConvertToString> {
+    using Base = InspectorCRTP<ConvertToString>;
  public:
     std::ostringstream out;
+    using Base::preorder;
     bool preorder(const IR::Expression *e);
     bool preorder(const IR::Type *t);
     bool preorder(const IR::PropertyValue *p);

@@ -36,7 +36,8 @@ namespace BMV2 {
 static constexpr unsigned INVALID_ACTION_ID = 0xffffffff;
 
 template <Standard::Arch arch>
-class ControlConverter : public Inspector {
+class ControlConverter : public InspectorCRTP<ControlConverter<arch>> {
+    using Base = InspectorCRTP<ControlConverter<arch>>;
     ConversionContext *ctxt;
     cstring name;
     P4::P4CoreLibrary &corelib;
@@ -752,7 +753,8 @@ class ControlConverter : public Inspector {
 
  public:
     const bool emitExterns;
-    bool preorder(const IR::P4Control *cont) override {
+    using Base::preorder;
+    bool preorder(const IR::P4Control *cont) {
         auto result = new Util::JsonObject();
 
         result->emplace("name", name);
@@ -832,7 +834,7 @@ class ControlConverter : public Inspector {
           name(name),
           corelib(P4::P4CoreLibrary::instance()),
           emitExterns(emitExterns_) {
-        setName("ControlConverter");
+        Base::setName("ControlConverter");
     }
 };
 

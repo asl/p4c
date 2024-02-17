@@ -107,9 +107,10 @@ namespace P4 {
 #define PARSE_STRING_LITERAL_LIST(aname) \
     { aname, &P4::ParseAnnotations::parseStringLiteralList }
 
-class ParseAnnotations : public Modifier {
+class ParseAnnotations : public ModifierCRTP<ParseAnnotations> {
+    using Base = ModifierCRTP<ParseAnnotations>;
  public:
-    using Modifier::postorder;
+    using Base::postorder;
 
     /// A handler returns true when the body of the given annotation is parsed
     /// successfully.
@@ -139,7 +140,7 @@ class ParseAnnotations : public Modifier {
         }
     }
 
-    void postorder(IR::Annotation *annotation) final;
+    void postorder(IR::Annotation *annotation);
 
     static HandlerMap standardHandlers();
 

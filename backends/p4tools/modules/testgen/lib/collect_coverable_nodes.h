@@ -19,7 +19,9 @@ using NodeCache = std::map<const IR::Node *, P4::Coverage::CoverageSet>;
 /// subsequent parser DAG for a particular parser state. If there is a loop in the parser state, it
 /// will terminate.
 /// TODO: Consider caching this information.
-class CoverableNodesScanner : public Inspector {
+class CoverableNodesScanner : public InspectorCRTP<CoverableNodesScanner> {
+    using Base = InspectorCRTP<CoverableNodesScanner>;
+    friend Base;
     /// The set of nodes in the program that could potentially be covered.
     P4::Coverage::CoverageSet coverableNodes;
 
@@ -32,15 +34,16 @@ class CoverableNodesScanner : public Inspector {
     /// Specifies, which IR nodes to track with this particular visitor.
     P4::Coverage::CoverageOptions coverageOptions;
 
+    using Base::preorder;
     /// Statement coverage.
-    bool preorder(const IR::ParserState *parserState) override;
-    bool preorder(const IR::AssignmentStatement *stmt) override;
-    bool preorder(const IR::MethodCallStatement *stmt) override;
-    bool preorder(const IR::ExitStatement *stmt) override;
-    bool preorder(const IR::MethodCallExpression *call) override;
+    bool preorder(const IR::ParserState *parserState);
+    bool preorder(const IR::AssignmentStatement *stmt);
+    bool preorder(const IR::MethodCallStatement *stmt);
+    bool preorder(const IR::ExitStatement *stmt);
+    bool preorder(const IR::MethodCallExpression *call);
 
     /// Actions coverage.
-    bool preorder(const IR::P4Action *act) override;
+    bool preorder(const IR::P4Action *act);
 
  public:
     explicit CoverableNodesScanner(const ExecutionState &state);

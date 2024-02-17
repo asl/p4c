@@ -118,7 +118,8 @@ struct TableAttributes {
 };
 
 /// This pass generates introspection JSON into user specified file
-class IntrospectionGenerator : public Inspector {
+class IntrospectionGenerator : public InspectorCRTP<IntrospectionGenerator> {
+    using Base = InspectorCRTP<IntrospectionGenerator>;
     IR::TCPipeline *tcPipeline;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
@@ -129,6 +130,7 @@ class IntrospectionGenerator : public Inspector {
     IntrospectionGenerator(IR::TCPipeline *tcPipeline, P4::ReferenceMap *refMap,
                            P4::TypeMap *typeMap)
         : tcPipeline(tcPipeline), refMap(refMap), typeMap(typeMap) {}
+    using Base::postorder;
     void postorder(const IR::P4Table *t);
     const Util::JsonObject *genIntrospectionJson();
     void genTableJson(Util::JsonArray *tablesJson);

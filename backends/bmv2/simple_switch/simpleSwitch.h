@@ -126,7 +126,8 @@ class SimpleSwitchExpressionConverter : public ExpressionConverter {
     }
 };
 
-class ParseV1Architecture : public Inspector {
+class ParseV1Architecture : public InspectorCRTP<ParseV1Architecture> {
+    using Base = InspectorCRTP<ParseV1Architecture>;
     V1ProgramStructure *structure;
     P4V1::V1Model &v1model;
 
@@ -134,7 +135,8 @@ class ParseV1Architecture : public Inspector {
     explicit ParseV1Architecture(V1ProgramStructure *structure)
         : structure(structure), v1model(P4V1::V1Model::instance) {}
     void modelError(const char *format, const IR::Node *node);
-    bool preorder(const IR::PackageBlock *block) override;
+    using Base::preorder;
+    bool preorder(const IR::PackageBlock *block);
 };
 
 class SimpleSwitchBackend : public Backend {

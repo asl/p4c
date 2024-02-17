@@ -34,10 +34,13 @@ void SymbolicEnv::set(const IR::StateVariable &var, const IR::Expression *value)
 
 const IR::Expression *SymbolicEnv::subst(const IR::Expression *expr) const {
     /// Traverses the IR to perform substitution.
-    class SubstVisitor : public Transform {
+    class SubstVisitor : public TransformCRTP<SubstVisitor> {
+        using Base = TransformCRTP<SubstVisitor>;
+        friend Base;
         const SymbolicEnv &symbolicEnv;
 
-        const IR::Node *preorder(IR::Member *member) override {
+        using Base::preorder;
+        const IR::Node *preorder(IR::Member *member) {
             prune();
             if (symbolicEnv.exists(member)) {
                 const auto *result = symbolicEnv.get(member);
@@ -51,7 +54,7 @@ const IR::Expression *SymbolicEnv::subst(const IR::Expression *expr) const {
             return member;
         }
 
-        const IR::Node *preorder(IR::PathExpression *path) override {
+        const IR::Node *preorder(IR::PathExpression *path) {
             prune();
             if (symbolicEnv.exists(path)) {
                 const auto *result = symbolicEnv.get(path);

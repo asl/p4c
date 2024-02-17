@@ -161,6 +161,55 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           buf << "}";
           return needed ? buf.str() : cstring();
       }}},
+    {"fill_children",
+     {&NamedType::Void(),
+      {new IrField(&ReferenceType::NodeChildrenRef, "out")},
+      CONST + IN_IMPL + OVERRIDE,
+      [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
+          bool needed = false;
+          std::stringstream buf;
+          buf << "{" << std::endl;
+          if (auto parent = cl->getParent())
+              buf << cl->indent << parent->qualified_name(cl->containedIn) << "::fill_children(out);"
+                  << std::endl;
+          for (auto f : *cl->getFields()) {
+              if (f->type->resolve(cl->containedIn) == nullptr)
+                  // This is not an IR pointer
+                  continue;
+              if (f->isInline)
+                  buf << cl->indent << f->name << ".fill_children(out);" << std::endl;
+              else
+                  buf << cl->indent << "out.add_children(" << f->name << ", \"" << f->name << "\");"
+                      << std::endl;
+              needed = true;
+          }
+          buf << "}";
+          return needed ? buf.str() : cstring();
+      }}},
+    {"update_children",
+     {&NamedType::Void(),
+      {new IrField(&ReferenceType::ReplacementNodeChildrenRef, "repl")},
+      IN_IMPL + OVERRIDE,
+      [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
+          bool needed = false;
+          std::stringstream buf;
+          buf << "{" << std::endl;
+          if (auto parent = cl->getParent())
+              buf << cl->indent << parent->qualified_name(cl->containedIn)
+                  << "::update_children(repl);" << std::endl;
+          for (auto f : *cl->getFields()) {
+              if (f->type->resolve(cl->containedIn) == nullptr)
+                  // This is not an IR pointer
+                  continue;
+              if (f->isInline)
+                  buf << cl->indent << f->name << ".update_children(repl);" << std::endl;
+              else
+                  buf << cl->indent << "repl.update_node_fields(" << f->name << ");" << std::endl;
+              needed = true;
+          }
+          buf << "}";
+          return needed ? buf.str() : cstring();
+      }}},
     {"validate",
      {&NamedType::Void(),
       {},

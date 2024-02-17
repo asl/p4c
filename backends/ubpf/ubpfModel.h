@@ -100,15 +100,18 @@ class UBPFModel : public ::Model::Model {
     int numberOfParserArguments() const { return version >= 20200515 ? 4 : 3; }
     int numberOfControlBlockArguments() const { return version >= 20200515 ? 3 : 2; }
 
-    class getUBPFModelVersion : public Inspector {
-        bool preorder(const IR::Declaration_Constant *dc) override {
+    class getUBPFModelVersion : public InspectorCRTP<getUBPFModelVersion> {
+        using Base = InspectorCRTP<getUBPFModelVersion>;
+        friend Base;
+        using Base::preorder;
+        bool preorder(const IR::Declaration_Constant *dc){
             if (dc->name == "__ubpf_model_version") {
                 auto val = dc->initializer->to<IR::Constant>();
                 UBPFModel::instance.version = static_cast<unsigned>(val->value);
             }
             return false;
         }
-        bool preorder(const IR::Declaration *) override { return false; }
+        bool preorder(const IR::Declaration *) { return false; }
     };
 
     const IR::P4Program *run(const IR::P4Program *program) {

@@ -127,7 +127,8 @@ struct SelectionTable {
 };
 
 // This pass generates context JSON into user specified file
-class DpdkContextGenerator : public Inspector {
+class DpdkContextGenerator : public InspectorCRTP<DpdkContextGenerator> {
+    using Base = InspectorCRTP<DpdkContextGenerator>;
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
     const p4configv1::P4Info &p4info;

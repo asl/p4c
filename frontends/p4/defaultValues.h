@@ -27,17 +27,19 @@ namespace P4 {
 /**
  * Expand the 'default values' initializer ...
  */
-class DoDefaultValues final : public Transform {
+class DoDefaultValues final : public TransformCRTP<DoDefaultValues> {
+    using Base = TransformCRTP<DoDefaultValues>;
     TypeMap *typeMap;
 
     const IR::Expression *defaultValue(const IR::Expression *expression, const IR::Type *type);
 
  public:
     explicit DoDefaultValues(TypeMap *typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
-    const IR::Node *postorder(IR::Dots *dots) override;
-    const IR::Node *postorder(IR::StructExpression *expression) override;
-    const IR::Node *postorder(IR::ListExpression *expression) override;
-    const IR::Node *postorder(IR::HeaderStackExpression *expression) override;
+    using Base::postorder;
+    const IR::Node *postorder(IR::Dots *dots);
+    const IR::Node *postorder(IR::StructExpression *expression);
+    const IR::Node *postorder(IR::ListExpression *expression);
+    const IR::Node *postorder(IR::HeaderStackExpression *expression);
 };
 
 class DefaultValues : public PassManager {

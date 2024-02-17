@@ -27,7 +27,8 @@ namespace BMV2 {
 /**
   This pass rewrites expressions which are not supported natively on BMv2.
 */
-class LowerExpressions : public Transform {
+class LowerExpressions : public TransformCRTP<LowerExpressions> {
+    using Base = TransformCRTP<LowerExpressions>;
     P4::TypeMap *typeMap;
     // Maximum shift amount, defaults to 8 bits
     int maxShiftWidth;
@@ -41,14 +42,16 @@ class LowerExpressions : public Transform {
         setName("LowerExpressions");
     }
 
-    const IR::Node *postorder(IR::Expression *expression) override;
-    const IR::Node *postorder(IR::Shl *expression) override { return shift(expression); }
-    const IR::Node *postorder(IR::Shr *expression) override { return shift(expression); }
-    const IR::Node *postorder(IR::Cast *expression) override;
-    const IR::Node *postorder(IR::Neg *expression) override;
-    const IR::Node *postorder(IR::Slice *expression) override;
-    const IR::Node *postorder(IR::Concat *expression) override;
-    const IR::Node *preorder(IR::P4Table *table) override {
+    using Base::postorder;
+    using Base::preorder;
+    const IR::Node *postorder(IR::Expression *expression);
+    const IR::Node *postorder(IR::Shl *expression) { return shift(expression); }
+    const IR::Node *postorder(IR::Shr *expression) { return shift(expression); }
+    const IR::Node *postorder(IR::Cast *expression);
+    const IR::Node *postorder(IR::Neg *expression);
+    const IR::Node *postorder(IR::Slice *expression);
+    const IR::Node *postorder(IR::Concat *expression);
+    const IR::Node *preorder(IR::P4Table *table) {
         prune();
         return table;
     }  // don't simplify expressions in table

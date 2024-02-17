@@ -164,28 +164,31 @@ bool CFG::checkImplementable() const {
 }
 
 namespace {
-class CFGBuilder : public Inspector {
+class CFGBuilder : public InspectorCRTP<CFGBuilder> {
+    using Base = InspectorCRTP<CFGBuilder>;
+    friend Base;
     CFG *cfg;
     /// predecessors of current CFG node
     const CFG::EdgeSet *live;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
 
-    bool preorder(const IR::ReturnStatement *) override {
+    using Base::preorder;
+    bool preorder(const IR::ReturnStatement *) {
         cfg->exitPoint->addPredecessors(live);
         live = new CFG::EdgeSet();
         return false;
     }
-    bool preorder(const IR::ExitStatement *) override {
+    bool preorder(const IR::ExitStatement *) {
         cfg->exitPoint->addPredecessors(live);
         live = new CFG::EdgeSet();
         return false;
     }
-    bool preorder(const IR::EmptyStatement *) override {
+    bool preorder(const IR::EmptyStatement *) {
         // unchanged 'live'
         return false;
     }
-    bool preorder(const IR::MethodCallStatement *statement) override {
+    bool preorder(const IR::MethodCallStatement *statement) {
         auto instance = P4::MethodInstance::resolve(statement->methodCall, refMap, typeMap);
         if (!instance->is<P4::ApplyMethod>()) return false;
         auto am = instance->to<P4::ApplyMethod>();
@@ -199,7 +202,7 @@ class CFGBuilder : public Inspector {
         live = new CFG::EdgeSet(new CFG::Edge(node));
         return false;
     }
-    bool preorder(const IR::IfStatement *statement) override {
+    bool preorder(const IR::IfStatement *statement) {
         // We only allow expressions of the form t.apply().hit lively.
         // If the expression is more complex it should have been
         // simplified by prior passes.
@@ -239,7 +242,7 @@ class CFGBuilder : public Inspector {
         live = result;
         return false;
     }
-    bool preorder(const IR::BlockStatement *statement) override {
+    bool preorder(const IR::BlockStatement *statement) {
         for (auto s : statement->components) {
             auto stat = s->to<IR::Statement>();
             if (stat == nullptr) continue;
@@ -248,7 +251,7 @@ class CFGBuilder : public Inspector {
         // live is unchanged
         return false;
     }
-    bool preorder(const IR::SwitchStatement *statement) override {
+    bool preorder(const IR::SwitchStatement *statement) {
         auto tc = P4::TableApplySolver::isActionRun(statement->expression, refMap, typeMap);
         BUG_CHECK(tc != nullptr, "%1%: unexpected switch statement expression",
                   statement->expression);

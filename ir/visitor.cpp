@@ -37,131 +37,74 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/map.h"
 
-/** @class Visitor::ChangeTracker
- *  @brief Assists visitors in traversing the IR.
+void Visitor::ChangeTracker::start(const IR::Node *n, bool defaultVisitOnce) {
+    // Initialization
+    visited_t::iterator visited_it;
+    bool inserted;
+    bool visit_in_progress = true;
+    std::tie(visited_it, inserted) =
+        visited.emplace(n, visit_info_t{visit_in_progress, defaultVisitOnce, n});
 
- *  A ChangeTracker object assists visitors traversing the IR by tracking each
- *  node.  The `start` method begins tracking, and `finish` ends it.  The
- *  `done` method determines whether the node has been visited, and `result`
- *  returns the new IR if it changed.
- */
-class Visitor::ChangeTracker {
-    struct visit_info_t {
-        bool visit_in_progress;
-        bool visitOnce;
-        const IR::Node *result;
-    };
-    typedef std::unordered_map<const IR::Node *, visit_info_t> visited_t;
-    visited_t visited;
+    // Sanity check for IR loops
+    bool already_present = !inserted;
+    visit_info_t *visit_info = &(visited_it->second);
+    if (already_present && visit_info->visit_in_progress) BUG("IR loop detected ");
+}
 
- public:
-    /** Begin tracking @n during a visiting pass.  Use `finish(@n)` to mark @n as
-     * visited once the pass completes.
-     */
-    void start(const IR::Node *n, bool defaultVisitOnce) {
-        // Initialization
-        visited_t::iterator visited_it;
-        bool inserted;
-        bool visit_in_progress = true;
-        std::tie(visited_it, inserted) =
-            visited.emplace(n, visit_info_t{visit_in_progress, defaultVisitOnce, n});
+bool Visitor::ChangeTracker::finish(const IR::Node *orig, const IR::Node *final) {
+    auto it = visited.find(orig);
+    if (it == visited.end()) BUG("visitor state tracker corrupted");
 
-        // Sanity check for IR loops
-        bool already_present = !inserted;
-        visit_info_t *visit_info = &(visited_it->second);
-        if (already_present && visit_info->visit_in_progress) BUG("IR loop detected ");
+    visit_info_t *orig_visit_info = &(it->second);
+    orig_visit_info->visit_in_progress = false;
+    if (!final) {
+        orig_visit_info->result = final;
+        return true;
+    } else if (final != orig && *final != *orig) {
+        orig_visit_info->result = final;
+        visited.emplace(final, visit_info_t{false, orig_visit_info->visitOnce, final});
+        return true;
+    } else if (visited.count(final)) {
+        // coalescing with some previously visited node, so we don't want to undo
+        // the coalesce
+        orig_visit_info->result = final;
+        return true;
+    } else {
+        // FIXME -- not safe if the visitor resurrects the node (which it shouldn't)
+        // if (final && final->id == IR::Node::currentId - 1)
+        //     --IR::Node::currentId;
+        return false;
     }
+}
 
-    /** Mark the process of visiting @orig as finished, with @final being the
-     * final state of the node, or nullptr if the node was removed from the
-     * tree.  `done(@orig)` will return true, and `result(@orig)` will return
-     * the resulting node, if any.
-     *
-     * If @final is a new node, that node is marked as finished as well, as if
-     * `start(@final); finish(@final);` were invoked.
-     *
-     * @return true if the node has changed or been removed or coalesced.
-     *
-     * @exception Util::CompilerBug This method fails if `start(@orig)` has not
-     * previously been invoked.
-     */
-    bool finish(const IR::Node *orig, const IR::Node *final) {
-        auto it = visited.find(orig);
-        if (it == visited.end()) BUG("visitor state tracker corrupted");
+bool *Visitor::ChangeTracker::refVisitOnce(const IR::Node *n) {
+    if (!visited.count(n)) BUG("visitor state tracker corrupted");
+    return &visited.at(n).visitOnce;
+}
 
-        visit_info_t *orig_visit_info = &(it->second);
-        orig_visit_info->visit_in_progress = false;
-        if (!final) {
-            orig_visit_info->result = final;
-            return true;
-        } else if (final != orig && *final != *orig) {
-            orig_visit_info->result = final;
-            visited.emplace(final, visit_info_t{false, orig_visit_info->visitOnce, final});
-            return true;
-        } else if (visited.count(final)) {
-            // coalescing with some previously visited node, so we don't want to undo
-            // the coalesce
-            orig_visit_info->result = final;
-            return true;
-        } else {
-            // FIXME -- not safe if the visitor resurrects the node (which it shouldn't)
-            // if (final && final->id == IR::Node::currentId - 1)
-            //     --IR::Node::currentId;
-            return false;
-        }
+void Visitor::ChangeTracker::revisit_visited() {
+    for (auto it = visited.begin(); it != visited.end();) {
+        if (!it->second.visit_in_progress)
+            it = visited.erase(it);
+        else
+            ++it;
     }
+}
 
-    /** Return a pointer to the visitOnce flag for node @n so that it can be changed
-     */
-    bool *refVisitOnce(const IR::Node *n) {
-        if (!visited.count(n)) BUG("visitor state tracker corrupted");
-        return &visited.at(n).visitOnce;
-    }
+bool Visitor::ChangeTracker::busy(const IR::Node *n) const {
+    auto it = visited.find(n);
+    return it != visited.end() && it->second.visit_in_progress;
+}
 
-    /** Forget nodes that have already been visited, allowing them to be visited
-     * again. */
-    void revisit_visited() {
-        for (auto it = visited.begin(); it != visited.end();) {
-            if (!it->second.visit_in_progress)
-                it = visited.erase(it);
-            else
-                ++it;
-        }
-    }
+bool Visitor::ChangeTracker::done(const IR::Node *n) const {
+    auto it = visited.find(n);
+    return it != visited.end() && !it->second.visit_in_progress && it->second.visitOnce;
+}
 
-    /** Determine whether @n is currently being visited and the visitor has not finished
-     * That is, `start(@n)` has been invoked, and `finish(@n)` has not,
-     *
-     * @return true if @n is being visited and has not finished
-     */
-    bool busy(const IR::Node *n) const {
-        auto it = visited.find(n);
-        return it != visited.end() && it->second.visit_in_progress;
-    }
-
-    /** Determine whether @n has been visited and the visitor has finished
-     *  and we don't want to visit @n again the next time we see it.
-     * That is, `start(@n)` has been invoked, followed by `finish(@n)`,
-     * and the visitOnce field is true.
-     *
-     * @return true if @n has been visited and the visitor is finished and visitOnce is true
-     */
-    bool done(const IR::Node *n) const {
-        auto it = visited.find(n);
-        return it != visited.end() && !it->second.visit_in_progress && it->second.visitOnce;
-    }
-
-    /** Produce the result of visiting @n.
-     *
-     * @return The result of visiting @n, or the intermediate result of
-     * visiting @n if `start(@n)` has been invoked but not `finish(@n)`, or @n
-     * if `start(@n)` has not been invoked.
-     */
-    const IR::Node *result(const IR::Node *n) const {
-        if (!visited.count(n)) return n;
-        return visited.at(n).result;
-    }
-};
+const IR::Node *Visitor::ChangeTracker::result(const IR::Node *n) const {
+    if (!visited.count(n)) return n;
+    return visited.at(n).result;
+}
 
 // static
 bool Visitor::warning_enabled(const Visitor *visitor, int warning_kind) {
@@ -194,17 +137,17 @@ Visitor::profile_t Visitor::init_apply(const IR::Node *root, const Context *pare
     ctxt = parent_ctxt;
     return rv;
 }
-Visitor::profile_t Modifier::init_apply(const IR::Node *root) {
+Visitor::profile_t Modifier_base::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
     visited = std::make_shared<ChangeTracker>();
     return rv;
 }
-Visitor::profile_t Inspector::init_apply(const IR::Node *root) {
+Visitor::profile_t Inspector_base::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
     visited = std::make_shared<visited_t>();
     return rv;
 }
-Visitor::profile_t Transform::init_apply(const IR::Node *root) {
+Visitor::profile_t Transform_base::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
     visited = std::make_shared<ChangeTracker>();
     return rv;
@@ -263,36 +206,31 @@ void Visitor::print_context() const {
 }
 
 void Visitor::visitor_const_error() { BUG("const Visitor wants to change IR"); }
-void Modifier::visitor_const_error() {
+void Modifier_base::visitor_const_error() {
     BUG("Modifier called const visit function -- missing template "
         "instantiation in gen-tree-macro.h?");
 }
-void Transform::visitor_const_error() {
+void Transform_base::visitor_const_error() {
     BUG("Transform called const visit function -- missing template "
         "instantiation in gen-tree-macro.h?");
 }
 
-struct PushContext {
-    Visitor::Context current;
-    const Visitor::Context *&stack;
-    bool saved_logging_disable;
-    PushContext(const Visitor::Context *&stck, const IR::Node *node) : stack(stck) {
-        saved_logging_disable = Log::Detail::enableLoggingInContext;
-        if (node->getAnnotation(IR::Annotation::debugLoggingAnnotation))
-            Log::Detail::enableLoggingInContext = true;
-        current.parent = stack;
-        current.node = current.original = node;
-        current.child_index = 0;
-        current.child_name = "";
-        current.depth = stack ? stack->depth + 1 : 1;
-        assert(current.depth < 10000);  // stack overflow?
-        stack = &current;
-    }
-    ~PushContext() {
-        stack = current.parent;
-        Log::Detail::enableLoggingInContext = saved_logging_disable;
-    }
-};
+PushContext::PushContext(const Visitor::Context *&stck, const IR::Node *node) : stack(stck) {
+    saved_logging_disable = Log::Detail::enableLoggingInContext;
+    if (node->getAnnotation(IR::Annotation::debugLoggingAnnotation))
+        Log::Detail::enableLoggingInContext = true;
+    current.parent = stack;
+    current.node = current.original = node;
+    current.child_index = 0;
+    current.child_name = "";
+    current.depth = stack ? stack->depth + 1 : 1;
+    assert(current.depth < 10000);  // stack overflow?
+    stack = &current;
+}
+PushContext::~PushContext() {
+    stack = current.parent;
+    Log::Detail::enableLoggingInContext = saved_logging_disable;
+}
 
 namespace {
 class ForwardChildren : public Visitor {
@@ -306,6 +244,108 @@ class ForwardChildren : public Visitor {
     explicit ForwardChildren(const ChangeTracker &v) : visited(v) {}
 };
 }  // namespace
+
+void Modifier_base::maybe_forward_children(IR::Node *n) {
+    if (!dontForwardChildrenBeforePreorder) {
+        ForwardChildren forward_children(*visited);
+        n->visit_children(forward_children);
+    }
+}
+
+void Modifier_base::visit_node_children(IR::Node *n) {
+    if (this->is_control_flow_visitor()) {
+        //! TODO: support visitors derived from ControlFlowVisitor.
+        // Some implementations of visit_children() use SplitFlowVisit or SplitFlowVisitVector to
+        // control how descendants of ControlFlowVisitor handle child nodes. At this time, only
+        // DoLocalCopyPropagation inherits ControlFlowVisitor, but it is a Transform visitor, not a
+        // Modifier. Nevertheless, provide a fallback for visitors that are both Inspector and
+        // ControlFlowVisitor, in case they exist somewhere outside the repository.
+        n->visit_children(*this);
+        return;
+    }
+    IR::NodeChildren children;
+    n->fill_children(children);
+    if (children.empty())
+        return;
+    IR::ReplacementNodeChildrenFill repl(children);
+    bool need_update = false;
+    for (size_t gix = 0; gix < children.group_count(); gix++) {
+        auto kind = children.group_kind(gix);
+        for (const auto &[node, name] : children.group_children(gix)) {
+            auto new_node = this->apply_visitor(node, name);
+            repl.add_child(new_node);
+            if (new_node != node)
+                need_update = true;
+            if (!new_node && kind == IR::GroupTraversalKind::Conditional) {
+                repl.clear_unfinished_group();
+                break;
+            }
+        }
+        repl.finish_group();
+    }
+    if (need_update)
+        n->update_children(repl);
+}
+
+void Transform_base::maybe_forward_children(IR::Node *n) {
+    if (!dontForwardChildrenBeforePreorder) {
+        ForwardChildren forward_children(*visited);
+        n->visit_children(forward_children);
+    }
+}
+
+void Inspector_base::visit_node_children(const IR::Node *n) {
+    if (this->is_control_flow_visitor()) {
+        //! TODO: support visitors derived from ControlFlowVisitor.
+        // Some implementations of visit_children() use SplitFlowVisit or SplitFlowVisitVector to
+        // control how descendants of ControlFlowVisitor handle child nodes. At this time, only
+        // DoLocalCopyPropagation inherits ControlFlowVisitor, but it is a Transform visitor, not an
+        // Inspector. Nevertheless, provide a fallback for visitors that are both Inspector and
+        // ControlFlowVisitor, in case they exist somewhere outside the repository.
+        n->visit_children(*this);
+        return;
+    }
+    IR::NodeChildren children;
+    n->fill_children(children);
+    for (size_t gix = 0; gix < children.group_count(); gix++) {
+        for (const auto &[node, name] : children.group_children(gix)) {
+            this->apply_visitor(node, name);
+        }
+    }
+}
+
+void Transform_base::visit_node_children(IR::Node *n) {
+    if (this->is_control_flow_visitor()) {
+        //! TODO: support visitors derived from ControlFlowVisitor.
+        // Some implementations of visit_children() use SplitFlowVisit or SplitFlowVisitVector to
+        // control how descendants of ControlFlowVisitor handle child nodes. At this time, the only
+        // Transform visitor that inherits from ControlFlowVisitor is DoLocalCopyPropagation.
+        n->visit_children(*this);
+        return;
+    }
+    IR::NodeChildren children;
+    n->fill_children(children);
+    if (children.empty())
+        return;
+    IR::ReplacementNodeChildrenFill repl(children);
+    bool need_update = false;
+    for (size_t gix = 0; gix < children.group_count(); gix++) {
+        auto kind = children.group_kind(gix);
+        for (const auto &[node, name] : children.group_children(gix)) {
+            auto new_node = this->apply_visitor(node, name);
+            repl.add_child(new_node);
+            if (new_node != node)
+                need_update = true;
+            if (!new_node && kind == IR::GroupTraversalKind::Conditional) {
+                repl.clear_unfinished_group();
+                break;
+            }
+        }
+        repl.finish_group();
+    }
+    if (need_update)
+        n->update_children(repl);
+}
 
 const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
@@ -322,13 +362,10 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
             visited->start(n, visitDagOnce);
             IR::Node *copy = n->clone();
             local.current.node = copy;
-            if (!dontForwardChildrenBeforePreorder) {
-                ForwardChildren forward_children(*visited);
-                copy->visit_children(forward_children);
-            }
+            maybe_forward_children(copy);
             visitCurrentOnce = visited->refVisitOnce(n);
             if (copy->apply_visitor_preorder(*this)) {
-                copy->visit_children(*this);
+                visit_node_children(copy);
                 visitCurrentOnce = visited->refVisitOnce(n);
                 copy->apply_visitor_postorder(*this);
             }
@@ -355,7 +392,7 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
             vp.first->second.done = false;
             visitCurrentOnce = &vp.first->second.visitOnce;
             if (n->apply_visitor_preorder(*this)) {
-                n->visit_children(*this);
+                visit_node_children(n);
                 visitCurrentOnce = &vp.first->second.visitOnce;
                 n->apply_visitor_postorder(*this);
             }
@@ -387,10 +424,7 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
             visited->start(n, visitDagOnce);
             auto copy = n->clone();
             local.current.node = copy;
-            if (!dontForwardChildrenBeforePreorder) {
-                ForwardChildren forward_children(*visited);
-                copy->visit_children(forward_children);
-            }
+            maybe_forward_children(copy);
             bool save_prune_flag = prune_flag;
             prune_flag = false;
             visitCurrentOnce = visited->refVisitOnce(n);
@@ -414,7 +448,7 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
                 }
             }
             if (!prune_flag) {
-                copy->visit_children(*this);
+                visit_node_children(copy);
                 visitCurrentOnce = visited->refVisitOnce(n);
                 final_result = copy->apply_visitor_postorder(*this);
             }
@@ -433,7 +467,7 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
     return n;
 }
 
-void Inspector::revisit_visited() {
+void Inspector_base::revisit_visited() {
     for (auto it = visited->begin(); it != visited->end();) {
         if (it->second.done)
             it = visited->erase(it);
@@ -441,10 +475,10 @@ void Inspector::revisit_visited() {
             ++it;
     }
 }
-void Modifier::revisit_visited() { visited->revisit_visited(); }
-bool Modifier::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
-void Transform::revisit_visited() { visited->revisit_visited(); }
-bool Transform::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
+void Modifier_base::revisit_visited() { visited->revisit_visited(); }
+bool Modifier_base::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
+void Transform_base::revisit_visited() { visited->revisit_visited(); }
+bool Transform_base::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
 
 #define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                                        \
     bool Modifier::preorder(IR::CLASS *n) { return preorder(static_cast<IR::BASE *>(n)); }         \
@@ -563,18 +597,18 @@ void ControlFlowVisitor::post_join_flows(const IR::Node *n, const IR::Node *) {
     status.vclone->flow_copy(*this);
 }
 
-bool Inspector::check_clone(const Visitor *v) {
-    auto *t = dynamic_cast<const Inspector *>(v);
+bool Inspector_base::check_clone(const Visitor *v) {
+    auto *t = dynamic_cast<const Inspector_base *>(v);
     BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
     return Visitor::check_clone(v);
 }
-bool Modifier::check_clone(const Visitor *v) {
-    auto *t = dynamic_cast<const Modifier *>(v);
+bool Modifier_base::check_clone(const Visitor *v) {
+    auto *t = dynamic_cast<const Modifier_base *>(v);
     BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
     return Visitor::check_clone(v);
 }
-bool Transform::check_clone(const Visitor *v) {
-    auto *t = dynamic_cast<const Transform *>(v);
+bool Transform_base::check_clone(const Visitor *v) {
+    auto *t = dynamic_cast<const Transform_base *>(v);
     BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
     return Visitor::check_clone(v);
 }

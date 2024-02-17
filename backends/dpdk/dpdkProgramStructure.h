@@ -118,7 +118,8 @@ struct hdrFieldInfo {
     }
 };
 
-class ParseDpdkArchitecture : public Inspector {
+class ParseDpdkArchitecture : public InspectorCRTP<ParseDpdkArchitecture> {
+    using Base = InspectorCRTP<ParseDpdkArchitecture>;
     DpdkProgramStructure *structure;
 
  public:
@@ -126,8 +127,9 @@ class ParseDpdkArchitecture : public Inspector {
         CHECK_NULL(structure);
     }
 
-    bool preorder(const IR::ToplevelBlock *block) override;
-    bool preorder(const IR::PackageBlock *block) override;
+    using Base::preorder;
+    bool preorder(const IR::ToplevelBlock *block);
+    bool preorder(const IR::PackageBlock *block);
     void parse_psa_block(const IR::PackageBlock *);
     void parse_pna_block(const IR::PackageBlock *);
 
@@ -139,11 +141,12 @@ class ParseDpdkArchitecture : public Inspector {
         structure->deparsers.clear();
         structure->pipelines.clear();
         structure->actions.clear();
-        return Inspector::init_apply(root);
+        return Base::init_apply(root);
     }
 };
 
-class InspectDpdkProgram : public Inspector {
+class InspectDpdkProgram : public InspectorCRTP<InspectDpdkProgram> {
+    using Base = InspectorCRTP<InspectDpdkProgram>;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     DpdkProgramStructure *structure;
@@ -159,9 +162,10 @@ class InspectDpdkProgram : public Inspector {
     void addTypesAndInstances(const IR::Type_StructLike *type, bool meta);
     void addHeaderType(const IR::Type_StructLike *st);
     void addHeaderInstance(const IR::Type_StructLike *st, cstring name);
-    bool preorder(const IR::Declaration_Variable *dv) override;
-    bool preorder(const IR::Parameter *parameter) override;
-    bool preorder(const IR::P4Action *) override;
+    using Base::preorder;
+    bool preorder(const IR::Declaration_Variable *dv);
+    bool preorder(const IR::Parameter *parameter);
+    bool preorder(const IR::P4Action *);
     bool isStandardMetadata(cstring);
 };
 

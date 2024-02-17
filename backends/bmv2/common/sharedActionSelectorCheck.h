@@ -37,7 +37,8 @@ using SelectorInput = std::vector<const IR::Expression *>;
 // the selection algorithm. This is because bmv2 considers that the selection key is part of the
 // action_selector while v1model.p4 considers that it belongs to the table match key definition.
 template <Standard::Arch arch>
-class SharedActionSelectorCheck : public Inspector {
+class SharedActionSelectorCheck : public InspectorCRTP<SharedActionSelectorCheck<arch>> {
+    using Base = InspectorCRTP<SharedActionSelectorCheck<arch>>;
     BMV2::ConversionContext *ctxt;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
@@ -67,7 +68,8 @@ class SharedActionSelectorCheck : public Inspector {
         typeMap = ctxt->typeMap;
     }
 
-    bool preorder(const IR::P4Table *table) override {
+    using Base::preorder;
+    bool preorder(const IR::P4Table *table) {
         auto implementation = table->properties->getProperty("implementation");
         if (implementation == nullptr) return false;
         if (!implementation->value->is<IR::ExpressionValue>()) {

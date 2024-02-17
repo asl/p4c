@@ -17,6 +17,8 @@
   void validate() const;
   const char *node_type_name() const;
   void visit_children(Visitor &v);
+  void fill_children(NodeChildren &out) const;
+  void update_children(ReplacementNodeChildren &repl);
   void dump_fields(std::ostream& out) const;
 
   C comments are ignored.
@@ -452,6 +454,12 @@ class IfStatement : Statement {
     visit_children {
         v.visit(condition, "condition");
         SplitFlowVisit<Statement>(v, ifTrue, ifFalse).run_visit(); }
+    fill_children {
+        out.add_children(condition, "condition");
+        out.add_children<GroupTraversalKind::SplitFlow>(ifTrue, ifFalse); }
+    update_children {
+        repl.update_node_fields(condition);
+        repl.update_node_fields(ifTrue, ifFalse); }
 }
 
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
@@ -498,6 +506,12 @@ class SwitchStatement : Statement {
         SplitFlowVisit<SwitchCase> split(v);
         for (auto &c : cases) split.addNode(c);
         split.run_visit(); }
+    fill_children {
+        out.add_children(expression, "expression");
+        cases.fill_children(out); }
+    update_children {
+        repl.update_node_fields(expression);
+        cases.update_children(repl); }
 }
 
 class Function : Declaration, IFunctional, ISimpleNamespace, INestedNamespace {
@@ -544,6 +558,8 @@ abstract Block : CompileTimeValue {
         BUG_CHECK(it != constantValue.end(), "%1%: No such node %2%", this, node);
         return it->second; }
     visit_children { (void)v; }
+    fill_children { (void)out; }
+    update_children { (void)repl; }
     virtual const IDeclaration* getContainer() const { return nullptr; }
 }
 

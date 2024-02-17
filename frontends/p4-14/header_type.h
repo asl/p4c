@@ -20,16 +20,18 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-class CheckHeaderTypes : public Modifier {
+class CheckHeaderTypes : public ModifierCRTP<CheckHeaderTypes> {
+    using Base = ModifierCRTP<CheckHeaderTypes>;
     const IR::V1Program *global = nullptr;
 
  public:
     CheckHeaderTypes() { setName("CheckHeaderTypes"); }
-    bool preorder(IR::V1Program *glob) override {
+    using Base::preorder;
+    bool preorder(IR::V1Program *glob) {
         global = glob;
         return true;
     }
-    bool preorder(IR::Metadata *meta) override {
+    bool preorder(IR::Metadata *meta) {
         if (auto type = global->get<IR::v1HeaderType>(meta->type_name))
             meta->type = type->as_metadata;
         else
@@ -37,7 +39,7 @@ class CheckHeaderTypes : public Modifier {
                   meta->type_name);
         return true;
     }
-    bool preorder(IR::HeaderOrMetadata *hdr) override {
+    bool preorder(IR::HeaderOrMetadata *hdr) {
         if (auto type = global->get<IR::v1HeaderType>(hdr->type_name))
             hdr->type = type->as_header;
         else
@@ -46,9 +48,11 @@ class CheckHeaderTypes : public Modifier {
     }
 };
 
-class HeaderTypeMaxLengthCalculator : public Modifier {
+class HeaderTypeMaxLengthCalculator : public ModifierCRTP<HeaderTypeMaxLengthCalculator> {
+    using Base = ModifierCRTP<HeaderTypeMaxLengthCalculator>;
  public:
-    bool preorder(IR::Type_StructLike *hdr_type) override;
+    using Base::preorder;
+    bool preorder(IR::Type_StructLike *hdr_type);
 };
 
 #endif /* FRONTENDS_P4_14_HEADER_TYPE_H_ */

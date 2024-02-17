@@ -199,6 +199,7 @@ class IndexedVector : public Vector<T> {
     static cstring static_type_name() { return "IndexedVector<" + T::static_type_name() + ">"; }
     void visit_children(Visitor &v) override;
     void visit_children(Visitor &v) const override;
+    void update_children(ReplacementNodeChildren &repl) override;
 
     void toJSON(JSONGenerator &json) const override;
     static IndexedVector<T> *fromJSON(JSONLoader &json);

@@ -54,7 +54,9 @@ class ConcolicMethodImpls {
     void add(const ImplList &implList);
 };
 
-class ConcolicResolver : public Inspector {
+class ConcolicResolver : public InspectorCRTP<ConcolicResolver> {
+    using Base = InspectorCRTP<ConcolicResolver>;
+    friend Base;
  public:
     explicit ConcolicResolver(const Model &evaluatedModel, const ExecutionState &state,
                               const ConcolicMethodImpls &concolicMethodImpls);
@@ -66,7 +68,8 @@ class ConcolicResolver : public Inspector {
     const ConcolicVariableMap *getResolvedConcolicVariables() const;
 
  private:
-    bool preorder(const IR::ConcolicVariable *var) override;
+    using Base::preorder;
+    bool preorder(const IR::ConcolicVariable *var);
 
     /// Execution state may be used by concolic implementations to access specific state.
     const ExecutionState &state;

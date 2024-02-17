@@ -23,10 +23,12 @@ limitations under the License.
 
 namespace P4 {
 
-class CloneConstants : public Transform {
+class CloneConstants : public TransformCRTP<CloneConstants> {
+    using Base = TransformCRTP<CloneConstants>;
  public:
     CloneConstants() = default;
-    const IR::Node *postorder(IR::Constant *constant) override {
+    using Base::postorder;
+    const IR::Node *postorder(IR::Constant *constant) {
         // We clone the constant.  This is necessary because the same
         // the type associated with the constant may participate in
         // type unification, and thus we want to have different type

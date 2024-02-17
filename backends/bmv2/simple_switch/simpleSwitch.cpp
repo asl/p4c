@@ -929,24 +929,26 @@ cstring SimpleSwitchBackend::createCalculation(cstring algo, const IR::Expressio
 }
 
 namespace {
-class EnsureExpressionIsSimple : public Inspector {
+class EnsureExpressionIsSimple : public InspectorCRTP<EnsureExpressionIsSimple> {
+    using Base = InspectorCRTP<EnsureExpressionIsSimple>;
     cstring block;
 
  public:
     explicit EnsureExpressionIsSimple(cstring block) : block(block) {
         setName("EnsureExpressionIsSimple");
     }
-    bool preorder(const IR::Expression *expression) override {
+    using Base::preorder;
+    bool preorder(const IR::Expression *expression) {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Computations are not supported in %2%",
                 expression, block);
         return false;
     }
-    bool preorder(const IR::StructExpression *) override { return true; }
-    bool preorder(const IR::PathExpression *) override { return true; }
-    bool preorder(const IR::Member *) override { return true; }
-    bool preorder(const IR::ListExpression *) override { return true; }
-    bool preorder(const IR::Constant *) override { return true; }
-    bool preorder(const IR::ArrayIndex *) override { return true; }
+    bool preorder(const IR::StructExpression *) { return true; }
+    bool preorder(const IR::PathExpression *) { return true; }
+    bool preorder(const IR::Member *) { return true; }
+    bool preorder(const IR::ListExpression *) { return true; }
+    bool preorder(const IR::Constant *) { return true; }
+    bool preorder(const IR::ArrayIndex *) { return true; }
 };
 }  // namespace
 

@@ -101,17 +101,19 @@ TEST_F(P4CMidend, getEnumMapping) {
     ASSERT_EQ(enumMap.size(), (unsigned long)1);
 }
 
-class CollectRangesAndMasks : public Inspector {
+class CollectRangesAndMasks : public InspectorCRTP<CollectRangesAndMasks> {
+    using Base = InspectorCRTP<CollectRangesAndMasks>;
  public:
     std::vector<const IR::Range *> ranges;
     std::vector<const IR::Mask *> masks;
 
-    bool preorder(const IR::Range *r) override {
+    using Base::preorder;
+    bool preorder(const IR::Range *r) {
         ranges.emplace_back(r);
         return true;
     }
 
-    bool preorder(const IR::Mask *m) override {
+    bool preorder(const IR::Mask *m) {
         masks.emplace_back(m);
         return true;
     }

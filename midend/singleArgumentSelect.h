@@ -29,7 +29,8 @@ namespace P4 {
    This should be run after SimplifySelectList and RemoveSelectBooleans.
    It assumes that all select arguments are scalar values of type Type_Bits.
 */
-class DoSingleArgumentSelect : public Modifier {
+class DoSingleArgumentSelect : public ModifierCRTP<DoSingleArgumentSelect> {
+    using Base = ModifierCRTP<DoSingleArgumentSelect>;
     TypeMap *typeMap;
     const IR::Type *selectListType;
 
@@ -51,8 +52,9 @@ class DoSingleArgumentSelect : public Modifier {
     // of supported types.
     void checkExpressionType(const IR::Expression *expression);
 
-    bool preorder(IR::SelectCase *selCase) override;
-    bool preorder(IR::SelectExpression *expression) override;
+    using Base::preorder;
+    bool preorder(IR::SelectCase *selCase);
+    bool preorder(IR::SelectExpression *expression);
 };
 
 class SingleArgumentSelect : public PassManager {

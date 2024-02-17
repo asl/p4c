@@ -200,12 +200,14 @@ void EBPFProgram::emitTypes(CodeBuilder *builder) {
 }
 
 namespace {
-class ErrorCodesVisitor : public Inspector {
+class ErrorCodesVisitor : public InspectorCRTP<ErrorCodesVisitor> {
+    using Base = InspectorCRTP<ErrorCodesVisitor>;
     CodeBuilder *builder;
 
  public:
     explicit ErrorCodesVisitor(CodeBuilder *builder) : builder(builder) {}
-    bool preorder(const IR::Type_Error *errors) override {
+    using Base::preorder;
+    bool preorder(const IR::Type_Error *errors) {
         for (auto m : *errors->getDeclarations()) {
             builder->emitIndent();
             builder->appendFormat("%s,\n", m->getName().name.c_str());

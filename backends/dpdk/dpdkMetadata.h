@@ -23,13 +23,15 @@ limitations under the License.
 
 namespace DPDK {
 
-class IsDirectionMetadataUsed : public Inspector {
+class IsDirectionMetadataUsed : public InspectorCRTP<IsDirectionMetadataUsed> {
+    using Base = InspectorCRTP<IsDirectionMetadataUsed>;
     bool &is_direction_used;
 
  public:
     explicit IsDirectionMetadataUsed(bool &is_direction_used)
         : is_direction_used(is_direction_used) {}
-    bool preorder(const IR::Member *m) override {
+    using Base::preorder;
+    bool preorder(const IR::Member *m) {
         if (!is_direction_used && isDirection(m)) {
             is_direction_used = true;
         }
@@ -40,7 +42,8 @@ class IsDirectionMetadataUsed : public Inspector {
 // This pass adds decl instance of Register extern in dpdk pna program which will
 // be used by dpdk backend for initializing the mask for calculating packet direction
 // at beginning of pipeline
-class DirectionToRegRead : public Transform {
+class DirectionToRegRead : public TransformCRTP<DirectionToRegRead> {
+    using Base = TransformCRTP<DirectionToRegRead>;
     ordered_map<cstring, cstring> dirToDirMapping;
     ordered_map<cstring, cstring> inputToInputPortMapping;
     ordered_set<cstring> usedNames;
@@ -68,8 +71,10 @@ class DirectionToRegRead : public Transform {
             std::make_pair(cstring("pna_main_parser_input_metadata_direction"),
                            cstring("pna_main_input_metadata_input_port")));
     }
-    const IR::Node *preorder(IR::DpdkAsmProgram *p) override;
-    const IR::Node *preorder(IR::Member *m) override;
+
+    using Base::preorder;
+    const IR::Node *preorder(IR::DpdkAsmProgram *p);
+    const IR::Node *preorder(IR::Member *m);
 
     void uniqueNames(IR::DpdkAsmProgram *p);
     IR::DpdkExternDeclaration *addRegDeclInstance(cstring instanceName);
@@ -81,14 +86,17 @@ class DirectionToRegRead : public Transform {
 // DPDK implements pass metadata using "recircid" instruction.
 // All occurrences of pass metadata usage should be prepended with recircid instruction to fetch
 // the latest pass_id from the target.
-class PrependPassRecircId : public Transform {
+class PrependPassRecircId : public TransformCRTP<PrependPassRecircId> {
+    using Base = TransformCRTP<PrependPassRecircId>;
     IR::IndexedVector<IR::DpdkAsmStatement> newStmts;
 
  public:
     PrependPassRecircId() {}
     bool isPass(const IR::Member *m);
-    const IR::Node *postorder(IR::DpdkAction *a) override;
-    const IR::Node *postorder(IR::DpdkListStatement *l) override;
+
+    using Base::postorder;
+    const IR::Node *postorder(IR::DpdkAction *a);
+    const IR::Node *postorder(IR::DpdkListStatement *l);
     IR::IndexedVector<IR::DpdkAsmStatement> prependPassWithRecircid(
         IR::IndexedVector<IR::DpdkAsmStatement> stmts);
 };

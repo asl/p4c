@@ -7,7 +7,9 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-class RefersToParser : public Inspector {
+class RefersToParser : public InspectorCRTP<RefersToParser> {
+    using Base = InspectorCRTP<RefersToParser>;
+    friend Base;
  private:
     /// A vector of restrictions imposed on the control-plane.
     ConstraintsVector restrictionsVector;
@@ -36,7 +38,8 @@ class RefersToParser : public Inspector {
     static const IR::SymbolicVariable *getReferencedKey(const IR::P4Control &ctrlContext,
                                                         const IR::Annotation &refersAnno);
 
-    bool preorder(const IR::P4Table *table) override;
+    using Base::preorder;
+    bool preorder(const IR::P4Table *table);
 
  public:
     RefersToParser();

@@ -28,7 +28,8 @@ namespace BMV2 {
 
 class JsonObjects;
 
-class ParserConverter : public Inspector {
+class ParserConverter : public InspectorCRTP<ParserConverter> {
+    using Base = InspectorCRTP<ParserConverter>;
     ConversionContext *ctxt;
     cstring name;
     P4::P4CoreLibrary &corelib;
@@ -47,7 +48,8 @@ class ParserConverter : public Inspector {
     void addValueSets(const IR::P4Parser *parser);
 
  public:
-    bool preorder(const IR::P4Parser *p) override;
+    using Base::preorder;
+    bool preorder(const IR::P4Parser *p);
     explicit ParserConverter(ConversionContext *ctxt, cstring name = "parser")
         : ctxt(ctxt), name(name), corelib(P4::P4CoreLibrary::instance()) {
         setName("ParserConverter");

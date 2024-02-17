@@ -35,7 +35,8 @@ limitations under the License.
 
 namespace DPDK {
 
-class ConvertToDpdkProgram : public Transform {
+class ConvertToDpdkProgram : public TransformCRTP<ConvertToDpdkProgram> {
+    using Base = TransformCRTP<ConvertToDpdkProgram>;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
@@ -52,13 +53,15 @@ class ConvertToDpdkProgram : public Transform {
     IR::IndexedVector<IR::DpdkAsmStatement> create_psa_preamble();
     IR::IndexedVector<IR::DpdkAsmStatement> create_pna_postamble();
     IR::IndexedVector<IR::DpdkAsmStatement> create_psa_postamble();
-    const IR::Node *preorder(IR::P4Program *p) override;
+    using Base::preorder;
+    const IR::Node *preorder(IR::P4Program *p);
     const IR::DpdkAsmProgram *getDpdkProgram() { return dpdk_program; }
     IR::IndexedVector<IR::DpdkStructType> UpdateHeaderMetadata(IR::P4Program *prog,
                                                                IR::Type_Struct *metadata);
 };
 
-class ConvertToDpdkParser : public Inspector {
+class ConvertToDpdkParser : public InspectorCRTP<ConvertToDpdkParser> {
+    using Base = InspectorCRTP<ConvertToDpdkParser>;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
@@ -71,8 +74,9 @@ class ConvertToDpdkParser : public Inspector {
         : refmap(refmap), typemap(typemap), structure(structure), metadataStruct(metadataStruct) {}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }
 
-    bool preorder(const IR::P4Parser *a) override;
-    bool preorder(const IR::ParserState *s) override;
+    using Base::preorder;
+    bool preorder(const IR::P4Parser *a);
+    bool preorder(const IR::ParserState *s);
     void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     cstring append_parser_name(const IR::P4Parser *p, cstring);
     IR::Declaration_Variable *addNewTmpVarToMetadata(cstring name, const IR::Type *type);
@@ -82,7 +86,8 @@ class ConvertToDpdkParser : public Inspector {
                      IR::Expression **rightExpr);
 };
 
-class ConvertToDpdkControl : public Inspector {
+class ConvertToDpdkControl : public InspectorCRTP<ConvertToDpdkControl> {
+    using Base = InspectorCRTP<ConvertToDpdkControl>;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
@@ -111,9 +116,10 @@ class ConvertToDpdkControl : public Inspector {
     IR::IndexedVector<IR::DpdkAction> &getActions() { return actions; }
     IR::IndexedVector<IR::DpdkAsmStatement> &getInstructions() { return instructions; }
 
-    bool preorder(const IR::P4Action *a) override;
-    bool preorder(const IR::P4Table *a) override;
-    bool preorder(const IR::P4Control *) override;
+    using Base::preorder;
+    bool preorder(const IR::P4Action *a);
+    bool preorder(const IR::P4Table *a);
+    bool preorder(const IR::P4Control *);
     bool checkTableValid(const IR::P4Table *a);
 
     void add_inst(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
@@ -126,11 +132,14 @@ class ConvertToDpdkControl : public Inspector {
     std::optional<int> getNumberFromProperty(const IR::P4Table *, cstring);
 };
 
-class CollectActionUses : public Inspector {
+class CollectActionUses : public InspectorCRTP<CollectActionUses> {
+    using Base = InspectorCRTP<CollectActionUses>;
     ordered_set<cstring> &actions;
 
  public:
     explicit CollectActionUses(ordered_set<cstring> &a) : actions(a) {}
+
+    using Base::preorder;
     bool preorder(const IR::ActionListElement *ale) {
         if (auto mce = ale->expression->to<IR::MethodCallExpression>()) {
             if (auto path = mce->method->to<IR::PathExpression>()) {
@@ -144,13 +153,15 @@ class CollectActionUses : public Inspector {
     }
 };
 
-class ElimUnusedActions : public Transform {
+class ElimUnusedActions : public TransformCRTP<ElimUnusedActions> {
+    using Base = TransformCRTP<ElimUnusedActions>;
     const ordered_set<cstring> &used_actions;
     std::set<cstring> kept_actions;
 
  public:
     explicit ElimUnusedActions(const ordered_set<cstring> &a) : used_actions(a) {}
-    const IR::Node *postorder(IR::DpdkAction *a) override {
+    using Base::postorder;
+    const IR::Node *postorder(IR::DpdkAction *a) {
         if (kept_actions.count(a->name.name) != 0) return nullptr;
         if (used_actions.find(a->name.name) != used_actions.end()) {
             kept_actions.insert(a->name.name);

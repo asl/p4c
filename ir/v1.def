@@ -146,6 +146,16 @@ class If :  Expression {
         SplitFlowVisit<Vector<Expression>>(v, ifTrue, ifFalse).run_visit();
         Expression::visit_children(v);
     }
+    fill_children {
+        out.add_children(pred, "pred");
+        out.add_children<GroupTraversalKind::SplitFlow>(ifTrue, ifFalse);
+        Expression::fill_children(out);
+    }
+    update_children {
+        repl.update_node_fields(pred);
+        repl.update_node_fields(ifTrue, ifFalse);
+        Expression::update_children(repl);
+    }
 }
 
 // an if condition tagged with a name so we can refer to it
@@ -239,6 +249,14 @@ class CalculatedField : IAnnotated {
         v.visit(field, "field");
         for (auto &s : specs) v.visit(s.cond, s.name.name);
         v.visit(annotations, "annotations"); }
+    fill_children {
+        out.add_children(field, "field");
+        for (auto &s : specs) out.add_children(s.cond, s.name.name.c_str());
+        out.add_children(annotations, "annotations"); }
+    update_children {
+        repl.update_node_fields(field);
+        for (auto &s : specs) repl.update_node_fields(s.cond);
+        repl.update_node_fields(annotations); }
 }
 
 class ParserValueSet : IAnnotated {
@@ -366,6 +384,18 @@ class ActionFunction : IAnnotated {
         // DANGER -- action args based on use.  This is immoral.
         for (auto &a : args) v.visit(a, "arg");
         v.visit(annotations, "annotations");
+    }
+    fill_children {
+        action.fill_children(out, "action");
+        // DANGER -- visiting action first so type inferencing will push types to
+        // DANGER -- action args based on use.  This is immoral.
+        for (auto &a : args) out.add_children(a, "arg");
+        out.add_children(annotations, "annotations");
+    }
+    update_children {
+        action.update_children(repl);
+        for (auto &a : args) repl.update_node_fields(a);
+        repl.update_node_fields(annotations);
     }
     toString {
         return cstring("action ") + name + " {\n" +

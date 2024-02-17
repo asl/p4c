@@ -126,7 +126,8 @@ structure so that they do not clash with fields of the headers
 structure.  This is necessary because both of them become global
 objects in the output json.
 */
-class RenameUserMetadata : public Transform {
+class RenameUserMetadata : public TransformCRTP<RenameUserMetadata> {
+    using Base = TransformCRTP<RenameUserMetadata>;
     P4::ReferenceMap *refMap;
     const IR::Type_Struct *userMetaType;
     // Used as a prefix for the fields of the userMetadata structure
@@ -143,7 +144,8 @@ class RenameUserMetadata : public Transform {
         visitDagOnce = false;
     }
 
-    const IR::Node *postorder(IR::Type_Struct *type) override {
+    using Base::postorder;
+    const IR::Node *postorder(IR::Type_Struct *type) {
         // Clone the user metadata type
         auto orig = getOriginal<IR::Type_Struct>();
         if (userMetaType->name != orig->name) return type;
@@ -186,7 +188,8 @@ class RenameUserMetadata : public Transform {
         return vec;
     }
 
-    const IR::Node *preorder(IR::Type_Name *type) override {
+    using Base::preorder;
+    const IR::Node *preorder(IR::Type_Name *type) {
         // Find any reference to the user metadata type that is used and replace them
         auto decl = refMap->getDeclaration(type->path);
         if (decl == userMetaType)

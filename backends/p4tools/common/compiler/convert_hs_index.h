@@ -10,9 +10,11 @@
 namespace P4Tools {
 
 /// The main class for finding non-concrete header stack indices.
-class HSIndexToMember : public Transform {
+class HSIndexToMember : public TransformCRTP<HSIndexToMember> {
+    using Base = TransformCRTP<HSIndexToMember>;
  public:
-    const IR::Node *postorder(IR::ArrayIndex *curArrayIndex) override;
+    using Base::postorder;
+    const IR::Node *postorder(IR::ArrayIndex *curArrayIndex);
 
     /// Convert a parent expression and an index into a member expression with that
     /// particular index as string member. The type is used to specify the member type.

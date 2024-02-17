@@ -308,7 +308,9 @@ static IR::Cast *makeP14Cast(const IR::Type *type, const IR::Expression *exp) {
 }
 
 /// Bottom up type inferencing -- set the types of expression nodes based on operands.
-class TypeCheck::InferExpressionsBottomUp : public Modifier {
+class TypeCheck::InferExpressionsBottomUp : public ModifierCRTP<InferExpressionsBottomUp> {
+    using Base = ModifierCRTP<InferExpressionsBottomUp>;
+    friend Base;
  public:
     InferExpressionsBottomUp() { setName("InferExpressionsBottomUp"); }
 
@@ -329,7 +331,8 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
         return false;
     }
 
-    void postorder(IR::Operation_Binary *op) override {
+    using Base::postorder;
+    void postorder(IR::Operation_Binary *op) {
         checkBits(op, op->left->type) && checkBits(op, op->right->type);
         if (op->left->type->is<IR::Type_InfInt>()) {
             setType(op, op->right->type);
@@ -358,23 +361,23 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
             op = new IR::Neq(IR::Type::Boolean::get(), op, new IR::Constant(bit, 0));
         }
     }
-    void postorder(IR::LAnd *op) override {
+    void postorder(IR::LAnd *op) {
         logic_operand(op->left);
         logic_operand(op->right);
         setType(op, IR::Type::Boolean::get());
     }
-    void postorder(IR::LOr *op) override {
+    void postorder(IR::LOr *op) {
         logic_operand(op->left);
         logic_operand(op->right);
         setType(op, IR::Type::Boolean::get());
     }
-    void postorder(IR::LNot *op) override {
+    void postorder(IR::LNot *op) {
         logic_operand(op->expr);
         setType(op, IR::Type::Boolean::get());
     }
-    void postorder(IR::Neg *op) override { setType(op, op->expr->type); }
-    void postorder(IR::Cmpl *op) override { setType(op, op->expr->type); }
-    void postorder(IR::Operation_Relation *op) override { setType(op, IR::Type::Boolean::get()); }
+    void postorder(IR::Neg *op) { setType(op, op->expr->type); }
+    void postorder(IR::Cmpl *op) { setType(op, op->expr->type); }
+    void postorder(IR::Operation_Relation *op) { setType(op, IR::Type::Boolean::get()); }
 };
 
 static const IR::Type *inferTypeFromContext(const Visitor::Context *ctxt,
@@ -383,19 +386,18 @@ static const IR::Type *inferTypeFromContext(const Visitor::Context *ctxt,
     if (!ctxt) return rv;
     if (auto parent = ctxt->node->to<IR::Expression>()) {
         if (auto p = parent->to<IR::Operation_Relation>()) {
-            const IR::Type::Bits *t, *ct = nullptr;
-            if (ctxt->child_index == 0) {
-                rv = p->right->type;
-                ct = p->left->type->to<IR::Type::Bits>();
-            } else if (ctxt->child_index == 1) {
+            // Return the type of the left child if:
+            // * Both types are IR::Type::Bits and the left is larger;
+            // * The type of the right child is IR::Type_InfInt.
+            // In all other cases, return the type of the right child.
+            if (p->right->type->is<IR::Type_InfInt>())
                 rv = p->left->type;
-                ct = p->right->type->to<IR::Type::Bits>();
-            } else {
-                BUG("Unepxected child index");
-            }
-            if (ct && (t = rv->to<IR::Type::Bits>()) && ct->size > t->size)
-                // if both children have bit types, use the larger
-                rv = ct;
+            else if (auto tl = p->left->type->to<IR::Type::Bits>(),
+                          tr = p->right->type->to<IR::Type::Bits>();
+                     tl && tr && tl->size > tr->size)
+                rv = p->left->type;
+            else
+                rv = p->right->type;
         } else if (parent->is<IR::Operation::Binary>()) {
             if ((parent->is<IR::Shl>() || parent->is<IR::Shr>()) && ctxt->child_index == 1) {
                 // don't propagate into shift count -- maybe should infer log2 bits?
@@ -419,7 +421,9 @@ static const IR::Type *inferTypeFromContext(const Visitor::Context *ctxt,
 }
 
 /// Top down type inferencing -- set the type of expression nodes based on their uses.
-class TypeCheck::InferExpressionsTopDown : public Modifier {
+class TypeCheck::InferExpressionsTopDown : public ModifierCRTP<InferExpressionsTopDown> {
+    using Base = ModifierCRTP<InferExpressionsTopDown>;
+    friend Base;
  public:
     InferExpressionsTopDown() { setName("InferExpressionsTopDown"); }
 
@@ -427,10 +431,11 @@ class TypeCheck::InferExpressionsTopDown : public Modifier {
     const IR::V1Program *global = nullptr;
     profile_t init_apply(const IR::Node *root) override {
         global = root->to<IR::V1Program>();
-        return Modifier::init_apply(root);
+        return Base::init_apply(root);
     }
-    bool preorder(IR::ActionArg *) override { return false; }  // don't infer these yet
-    bool preorder(IR::Expression *op) override {
+    using Base::preorder;
+    bool preorder(IR::ActionArg *) { return false; }  // don't infer these yet
+    bool preorder(IR::Expression *op) {
         if (op->type == IR::Type::Unknown::get() || op->type->is<IR::Type_InfInt>()) {
             auto *type = inferTypeFromContext(getContext(), global);
             if (type != IR::Type::Unknown::get() && type != getOriginal<IR::Expression>()->type) {
@@ -522,14 +527,17 @@ class TypeCheck::InferActionArgsTopDown : public Inspector {
     }
 };
 
-class TypeCheck::AssignActionArgTypes : public Modifier {
+class TypeCheck::AssignActionArgTypes : public ModifierCRTP<AssignActionArgTypes> {
+    using Base = ModifierCRTP<AssignActionArgTypes>;
+    friend Base;
     TypeCheck &self;
     const IR::V1Program *global = nullptr;
     profile_t init_apply(const IR::Node *root) override {
         global = root->to<IR::V1Program>();
-        return Modifier::init_apply(root);
+        return Base::init_apply(root);
     }
-    bool preorder(IR::ActionArg *arg) override {
+    using Base::preorder;
+    bool preorder(IR::ActionArg *arg) {
         // FIXME -- this duplicates P4WriteContext::isWrite, but that is unable to deal with
         // calls of action functions (it treats all IR::Primitive as primitive calls)
         const Context *ctxt = getContext();

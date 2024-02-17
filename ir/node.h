@@ -20,6 +20,9 @@ limitations under the License.
 #include <iosfwd>
 #include <typeinfo>
 
+#include <boost/container/small_vector.hpp>
+#include <boost/range/iterator_range_core.hpp>
+
 #include "ir-tree-macros.h"
 #include "ir/gen-tree-macro.h"
 #include "lib/castable.h"
@@ -29,9 +32,15 @@ limitations under the License.
 
 class Visitor;
 struct Visitor_Context;
+class Inspector_base;
 class Inspector;
+template <class T> class InspectorCRTP;
+class Modifier_base;
 class Modifier;
+template <class T> class ModifierCRTP;
+class Transform_base;
 class Transform;
+template <class T> class TransformCRTP;
 class JSONGenerator;
 class JSONLoader;
 
@@ -69,6 +78,7 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
     virtual cstring node_type_name() const = 0;
     virtual void validate() const {}
     virtual const Annotation *getAnnotation(cstring) const { return nullptr; }
+    
 
     // default checkedTo implementation for nodes: just fallback to generic ICastable method
     template <typename T>
@@ -89,7 +99,13 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
     DECLARE_TYPEINFO_WITH_TYPEID(INode, NodeKind::INode);
 };
 
+class NodeChildren;
+class ReplacementNodeChildren;
+
 class Node : public virtual INode {
+ public:
+    virtual void fill_children(NodeChildren &) const { }
+    virtual void update_children(ReplacementNodeChildren &) { }
  public:
     virtual bool apply_visitor_preorder(Modifier &v);
     virtual void apply_visitor_postorder(Modifier &v);
@@ -112,9 +128,13 @@ class Node : public virtual INode {
     virtual void visit_children(Visitor &) {}
     virtual void visit_children(Visitor &) const {}
     friend class ::Visitor;
-    friend class ::Inspector;
+    friend class ::Inspector_base;
+    friend class ::Modifier_base;
     friend class ::Modifier;
+    template <class T> friend class ::ModifierCRTP;
+    friend class ::Transform_base;
     friend class ::Transform;
+    template <class T> friend class ::TransformCRTP;
     cstring prepareSourceInfoForJSON(Util::SourceInfo &si, unsigned *lineNumber,
                                      unsigned *columnNumber) const;
 
@@ -221,6 +241,145 @@ inline bool equiv(const INode *a, const INode *b) {
         v.end_apply(tmp);                                                                    \
         return tmp;                                                                          \
     }
+
+enum class GroupTraversalKind {
+    Sequential,
+    SplitFlow,
+    Conditional,
+};
+
+class NodeChildren {
+    using ChildInfo = std::pair<const Node *, const char *>;
+    using GroupInfo = std::pair<GroupTraversalKind, size_t>;
+    using Children = boost::container::small_vector<ChildInfo, 16>;
+    Children children;
+    boost::container::small_vector<GroupInfo, 4> groups;
+    void add_child(const Node *n, const char *name) { children.emplace_back(n, name); }
+    void finish_group(GroupTraversalKind kind) { groups.emplace_back(kind, children.size()); }
+    void add_next_child(const Node *n) {
+        add_child(n, nullptr);
+    }
+    void add_next_child(const Node *n, const char *name) {
+        add_child(n, name);
+    }
+    template <class... T>
+    void add_next_child(const Node *n, const Node *next_node, const T *...rest) {
+        add_child(n, nullptr);
+        add_next_child(next_node, rest...);
+    }
+    template <class... T>
+    void add_next_child(const Node *n, const char *name, const T *...rest) {
+        add_child(n, name);
+        add_next_child(rest...);
+    }
+ public:
+    using ChildrenRange = boost::iterator_range<Children::const_iterator>;
+
+    bool empty() const { return children.empty(); }
+    size_t children_count() const { return children.size(); }
+    size_t group_count() const { return groups.size(); }
+    GroupTraversalKind group_kind(size_t i) const {
+        BUG_CHECK(i < groups.size(), "group index out of bounds");
+        return groups[i].first;
+    }
+    ChildrenRange group_children(size_t i) const {
+        BUG_CHECK(i < groups.size(), "group index out of bounds");
+        size_t from = (i > 0) ? groups[i - 1].second : 0;
+        size_t to = groups[i].second;
+        return boost::make_iterator_range(children.begin() + from, children.begin() + to);
+    }
+
+    template <GroupTraversalKind Kind = GroupTraversalKind::Sequential, class... T>
+    void add_children(const T *...n) {
+        children.reserve(children.size() + sizeof...(n));
+        add_next_child(n...);
+        finish_group(Kind);
+    }
+    template <GroupTraversalKind Kind = GroupTraversalKind::Sequential, class It>
+    void add_children_range(It from, It to, const char *name = nullptr) {
+        children.reserve(children.size() + std::distance(from, to));
+        for (auto it = from; it != to; ++it)
+            add_child(*it, name);
+        finish_group(Kind);
+    }
+    template <GroupTraversalKind Kind = GroupTraversalKind::Sequential, class It>
+    void add_named_children_range(It from, It to) {
+        children.reserve(children.size() + std::distance(from, to));
+        for (auto it = from; it != to; ++it)
+            add_child(it->first, it->second);
+        finish_group(Kind);
+    }
+};
+
+template <class T>
+static void update_node_field(const T *&n, const Node *t) {
+    if (!t)
+        n = nullptr;
+    else if (t->is<T>())
+        n = static_cast<const T *>(t);
+    else
+        BUG("visitor returned a node of invalid type: %1%", t);
+}
+
+class ReplacementNodeChildren {
+    using Children = boost::container::small_vector<const Node *, 16>;
+    Children children;
+    boost::container::small_vector<size_t, 4> groups;
+    size_t current_group = 0;
+    size_t group_start = 0;
+
+    template <size_t I>
+    void update_next_node_field() {
+        BUG_CHECK(group_start + I == groups[current_group],
+                  "unexpected child count in the current group");
+    }
+    template <size_t I, class T, class... U>
+    void update_next_node_field(const T *&n, const U *&...rest) {
+        update_node_field(n, children[group_start + I]);
+        update_next_node_field<I + 1>(rest...);
+    }
+
+ protected:
+    void add_child(const Node *n) { children.emplace_back(n); }
+    void clear_unfinished_group() {
+        if (groups.empty())
+            children.clear();
+        else
+            children.resize(groups.back());
+    }
+    void finish_group() { groups.emplace_back(children.size()); }
+    ReplacementNodeChildren(const NodeChildren &nch) {
+        children.reserve(nch.children_count());
+        groups.reserve(nch.group_count());
+    }
+
+ public:
+    using ChildrenRange = boost::iterator_range<Children::const_iterator>;
+
+    template <class... T>
+    void update_node_fields(const T *&...n) {
+        BUG_CHECK(current_group < groups.size(), "no more groups");
+        BUG_CHECK(sizeof...(T) == groups[current_group] - group_start,
+                  "unexpected number of children");
+        update_next_node_field<0>(n...);
+        group_start = groups[current_group++];
+    }
+    ChildrenRange get_next_group() {
+        BUG_CHECK(current_group < groups.size(), "no more groups");
+        auto from = children.begin() + group_start;
+        auto to = children.begin() + groups[current_group];
+        group_start = groups[current_group++];
+        return boost::make_iterator_range(from, to);
+    }
+};
+
+class ReplacementNodeChildrenFill : public ReplacementNodeChildren {
+ public:
+    ReplacementNodeChildrenFill(const NodeChildren &nch) : ReplacementNodeChildren(nch) {}
+    using ReplacementNodeChildren::add_child;
+    using ReplacementNodeChildren::clear_unfinished_group;
+    using ReplacementNodeChildren::finish_group;
+};
 
 }  // namespace IR
 

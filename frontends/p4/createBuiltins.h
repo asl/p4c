@@ -27,7 +27,8 @@ limitations under the License.
  * Parser states without selects will transition to reject.
  */
 namespace P4 {
-class CreateBuiltins final : public Transform {
+class CreateBuiltins final : public TransformCRTP<CreateBuiltins> {
+    using Base = TransformCRTP<CreateBuiltins>;
     bool addNoAction = false;
     /// toplevel declaration of NoAction.
     /// Checked only if it is referred.
@@ -40,16 +41,18 @@ class CreateBuiltins final : public Transform {
         setName("CreateBuiltins");
         globalNoAction = nullptr;
     }
-    const IR::Node *postorder(IR::ParserState *state) override;
-    const IR::Node *postorder(IR::P4Parser *parser) override;
-    const IR::Node *postorder(IR::ActionListElement *element) override;
-    const IR::Node *postorder(IR::ExpressionValue *property) override;
-    const IR::Node *postorder(IR::Entry *property) override;
-    const IR::Node *preorder(IR::P4Table *table) override;
-    const IR::Node *postorder(IR::ActionList *actions) override;
-    const IR::Node *postorder(IR::TableProperties *properties) override;
-    const IR::Node *postorder(IR::Property *property) override;
-    const IR::Node *preorder(IR::P4Program *program) override;
+    using Base::preorder;
+    using Base::postorder;
+    const IR::Node *postorder(IR::ParserState *state);
+    const IR::Node *postorder(IR::P4Parser *parser);
+    const IR::Node *postorder(IR::ActionListElement *element);
+    const IR::Node *postorder(IR::ExpressionValue *property);
+    const IR::Node *postorder(IR::Entry *property);
+    const IR::Node *preorder(IR::P4Table *table);
+    const IR::Node *postorder(IR::ActionList *actions);
+    const IR::Node *postorder(IR::TableProperties *properties);
+    const IR::Node *postorder(IR::Property *property);
+    const IR::Node *preorder(IR::P4Program *program);
 };
 }  // namespace P4
 

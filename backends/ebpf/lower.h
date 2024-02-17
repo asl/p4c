@@ -26,7 +26,8 @@ namespace EBPF {
 /**
   This pass rewrites expressions which are not supported natively on EBPF.
 */
-class LowerExpressions : public Transform {
+class LowerExpressions : public TransformCRTP<LowerExpressions> {
+    using Base = TransformCRTP<LowerExpressions>;
     P4::TypeMap *typeMap;
     // Cannot shift with a value larger than 5 bits
     const int maxShiftWidth = 5;
@@ -38,12 +39,13 @@ class LowerExpressions : public Transform {
         setName("LowerExpressions");
     }
 
-    const IR::Node *postorder(IR::Shl *expression) override { return shift(expression); }
-    const IR::Node *postorder(IR::Shr *expression) override { return shift(expression); }
-    const IR::Node *postorder(IR::Expression *expression) override;
-    const IR::Node *postorder(IR::Slice *expression) override;
-    const IR::Node *postorder(IR::Concat *expression) override;
-    const IR::Node *postorder(IR::Cast *expression) override;
+    using Base::postorder;
+    const IR::Node *postorder(IR::Shl *expression) { return shift(expression); }
+    const IR::Node *postorder(IR::Shr *expression) { return shift(expression); }
+    const IR::Node *postorder(IR::Expression *expression);
+    const IR::Node *postorder(IR::Slice *expression);
+    const IR::Node *postorder(IR::Concat *expression);
+    const IR::Node *postorder(IR::Cast *expression);
 };
 
 class Lower : public PassManager {

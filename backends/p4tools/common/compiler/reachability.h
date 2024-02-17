@@ -87,7 +87,8 @@ class ExtendedCallGraph : public P4::CallGraph<T> {
 using NodesCallGraph = ExtendedCallGraph<DCGVertexType *>;
 
 /// The main class for building control flow DCG.
-class P4ProgramDCGCreator : public Inspector {
+class P4ProgramDCGCreator : public InspectorCRTP<P4ProgramDCGCreator> {
+    using Base = InspectorCRTP<P4ProgramDCGCreator>;
     NodesCallGraph *dcg;
     DCGVertexTypeSet prev;
     std::unordered_set<const DCGVertexType *> visited;
@@ -96,21 +97,22 @@ class P4ProgramDCGCreator : public Inspector {
  public:
     explicit P4ProgramDCGCreator(NodesCallGraph *dcg);
 
-    bool preorder(const IR::Annotation *annotation) override;
-    bool preorder(const IR::ConstructorCallExpression *callExpr) override;
-    bool preorder(const IR::MethodCallExpression *method) override;
-    bool preorder(const IR::MethodCallStatement *method) override;
-    bool preorder(const IR::P4Action *action) override;
-    bool preorder(const IR::P4Parser *parser) override;
-    bool preorder(const IR::P4Table *table) override;
-    bool preorder(const IR::ParserState *parserState) override;
-    bool preorder(const IR::P4Control *control) override;
-    bool preorder(const IR::P4Program *program) override;
-    bool preorder(const IR::P4ValueSet *valueSet) override;
-    bool preorder(const IR::SelectExpression *selectExpression) override;
-    bool preorder(const IR::IfStatement *ifStatement) override;
-    bool preorder(const IR::SwitchStatement *switchStatement) override;
-    bool preorder(const IR::StatOrDecl *statOrDecl) override;
+    using Base::preorder;
+    bool preorder(const IR::Annotation *annotation);
+    bool preorder(const IR::ConstructorCallExpression *callExpr);
+    bool preorder(const IR::MethodCallExpression *method);
+    bool preorder(const IR::MethodCallStatement *method);
+    bool preorder(const IR::P4Action *action);
+    bool preorder(const IR::P4Parser *parser);
+    bool preorder(const IR::P4Table *table);
+    bool preorder(const IR::ParserState *parserState);
+    bool preorder(const IR::P4Control *control);
+    bool preorder(const IR::P4Program *program);
+    bool preorder(const IR::P4ValueSet *valueSet);
+    bool preorder(const IR::SelectExpression *selectExpression);
+    bool preorder(const IR::IfStatement *ifStatement);
+    bool preorder(const IR::SwitchStatement *switchStatement);
+    bool preorder(const IR::StatOrDecl *statOrDecl);
 
  protected:
     /// Function add edge to current @vertex in DCG.

@@ -13,13 +13,15 @@ namespace P4Tools {
 /// Converts all existing Type_Varbit types in the program into a custom Extracted_Varbit type.
 /// Extracted_Varbit also contains information about the width that was assigned to the type by
 /// the extract call.
-class ConvertVarbits : public Transform {
+class ConvertVarbits : public TransformCRTP<ConvertVarbits> {
+    using Base = TransformCRTP<ConvertVarbits>;
  public:
     ConvertVarbits();
 
-    const IR::Node *postorder(IR::Type_Varbits *varbit) override;
+    using Base::postorder;
+    const IR::Node *postorder(IR::Type_Varbits *varbit);
 
-    const IR::Node *postorder(IR::Expression *expr) override;
+    const IR::Node *postorder(IR::Expression *expr);
 };
 
 }  // namespace P4Tools

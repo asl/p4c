@@ -252,6 +252,8 @@ class Constant : Literal {
         return Util::toString(value, width, sign, base);
     }
     visit_children { v.visit(type, "type"); }
+    fill_children { out.add_children(type, "type"); }
+    update_children { repl.update_node_fields(type); }
 }
 
 class BoolLiteral : Literal {
@@ -358,6 +360,12 @@ class Mux : Operation_Ternary {
     visit_children {
         v.visit(e0, "e0");
         SplitFlowVisit<Expression>(v, e1, e2).run_visit(); }
+    fill_children {
+        out.add_children(e0, "e0");
+        out.add_children<GroupTraversalKind::SplitFlow>(e1, e2); }
+    update_children {
+        repl.update_node_fields(e0);
+        repl.update_node_fields(e1, e2); }
     Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
 }
 
@@ -395,6 +403,12 @@ class SelectExpression : Expression {
     visit_children {
         v.visit(select, "select");
         SplitFlowVisitVector<SelectCase>(v, selectCases).run_visit(); }
+    fill_children {
+        out.add_children(select, "select");
+        selectCases.fill_children(out); }
+    update_children {
+        repl.update_node_fields(select);
+        selectCases.update_children(repl); }
 }
 
 class MethodCallExpression : Expression {

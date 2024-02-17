@@ -65,8 +65,11 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(),
     return FrontendTestCase::create(source, CompilerOptions::FrontendVersion::P4_16);
 }
 
-class CountAssignmentStatements : public Inspector {
+class CountAssignmentStatements : public InspectorCRTP<CountAssignmentStatements> {
+    using Base = InspectorCRTP<CountAssignmentStatements>;
+    friend Base;
     int _as_total = 0;
+    using Base::preorder;
     bool preorder(const IR::AssignmentStatement *) {
         _as_total++;
         return true;

@@ -45,7 +45,8 @@ class PNAEbpfGenerator;
 /**
  * Backend code generation from midend IR
  */
-class ConvertToBackendIR : public Inspector {
+class ConvertToBackendIR : public InspectorCRTP<ConvertToBackendIR> {
+    using Base = InspectorCRTP<ConvertToBackendIR>;
  public:
     const IR::ToplevelBlock *tlb;
     IR::TCPipeline *tcPipeline;
@@ -69,10 +70,12 @@ class ConvertToBackendIR : public Inspector {
         : tlb(tlb), tcPipeline(pipe), refMap(refMap), typeMap(typeMap), options(options) {}
     void setPipelineName();
     cstring getPipelineName() { return pipelineName; };
-    bool preorder(const IR::P4Program *p) override;
-    void postorder(const IR::P4Action *a) override;
-    void postorder(const IR::P4Table *t) override;
-    void postorder(const IR::P4Program *p) override;
+    using Base::preorder;
+    using Base::postorder;
+    bool preorder(const IR::P4Program *p);
+    void postorder(const IR::P4Action *a);
+    void postorder(const IR::P4Table *t);
+    void postorder(const IR::P4Program *p);
     bool isDuplicateOrNoAction(const IR::P4Action *action);
     void updateDefaultHitAction(const IR::P4Table *t, IR::TCTable *tdef);
     void updateDefaultMissAction(const IR::P4Table *t, IR::TCTable *tdef);

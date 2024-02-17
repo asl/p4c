@@ -117,7 +117,8 @@ class PSAArchXDP : public PSAEbpfGenerator {
     void emitDummyProgram(CodeBuilder *builder) const;
 };
 
-class ConvertToEbpfPSA : public Transform {
+class ConvertToEbpfPSA : public TransformCRTP<ConvertToEbpfPSA> {
+    using Base = TransformCRTP<ConvertToEbpfPSA>;
     const EbpfOptions &options;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
@@ -128,12 +129,14 @@ class ConvertToEbpfPSA : public Transform {
         : options(options), typemap(typemap), refmap(refmap), ebpf_psa_arch(nullptr) {}
 
     const PSAEbpfGenerator *build(const IR::ToplevelBlock *prog);
-    const IR::Node *preorder(IR::ToplevelBlock *p) override;
+    using Base::preorder;
+    const IR::Node *preorder(IR::ToplevelBlock *p);
 
     const PSAEbpfGenerator *getPSAArchForEBPF() { return ebpf_psa_arch; }
 };
 
-class ConvertToEbpfPipeline : public Inspector {
+class ConvertToEbpfPipeline : public InspectorCRTP<ConvertToEbpfPipeline> {
+    using Base = InspectorCRTP<ConvertToEbpfPipeline>;
     const cstring name;
     const pipeline_type type;
     const EbpfOptions &options;
@@ -159,11 +162,13 @@ class ConvertToEbpfPipeline : public Inspector {
           refmap(refmap),
           pipeline(nullptr) {}
 
-    bool preorder(const IR::PackageBlock *block) override;
+    using Base::preorder;
+    bool preorder(const IR::PackageBlock *block);
     EBPFPipeline *getEbpfPipeline() { return pipeline; }
 };
 
-class ConvertToEBPFParserPSA : public Inspector {
+class ConvertToEBPFParserPSA : public InspectorCRTP<ConvertToEBPFParserPSA> {
+    using Base = InspectorCRTP<ConvertToEBPFParserPSA>;
     EBPF::EBPFProgram *program;
     pipeline_type type;
 
@@ -174,12 +179,14 @@ class ConvertToEBPFParserPSA : public Inspector {
     ConvertToEBPFParserPSA(EBPF::EBPFProgram *program, P4::TypeMap *typemap, pipeline_type type)
         : program(program), type(type), typemap(typemap), parser(nullptr) {}
 
-    bool preorder(const IR::ParserBlock *prsr) override;
-    bool preorder(const IR::P4ValueSet *pvs) override;
+    using Base::preorder;
+    bool preorder(const IR::ParserBlock *prsr);
+    bool preorder(const IR::P4ValueSet *pvs);
     EBPF::EBPFParser *getEBPFParser() { return parser; }
 };
 
-class ConvertToEBPFControlPSA : public Inspector {
+class ConvertToEBPFControlPSA : public InspectorCRTP<ConvertToEBPFControlPSA> {
+    using Base = InspectorCRTP<ConvertToEBPFControlPSA>;
     EBPF::EBPFProgram *program;
     pipeline_type type;
     EBPF::EBPFControlPSA *control;
@@ -196,17 +203,19 @@ class ConvertToEBPFControlPSA : public Inspector {
           parserHeaders(parserHeaders),
           refmap(refmap) {}
 
-    bool preorder(const IR::TableBlock *) override;
-    bool preorder(const IR::ControlBlock *) override;
-    bool preorder(const IR::Declaration_Variable *) override;
-    bool preorder(const IR::Member *m) override;
-    bool preorder(const IR::IfStatement *a) override;
-    bool preorder(const IR::ExternBlock *instance) override;
+    using Base::preorder;
+    bool preorder(const IR::TableBlock *);
+    bool preorder(const IR::ControlBlock *);
+    bool preorder(const IR::Declaration_Variable *);
+    bool preorder(const IR::Member *m);
+    bool preorder(const IR::IfStatement *a);
+    bool preorder(const IR::ExternBlock *instance);
 
     EBPF::EBPFControlPSA *getEBPFControl() { return control; }
 };
 
-class ConvertToEBPFDeparserPSA : public Inspector {
+class ConvertToEBPFDeparserPSA : public InspectorCRTP<ConvertToEBPFDeparserPSA> {
+    using Base = InspectorCRTP<ConvertToEBPFDeparserPSA>;
     EBPF::EBPFProgram *program;
     pipeline_type pipelineType;
 
@@ -223,8 +232,9 @@ class ConvertToEBPFDeparserPSA : public Inspector {
           istd(istd),
           deparser(nullptr) {}
 
-    bool preorder(const IR::ControlBlock *) override;
-    bool preorder(const IR::Declaration_Instance *) override;
+    using Base::preorder;
+    bool preorder(const IR::ControlBlock *);
+    bool preorder(const IR::Declaration_Instance *);
     EBPF::EBPFDeparserPSA *getEBPFDeparser() { return deparser; }
 };
 

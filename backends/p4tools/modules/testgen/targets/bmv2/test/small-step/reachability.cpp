@@ -95,10 +95,12 @@ const IR::Node *getSpecificNode(std::vector<const IR::IDeclaration *> *v, cstrin
 }
 
 template <class T>
-class NodeFinder : public Inspector {
+class NodeFinder : public InspectorCRTP<NodeFinder<T>> {
+    using Base = InspectorCRTP<NodeFinder<T>>;
  public:
     std::vector<const T *> v;
-    bool preorder(const T *t) override {
+    using Base::preorder;
+    bool preorder(const T *t) {
         v.push_back(t);
         return false;
     }

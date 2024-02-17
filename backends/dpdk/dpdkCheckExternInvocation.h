@@ -144,7 +144,8 @@ class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
  * @brief Class which chooses the correct class for checking the constraints for invocations
  *        of extern methods and functions depending on the architecture.
  */
-class CheckExternInvocation : public Inspector {
+class CheckExternInvocation : public InspectorCRTP<CheckExternInvocation> {
+    using Base = InspectorCRTP<CheckExternInvocation>;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     DpdkProgramStructure *structure;
@@ -154,6 +155,7 @@ class CheckExternInvocation : public Inspector {
                           DpdkProgramStructure *structure)
         : refMap(refMap), typeMap(typeMap), structure(structure) {}
 
+    using Base::preorder;
     bool preorder(const IR::P4Program *program) {
         if (structure->isPNA()) {
             LOG1("Checking extern invocations for PNA architecture.");
