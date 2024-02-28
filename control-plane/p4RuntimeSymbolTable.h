@@ -187,10 +187,6 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
         return constructId(value);
     }
 
-    // The hash function used for resource names.
-    // Taken from: https://en.wikipedia.org/wiki/Jenkins_hash_function
-    static uint32_t jenkinsOneAtATimeHash(const char *key, size_t length);
-
     // All the ids we've assigned so far. Used to avoid id collisions; this is
     // especially crucial since ids can be set manually via the '@id'
     // annotation.

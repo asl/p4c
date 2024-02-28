@@ -18,6 +18,7 @@ limitations under the License.
 #include <boost/algorithm/string/split.hpp>
 
 #include "lib/cstring.h"
+#include "lib/hash.h"
 #include "lib/iterator_range.h"
 #include "p4RuntimeArchHandler.h"
 #include "typeSpecConverter.h"
@@ -254,7 +255,7 @@ void P4::ControlPlaneAPI::P4RuntimeSymbolTable::computeIdsForSymbols(P4RuntimeSy
     for (const auto &mapping : nameToIteratorMap) {
         const cstring name = mapping.first;
         const auto iterator = mapping.second;
-        const uint32_t nameId = jenkinsOneAtATimeHash(name.c_str(), name.size());
+        const uint32_t nameId = Util::Hash{}(name);
 
         // Hash the name and construct an id. Because linear probing is used
         // to resolve hash collisions, the id that we select depends on the
@@ -273,21 +274,6 @@ void P4::ControlPlaneAPI::P4RuntimeSymbolTable::computeIdsForSymbols(P4RuntimeSy
         assignedIds.insert(*id);
         iterator->second = *id;
     }
-}
-
-uint32_t P4::ControlPlaneAPI::P4RuntimeSymbolTable::jenkinsOneAtATimeHash(const char *key,
-                                                                          size_t length) {
-    size_t i = 0;
-    uint32_t hash = 0;
-    while (i != length) {
-        hash += uint8_t(key[i++]);
-        hash += hash << 10;
-        hash ^= hash >> 6;
-    }
-    hash += hash << 3;
-    hash ^= hash >> 11;
-    hash += hash << 15;
-    return hash;
 }
 
 cstring P4::ControlPlaneAPI::P4SymbolSuffixSet::shortestUniqueSuffix(const cstring &symbol) const {
