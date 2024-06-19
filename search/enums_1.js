@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['p4runtimesymboltype',['P4RuntimeSymbolType',['../namespace_p4_1_1_control_plane_a_p_i.html#a3b04fd588422467193cae4ccaf6df88d',1,'P4::ControlPlaneAPI']]]
+  ['clonetype_0',['CloneType',['../class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_b_mv2_constants.html#acb7664f5f63d38f4149489d3ad1fc817',1,'P4Tools::P4Testgen::Bmv2::BMv2Constants']]]
 ];
