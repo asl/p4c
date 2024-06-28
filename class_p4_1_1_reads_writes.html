@@ -11,7 +11,21 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
-<script type="text/javascript" src="clipboard.js"></script>
+<!--  Add link to paragraphs   -->
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript">
+  DoxygenAwesomeParagraphLink.init()
+</script>
+<!-- Add copy button to code fragments  -->
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript">
+  DoxygenAwesomeFragmentCopyButton.init()
+</script>
+<!-- Add dark mode toggle -->
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript">
+  DoxygenAwesomeDarkModeToggle.init()
+</script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="navtreedata.js"></script>
 <script type="text/javascript" src="navtree.js"></script>
@@ -21,7 +35,7 @@
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
-<link href="p4c.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -110,6 +124,8 @@ $(function(){initNavTree('class_p4_1_1_reads_writes.html',''); initResizable(tru
 
 <p>Computes the <a class="el" href="class_p4_1_1_set_of_locations.html">SetOfLocations</a> read and written by an expression.  
  <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="alias_8h_source.html">alias.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for P4::ReadsWrites:</div>
 <div class="dyncontent">
@@ -133,6 +149,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const 
 <tr class="memitem:a1f17131616ddf86546db390db1e9f2c3" id="r_a1f17131616ddf86546db390db1e9f2c3"><td class="memItemLeft" align="right" valign="top"><a id="a1f17131616ddf86546db390db1e9f2c3" name="a1f17131616ddf86546db390db1e9f2c3"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::ConstructorCallExpression *expression) override</td></tr>
 <tr class="separator:a1f17131616ddf86546db390db1e9f2c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad856f552dd51081ad5e8628ca151e3fa" id="r_ad856f552dd51081ad5e8628ca151e3fa"><td class="memItemLeft" align="right" valign="top"><a id="ad856f552dd51081ad5e8628ca151e3fa" name="ad856f552dd51081ad5e8628ca151e3fa"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::DefaultExpression *expression) override</td></tr>
+<tr class="separator:ad856f552dd51081ad5e8628ca151e3fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b1b5f3f9bdf1650fbc308d9d7d1ffc8" id="r_a8b1b5f3f9bdf1650fbc308d9d7d1ffc8"><td class="memItemLeft" align="right" valign="top"><a id="a8b1b5f3f9bdf1650fbc308d9d7d1ffc8" name="a8b1b5f3f9bdf1650fbc308d9d7d1ffc8"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::HeaderStackExpression *expression) override</td></tr>
 <tr class="separator:a8b1b5f3f9bdf1650fbc308d9d7d1ffc8"><td class="memSeparator" colspan="2">&#160;</td></tr>

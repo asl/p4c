@@ -11,7 +11,21 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
-<script type="text/javascript" src="clipboard.js"></script>
+<!--  Add link to paragraphs   -->
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript">
+  DoxygenAwesomeParagraphLink.init()
+</script>
+<!-- Add copy button to code fragments  -->
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript">
+  DoxygenAwesomeFragmentCopyButton.init()
+</script>
+<!-- Add dark mode toggle -->
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript">
+  DoxygenAwesomeDarkModeToggle.init()
+</script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="navtreedata.js"></script>
 <script type="text/javascript" src="navtree.js"></script>
@@ -21,7 +35,7 @@
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
-<link href="p4c.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -104,15 +118,15 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2p4fmt_2_r
   <div class="headertitle"><div class="title">p4fmt (P4 Formatter)</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md111"></a> p4fmt is a WIP formatter for <a class="el" href="namespace_p4.html">P4</a>. It's in a highly experimental phase and, not yet stable/reliable for general use. Contributions and feedbacks from the community would be highly appreciated.</p>
-<h1><a class="anchor" id="autotoc_md112"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md184"></a> p4fmt is a WIP formatter for <a class="el" href="namespace_p4.html">P4</a>. It's in a highly experimental phase and, not yet stable/reliable for general use. Contributions and feedbacks from the community would be highly appreciated.</p>
+<h1><a class="anchor" id="autotoc_md185"></a>
 Build</h1>
 <ul>
 <li>Setup P4C correctly, from <a href="https://github.com/p4lang/p4c#dependencies">here</a>.</li>
 <li>Follow the instructions here to <a href="https://github.com/p4lang/p4c#installing-p4c-from-source">build</a>.</li>
 </ul>
 <p>Later <code>p4fmt</code> executable can be found inside the <code>p4c/build/</code> dir, and can be invoked as <code>./build/p4fmt</code> from p4c's root dir.</p>
-<h1><a class="anchor" id="autotoc_md113"></a>
+<h1><a class="anchor" id="autotoc_md186"></a>
 Usage</h1>
 <ul>
 <li><p class="startli">Takes an output file with a <code>-o</code> flag and writes to it.</p>
