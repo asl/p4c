@@ -102,30 +102,39 @@ var NAVTREE =
     [ "P4C Intermediate Representation (IR) Classes", "irdefs.html", null ],
     [ "Changelog", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html", [
       [ "Semantic Versioning", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#semantic-versioning", null ],
-      [ "Release v1.2.4.13 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12413-viewhttpsgithubcomp4langp4cpull4767", [
+      [ "Release v1.2.4.14 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12414-viewhttpsgithubcomp4langp4cpull4844", [
         [ "Breaking Changes 🛠", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#breaking-changes-", null ],
+        [ "P4 Specification Implementation", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#p4-specification-implementation", null ],
         [ "Changes to the Compiler Core", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-compiler-core", null ],
+        [ "Changes to the BMv2 Back Ends", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-bmv2-back-ends", null ],
         [ "Changes to the TC Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end", null ],
-        [ "Changes to the DPDK Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-dpdk-back-end", null ],
         [ "Changes to the P4Tools Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-p4tools-back-end", null ],
         [ "Other Changes", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#other-changes", null ]
       ] ],
-      [ "Release v1.2.4.12 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12412-viewhttpsgithubcomp4langp4cpull4699", [
+      [ "Release v1.2.4.13 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12413-viewhttpsgithubcomp4langp4cpull4767", [
         [ "Breaking Changes 🛠", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#breaking-changes--1", null ],
-        [ "P4 Specification Implementation", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#p4-specification-implementation", null ],
         [ "Changes to the Compiler Core", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-compiler-core-1", null ],
-        [ "Changes to the Control Plane", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-control-plane", null ],
-        [ "Changes to the eBPF Back Ends", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-ebpf-back-ends", null ],
         [ "Changes to the TC Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end-1", null ],
+        [ "Changes to the DPDK Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-dpdk-back-end", null ],
         [ "Changes to the P4Tools Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-p4tools-back-end-1", null ],
         [ "Other Changes", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#other-changes-1", null ]
       ] ],
-      [ "Release v1.2.4.11 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12411-viewhttpsgithubcomp4langp4cpull4646", [
+      [ "Release v1.2.4.12 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12412-viewhttpsgithubcomp4langp4cpull4699", [
+        [ "Breaking Changes 🛠", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#breaking-changes--2", null ],
+        [ "P4 Specification Implementation", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#p4-specification-implementation-1", null ],
         [ "Changes to the Compiler Core", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-compiler-core-2", null ],
-        [ "Changes to the eBPF Back Ends", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-ebpf-back-ends-1", null ],
+        [ "Changes to the Control Plane", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-control-plane", null ],
+        [ "Changes to the eBPF Back Ends", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-ebpf-back-ends", null ],
         [ "Changes to the TC Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end-2", null ],
         [ "Changes to the P4Tools Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-p4tools-back-end-2", null ],
         [ "Other Changes", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#other-changes-2", null ]
+      ] ],
+      [ "Release v1.2.4.11 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12411-viewhttpsgithubcomp4langp4cpull4646", [
+        [ "Changes to the Compiler Core", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-compiler-core-3", null ],
+        [ "Changes to the eBPF Back Ends", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-ebpf-back-ends-1", null ],
+        [ "Changes to the TC Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-tc-back-end-3", null ],
+        [ "Changes to the P4Tools Back End", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#changes-to-the-p4tools-back-end-3", null ],
+        [ "Other Changes", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#other-changes-3", null ]
       ] ],
       [ "Release v1.2.4.10 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v12410-viewhttpsgithubcomp4langp4cpull4587", null ],
       [ "Release v1.2.4.9 [view]", "md__2home_2runner_2work_2p4c_2p4c_2_c_h_a_n_g_e_l_o_g.html#release-v1249-viewhttpsgithubcomp4langp4cpull4490", null ],
@@ -356,6 +365,8 @@ var NAVTREE =
     [ "uBPF Backend testing", "md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2tests_2_r_e_a_d_m_e.html", [
       [ "Steps to run tests", "md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2tests_2_r_e_a_d_m_e.html#steps-to-run-tests", null ]
     ] ],
+    [ "BMv2 \"pna_nic\" Backend", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2pna__nic_2_r_e_a_d_m_e.html", null ],
+    [ "portable_common", "md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2portable__common_2_r_e_a_d_m_e.html", null ],
     [ "Contribute to the P4 Compiler Project", "md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html", [
       [ "Contributing License", "md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html#contributing-license", null ],
       [ "Coding Standard Philosophy", "md__2home_2runner_2work_2p4c_2p4c_2_c_o_n_t_r_i_b_u_t_i_n_g.html#coding-standard-philosophy", null ],
@@ -404,25 +415,25 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"class_d_p_d_k_1_1_dpdk_asm_optimization.html",
-"class_e_b_p_f_1_1_e_b_p_f_digest_p_s_a_value_visitor.html#a864dfee7d3692324fc53e84fd568ee09",
-"class_e_b_p_f_1_1_p_s_a_ebpf_generator.html#ae389ba18593ad2362e74c36d22db1b43",
-"class_p4_1_1_choose_error_representation.html#a62c172ace046806561c64c7206955d61",
-"class_p4_1_1_direct_meter_map.html#a5b36a4f0f1c5f34e9e011c68ba2ab800",
-"class_p4_1_1_flatten_header_union.html",
-"class_p4_1_1_program_structure.html#a6d2ae70bf6a002aad26b8aba05905c92",
-"class_p4_1_1_storage_location.html#aa58926a1f7dfa776c16b0636ae3693c5",
-"class_p4_tools_1_1_abstract_execution_state.html#a8424247606da28357a59cc3e81a06851",
-"class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_action_profile.html",
-"class_p4_tools_1_1_p4_testgen_1_1_execution_state_1_1_stack_frame.html",
-"class_p4_tools_1_1_p4_testgen_1_1_test_back_end.html#ad89141c9a6fea3b9307df8ecc3d18b32",
-"class_p4_tools_1_1_z3_solver.html#aadd1138a966a3341092af10c7ba8b8df",
-"class_test_1_1_s_t_f_test.html",
-"classn4.html",
-"md__2home_2runner_2work_2p4c_2p4c_2backends_2ebpf_2psa_2_r_e_a_d_m_e.html#prerequisites-1",
-"namespace_p4_tools.html#a937e208f74ad1f4d660f8a2bd27bf217",
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_p_n_a_01_4.html",
-"struct_util_1_1_hasher_3_01std_1_1string_01_4.html"
+"class_control_flow_visitor.html#a5d515c1f31e8edf330aee71aba43dc64",
+"class_d_p_d_k_1_1_shorten_token_length.html",
+"class_e_b_p_f_1_1_e_b_p_f_register_p_s_a.html",
+"class_json_number.html",
+"class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_iface.html#ab0802484a38a3541c7b0b0ef646d4441",
+"class_p4_1_1_do_replace_tuples.html",
+"class_p4_1_1_localize_all_actions.html",
+"class_p4_1_1_remove_unused_h_u_declarations.html",
+"class_p4_1_1_type_inference.html#abda500d19fdb4a79735326edc0625b67",
+"class_p4_tools_1_1_compiler_target.html#ad484e1d0e41d71477d7832e0635fc0f9",
+"class_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_range.html#a82f3fd491137f3a9bafaa2373e459408",
+"class_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_register_value.html#a9344233f5d94f5bc59fa9d3bb67ef3a4",
+"class_p4_tools_1_1_symbolic_env.html#a5a4fea2189fac9005cbc6e87d5a35477",
+"class_parser_options.html#aac527390c1cba6eb2acc56a0a5409498",
+"class_util_1_1_i_has_source_info.html",
+"md_00__revision__history.html",
+"md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2docs_2_e_x_a_m_p_l_e_s.html#ipv6-ipv6-actionsp4",
+"struct_closed_range.html#acbd529d25d50502cc83eec7527697d2b",
+"struct_p4_1_1_inline_summary_1_1_per_caller_1_1key__hash.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
