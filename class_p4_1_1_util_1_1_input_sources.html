@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4C: P4::Util::InputSources Class Reference</title>
+<title>P4 Compiler Documentation (P4C): P4::Util::InputSources Class Reference</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -127,7 +127,7 @@ $(function(){initNavTree('class_p4_1_1_util_1_1_input_sources.html',''); initRes
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="copy_src_info_8h_source.html">copySrcInfo.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="source__file_8h_source.html">source_file.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -150,11 +150,11 @@ unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>getCurrentLineNum
 <tr class="memitem:a7525a025165634f5d587553d574f3515" id="r_a7525a025165634f5d587553d574f3515"><td class="memItemLeft" align="right" valign="top"><a id="a7525a025165634f5d587553d574f3515" name="a7525a025165634f5d587553d574f3515"></a>
 std::string_view&#160;</td><td class="memItemRight" valign="bottom"><b>getLine</b> (unsigned lineNumber) const</td></tr>
 <tr class="separator:a7525a025165634f5d587553d574f3515"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abbcc321027500c69fc74dc05092fbbcc" id="r_abbcc321027500c69fc74dc05092fbbcc"><td class="memItemLeft" align="right" valign="top"><a id="abbcc321027500c69fc74dc05092fbbcc" name="abbcc321027500c69fc74dc05092fbbcc"></a>
-<a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getSourceFragment</b> (const <a class="el" href="class_p4_1_1_util_1_1_source_info.html">SourceInfo</a> &amp;position, bool useMarker) const</td></tr>
-<tr class="separator:abbcc321027500c69fc74dc05092fbbcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adffdd2e42128d23dc38dc35fe0f0d3d7" id="r_adffdd2e42128d23dc38dc35fe0f0d3d7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adffdd2e42128d23dc38dc35fe0f0d3d7">getSourceFragment</a> (const <a class="el" href="class_p4_1_1_util_1_1_source_position.html">SourcePosition</a> &amp;position, bool useMarker) const</td></tr>
-<tr class="separator:adffdd2e42128d23dc38dc35fe0f0d3d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad10d1317aa1b2bc0e184a1208d7d6e81" id="r_ad10d1317aa1b2bc0e184a1208d7d6e81"><td class="memItemLeft" align="right" valign="top"><a id="ad10d1317aa1b2bc0e184a1208d7d6e81" name="ad10d1317aa1b2bc0e184a1208d7d6e81"></a>
+<a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getSourceFragment</b> (const <a class="el" href="class_p4_1_1_util_1_1_source_info.html">SourceInfo</a> &amp;position, int trimWidth, bool useMarker) const</td></tr>
+<tr class="separator:ad10d1317aa1b2bc0e184a1208d7d6e81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c1e3d256f0e882905a28bf3b22ddac9" id="r_a3c1e3d256f0e882905a28bf3b22ddac9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3c1e3d256f0e882905a28bf3b22ddac9">getSourceFragment</a> (const <a class="el" href="class_p4_1_1_util_1_1_source_position.html">SourcePosition</a> &amp;position, int trimWidth, bool useMarker) const</td></tr>
+<tr class="separator:a3c1e3d256f0e882905a28bf3b22ddac9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac950c54b6860d8f73b2295300abfedf0" id="r_ac950c54b6860d8f73b2295300abfedf0"><td class="memItemLeft" align="right" valign="top"><a id="ac950c54b6860d8f73b2295300abfedf0" name="ac950c54b6860d8f73b2295300abfedf0"></a>
 <a class="el" href="struct_p4_1_1_util_1_1_source_file_line.html">SourceFileLine</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getSourceLine</b> (unsigned line) const</td></tr>
 <tr class="memdesc:ac950c54b6860d8f73b2295300abfedf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Original source line that produced the line with the specified number. <br /></td></tr>
@@ -164,21 +164,20 @@ unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>lineCount</b> () 
 <tr class="separator:a4d45fa63838e55a46aca8b232538da10"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa2de986e7427c7367b745f4951173bce" id="r_aa2de986e7427c7367b745f4951173bce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa2de986e7427c7367b745f4951173bce">mapLine</a> (std::string_view file, unsigned originalSourceLineNo)</td></tr>
 <tr class="separator:aa2de986e7427c7367b745f4951173bce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad44491cc150aa727e2dc7252ae59984d" id="r_ad44491cc150aa727e2dc7252ae59984d"><td class="memItemLeft" align="right" valign="top"><a id="ad44491cc150aa727e2dc7252ae59984d" name="ad44491cc150aa727e2dc7252ae59984d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>seal</b> ()</td></tr>
-<tr class="memdesc:ad44491cc150aa727e2dc7252ae59984d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevents further changes; currently not used. <br /></td></tr>
+<tr class="memitem:ad44491cc150aa727e2dc7252ae59984d" id="r_ad44491cc150aa727e2dc7252ae59984d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad44491cc150aa727e2dc7252ae59984d">seal</a> ()</td></tr>
+<tr class="memdesc:ad44491cc150aa727e2dc7252ae59984d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevents further changes; currently not used.  <br /></td></tr>
 <tr class="separator:ad44491cc150aa727e2dc7252ae59984d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54d7ed89270a8d3b78c57a74310c8a96" id="r_a54d7ed89270a8d3b78c57a74310c8a96"><td class="memItemLeft" align="right" valign="top"><a id="a54d7ed89270a8d3b78c57a74310c8a96" name="a54d7ed89270a8d3b78c57a74310c8a96"></a>
 <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>toDebugString</b> () const</td></tr>
 <tr class="separator:a54d7ed89270a8d3b78c57a74310c8a96"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Information about all the input sources that comprise a <a class="el" href="namespace_p4.html" title="TODO: this is not really specific to BMV2, it should reside somewhere else.">P4</a> program that is being compiled. The inputSources can be seen as a simple file produced by the preprocessor, but also as a set of fragments of input files which were stitched by the preprocessor.</p>
+<div class="textblock"><p>Information about all the input sources that comprise a P4 program that is being compiled. The inputSources can be seen as a simple file produced by the preprocessor, but also as a set of fragments of input files which were stitched by the preprocessor.</p>
 <p>The mutable part of the API is tailored for interaction with the lexer. After the lexer is done this object can be "sealed" and never changes again.</p>
 <p>This class implements a singleton pattern: there is a single instance of this class. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="adffdd2e42128d23dc38dc35fe0f0d3d7" name="adffdd2e42128d23dc38dc35fe0f0d3d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adffdd2e42128d23dc38dc35fe0f0d3d7">&#9670;&#160;</a></span>getSourceFragment()</h2>
+<a id="a3c1e3d256f0e882905a28bf3b22ddac9" name="a3c1e3d256f0e882905a28bf3b22ddac9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c1e3d256f0e882905a28bf3b22ddac9">&#9670;&#160;</a></span>getSourceFragment()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -187,6 +186,11 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>seal</b> ()</td></tr>
           <td class="memname"><a class="el" href="class_p4_1_1cstring.html">cstring</a> P4::Util::InputSources::getSourceFragment </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="class_p4_1_1_util_1_1_source_position.html">SourcePosition</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>position</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>trimWidth</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -218,6 +222,26 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>seal</b> ()</td></tr>
       </table>
 </div><div class="memdoc">
 <p>Map the next line in the file to the line with number 'originalSourceLine' from file 'file'. </p>
+
+</div>
+</div>
+<a id="ad44491cc150aa727e2dc7252ae59984d" name="ad44491cc150aa727e2dc7252ae59984d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad44491cc150aa727e2dc7252ae59984d">&#9670;&#160;</a></span>seal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4::Util::InputSources::seal </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Prevents further changes; currently not used. </p>
+<p>prevent further changes </p>
 
 </div>
 </div>
