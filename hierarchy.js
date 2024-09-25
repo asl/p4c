@@ -252,6 +252,7 @@ var hierarchy =
         [ "P4::FindGlobalActionUses", "class_p4_1_1_find_global_action_uses.html", null ],
         [ "P4::FindRepeatedActionUses", "class_p4_1_1_find_repeated_action_uses.html", null ],
         [ "P4::FindSpecializations", "class_p4_1_1_find_specializations.html", null ],
+        [ "P4::FunctionsInliner::isLocalExpression", "class_p4_1_1_functions_inliner_1_1is_local_expression.html", null ],
         [ "P4::HasTableApply", "class_p4_1_1_has_table_apply.html", null ],
         [ "P4::InstantiateDirectCalls", "class_p4_1_1_instantiate_direct_calls.html", null ],
         [ "P4::KeySideEffect", "class_p4_1_1_key_side_effect.html", [
@@ -1005,8 +1006,10 @@ var hierarchy =
             [ "P4::ActionCall", "class_p4_1_1_action_call.html", null ],
             [ "P4::ApplyMethod", "class_p4_1_1_apply_method.html", null ],
             [ "P4::BuiltInMethod", "class_p4_1_1_built_in_method.html", null ],
-            [ "P4::ExternFunction", "class_p4_1_1_extern_function.html", null ],
-            [ "P4::ExternMethod", "class_p4_1_1_extern_method.html", null ],
+            [ "P4::ExternCall", "class_p4_1_1_extern_call.html", [
+              [ "P4::ExternFunction", "class_p4_1_1_extern_function.html", null ],
+              [ "P4::ExternMethod", "class_p4_1_1_extern_method.html", null ]
+            ] ],
             [ "P4::FunctionCall", "class_p4_1_1_function_call.html", null ]
           ] ]
         ] ],
@@ -1141,6 +1144,8 @@ var hierarchy =
     [ "P4::TC::KeyFieldAttributes", "struct_p4_1_1_t_c_1_1_key_field_attributes.html", null ],
     [ "P4::TC::MidEnd", "class_p4_1_1_t_c_1_1_mid_end.html", null ],
     [ "P4::TC::TableAttributes", "struct_p4_1_1_t_c_1_1_table_attributes.html", null ],
+    [ "P4::ToP4::ListPrint", "struct_p4_1_1_to_p4_1_1_list_print.html", null ],
+    [ "P4::ToP4::VecPrint", "struct_p4_1_1_to_p4_1_1_vec_print.html", null ],
     [ "P4::TypeInferenceBase::Comparison", "class_p4_1_1_type_inference_base.html#struct_p4_1_1_type_inference_base_1_1_comparison", null ],
     [ "P4::TypeUnification", "class_p4_1_1_type_unification.html", null ],
     [ "P4::UnparsedConstant", "namespace_p4.html#struct_p4_1_1_unparsed_constant", null ],
@@ -1522,6 +1527,7 @@ var hierarchy =
         [ "P4::FindTypesInLogMsgInvocationToReplace", "class_p4_1_1_find_types_in_log_msg_invocation_to_replace.html", null ],
         [ "P4::FindTypesToReplace", "class_p4_1_1_find_types_to_replace.html", null ],
         [ "P4::FindVariableValues", "class_p4_1_1_find_variable_values.html", null ],
+        [ "P4::FunctionsInliner::isLocalExpression", "class_p4_1_1_functions_inliner_1_1is_local_expression.html", null ],
         [ "P4::HSIndexFinder", "class_p4_1_1_h_s_index_finder.html", null ],
         [ "P4::HasExits", "class_p4_1_1_has_exits.html", null ],
         [ "P4::HasTableApply", "class_p4_1_1_has_table_apply.html", null ],

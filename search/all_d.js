@@ -55,7 +55,7 @@ var searchData=
   ['developers_52',['Core Developers',['../p4tools.html#core-developers',1,'']]],
   ['development_20style_53',['Development Style',['../p4tools.html#development-style',1,'']]],
   ['development_20tools_54',['Development tools',['../getting_started.html#development-tools',1,'']]],
-  ['diagnose_55',['diagnose',['../class_p4_1_1_error_reporter.html#a4a873bca1529eee3407ac37cf1a0e07f',1,'P4::ErrorReporter::diagnose()'],['../namespace_p4.html#af5c8aefbbccc22f92e579a0d3dd652a2',1,'P4::diagnose(DiagnosticAction defaultAction, const char *diagnosticName, const char *format, const char *suffix, Args &amp;&amp;...args)']]],
+  ['diagnose_55',['diagnose',['../class_p4_1_1_error_reporter.html#a4a873bca1529eee3407ac37cf1a0e07f',1,'P4::ErrorReporter']]],
   ['diagnosticaction_56',['DiagnosticAction',['../namespace_p4.html#a3f204513d8ef11b57cae0f30becb863d',1,'P4']]],
   ['diagnosticcount_57',['diagnosticCount',['../namespace_p4.html#a61e4c327119249aa7fb8cdf771f2dc74',1,'P4']]],
   ['diagnosticcountinfo_58',['DiagnosticCountInfo',['../struct_p4_1_1_diagnostic_count_info.html',1,'P4::DiagnosticCountInfo'],['../struct_p4_1_1_diagnostic_count_info.html#afd8795dc3d740785fdd73c245e5337d1',1,'P4::DiagnosticCountInfo::DiagnosticCountInfo()']]],
@@ -169,9 +169,10 @@ var searchData=
   ['droppedpacketonly_166',['droppedPacketOnly',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a0495aa45fafbc14c0b183a0fe0cee05e',1,'P4::P4Tools::P4Testgen::TestgenOptions']]],
   ['dummynode_167',['DummyNode',['../class_p4_1_1_b_m_v2_1_1_c_f_g_1_1_dummy_node.html',1,'P4::BMV2::CFG']]],
   ['dump_168',['Dump',['../class_p4_1_1_dump.html',1,'P4']]],
-  ['dumpfolder_169',['dumpFolder',['../class_p4_1_1_parser_options.html#ac8beada7861751ebe6700edc717e7c8b',1,'P4::ParserOptions']]],
-  ['dumppass_170',['dumpPass',['../class_p4_1_1_parser_options.html#a665e3adf6f5e083e426e261f9be97e66',1,'P4::ParserOptions']]],
-  ['dumps_171',['Crash dumps',['../getting_started.html#crash-dumps',1,'']]],
-  ['duplicateactions_172',['DuplicateActions',['../class_p4_1_1_duplicate_actions.html',1,'P4']]],
-  ['dynamicvisitor_173',['DynamicVisitor',['../class_p4_1_1_dynamic_visitor.html',1,'P4']]]
+  ['dump_169',['dump',['../class_p4_1_1_to_p4.html#a0f24f5f607b85aef874c876844bea8a3',1,'P4::ToP4']]],
+  ['dumpfolder_170',['dumpFolder',['../class_p4_1_1_parser_options.html#ac8beada7861751ebe6700edc717e7c8b',1,'P4::ParserOptions']]],
+  ['dumppass_171',['dumpPass',['../class_p4_1_1_parser_options.html#a665e3adf6f5e083e426e261f9be97e66',1,'P4::ParserOptions']]],
+  ['dumps_172',['Crash dumps',['../getting_started.html#crash-dumps',1,'']]],
+  ['duplicateactions_173',['DuplicateActions',['../class_p4_1_1_duplicate_actions.html',1,'P4']]],
+  ['dynamicvisitor_174',['DynamicVisitor',['../class_p4_1_1_dynamic_visitor.html',1,'P4']]]
 ];
