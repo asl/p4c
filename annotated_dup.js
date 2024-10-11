@@ -407,6 +407,13 @@ var annotated_dup =
         [ "TempIndent", "class_p4_1_1_indent_ctl_1_1_temp_indent.html", null ]
       ] ],
       [ "IR", null, [
+        [ "Traversal", null, [
+          [ "Detail", null, [
+            [ "Traverse", "struct_p4_1_1_i_r_1_1_traversal_1_1_detail_1_1_traverse.html", null ]
+          ] ],
+          [ "Assign", "struct_p4_1_1_i_r_1_1_traversal_1_1_assign.html", null ],
+          [ "Index", "struct_p4_1_1_i_r_1_1_traversal_1_1_index.html", null ]
+        ] ],
         [ "has_static_type_name", "struct_p4_1_1_i_r_1_1has__static__type__name.html", null ],
         [ "has_static_type_name< T, std::void_t< decltype(T::static_type_name())> >", "struct_p4_1_1_i_r_1_1has__static__type__name_3_01_t_00_01std_1_1void__t_3_01decltype_07_t_1_1static__type__name_07_08_08_4_01_4.html", null ],
         [ "ID", "struct_p4_1_1_i_r_1_1_i_d.html", "struct_p4_1_1_i_r_1_1_i_d" ],
@@ -982,6 +989,7 @@ var annotated_dup =
       [ "CheckExternInvocationCommon", "class_p4_1_1_check_extern_invocation_common.html", "class_p4_1_1_check_extern_invocation_common" ],
       [ "CheckHeaderTypes", "class_p4_1_1_check_header_types.html", null ],
       [ "CheckNamedArgs", "class_p4_1_1_check_named_args.html", null ],
+      [ "CheckShadowing", "class_p4_1_1_check_shadowing.html", null ],
       [ "CheckTableSize", "class_p4_1_1_check_table_size.html", null ],
       [ "ChooseEnumRepresentation", "class_p4_1_1_choose_enum_representation.html", null ],
       [ "ChooseErrorRepresentation", "class_p4_1_1_choose_error_representation.html", "class_p4_1_1_choose_error_representation" ],
@@ -990,6 +998,7 @@ var annotated_dup =
       [ "CloneExpressions", "class_p4_1_1_clone_expressions.html", null ],
       [ "CloneVariableDeclarations", "class_p4_1_1_clone_variable_declarations.html", null ],
       [ "ClosedRange", "struct_p4_1_1_closed_range.html", "struct_p4_1_1_closed_range" ],
+      [ "CollectUsedDeclarations", "class_p4_1_1_collect_used_declarations.html", null ],
       [ "CompileContextStack", "struct_p4_1_1_compile_context_stack.html", null ],
       [ "CompilerOptions", "class_p4_1_1_compiler_options.html", "class_p4_1_1_compiler_options" ],
       [ "CompileTimeOperations", "class_p4_1_1_compile_time_operations.html", null ],
@@ -1280,6 +1289,7 @@ var annotated_dup =
       [ "RemoveActionParameters", "class_p4_1_1_remove_action_parameters.html", null ],
       [ "RemoveAliases", "class_p4_1_1_remove_aliases.html", null ],
       [ "RemoveAllUnusedDeclarations", "class_p4_1_1_remove_all_unused_declarations.html", null ],
+      [ "RemoveAllUnusedHUDDeclarations", "class_p4_1_1_remove_all_unused_h_u_d_declarations.html", null ],
       [ "RemoveAssertAssume", "class_p4_1_1_remove_assert_assume.html", null ],
       [ "RemoveBreakContinue", "class_p4_1_1_remove_break_continue.html", null ],
       [ "RemoveComplexComparisons", "class_p4_1_1_remove_complex_comparisons.html", "class_p4_1_1_remove_complex_comparisons" ],
@@ -1415,6 +1425,7 @@ var annotated_dup =
       [ "UnnestSelectList", "class_p4_1_1_unnest_select_list.html", null ],
       [ "UnparsedConstant", "namespace_p4.html#struct_p4_1_1_unparsed_constant", "namespace_p4_struct_p4_1_1_unparsed_constant_dup" ],
       [ "UnrollLoops", "class_p4_1_1_unroll_loops.html", "class_p4_1_1_unroll_loops" ],
+      [ "UsedDeclSet", "class_p4_1_1_used_decl_set.html", "class_p4_1_1_used_decl_set" ],
       [ "UselessCasts", "class_p4_1_1_useless_casts.html", null ],
       [ "ValidateMatchAnnotations", "class_p4_1_1_validate_match_annotations.html", null ],
       [ "ValidateParsedProgram", "class_p4_1_1_validate_parsed_program.html", "class_p4_1_1_validate_parsed_program" ],
