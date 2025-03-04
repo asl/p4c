@@ -24,7 +24,7 @@ control p(inout bit<1> bt, in bit<1> bt2, in bit<1> bt3) {
         y3_0 = tmp;
         if (y3_0 == 1w1) {
             y0 = 1w0;
-        } else if (y0 != 1w1) @inlinedFrom("foo") {
+        } else if (y0 != 1w1) {
             a_3 = bt2;
             retval_1 = a_3 + 1w1;
             inlinedRetval_3 = retval_1;
