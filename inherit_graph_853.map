@@ -1,9 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$class_p_h_v_1_1_cluster_stats.html" title="An interface for gathering statistics common across each kind of cluster." alt="" coords="5,55,140,80"/>
-<area shape="rect" id="Node000001" href="$class_p_h_v_1_1_aligned_cluster.html" title=" " alt="" coords="197,5,348,31"/>
-<area shape="poly" id="edge2637_Node000000_Node000001" title=" " alt="" coords="137,49,220,28,221,33,139,54"/>
-<area shape="rect" id="Node000002" href="$class_p_h_v_1_1_rotational_cluster.html" title=" " alt="" coords="188,55,357,80"/>
-<area shape="poly" id="edge2638_Node000000_Node000002" title=" " alt="" coords="154,65,188,65,188,70,154,70"/>
-<area shape="rect" id="Node000003" href="$class_p_h_v_1_1_super_cluster.html" title=" " alt="" coords="203,104,342,129"/>
-<area shape="poly" id="edge2639_Node000000_Node000003" title=" " alt="" coords="139,81,221,101,220,107,137,86"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,31,143,56"/>
+<area shape="rect" id="Node000001" href="$struct_target_1_1_j_bay_1_1parser__regs.html" title=" " alt="" coords="195,5,378,31"/>
+<area shape="poly" id="edge2627_Node000000_Node000001" title=" " alt="" coords="156,31,195,26,196,32,157,36"/>
+<area shape="rect" id="Node000002" href="$struct_target_1_1_tofino_1_1parser__regs.html" title=" " alt="" coords="191,55,383,80"/>
+<area shape="poly" id="edge2628_Node000000_Node000002" title=" " alt="" coords="157,50,191,54,190,59,156,55"/>
 </map>
