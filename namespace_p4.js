@@ -6,6 +6,7 @@ var namespace_p4 =
     [ "DPDK", "namespace_p4_1_1_d_p_d_k.html", "namespace_p4_1_1_d_p_d_k" ],
     [ "EBPF", "namespace_p4_1_1_e_b_p_f.html", "namespace_p4_1_1_e_b_p_f" ],
     [ "graphs", "namespace_p4_1_1graphs.html", "namespace_p4_1_1graphs" ],
+    [ "IR", "namespace_p4_1_1_i_r.html", "namespace_p4_1_1_i_r" ],
     [ "literals", "namespace_p4_1_1literals.html", [
       [ "operator\"\"_cs", "namespace_p4_1_1literals.html#a41de57cd942d16bef1f63b84eb2592ef", null ]
     ] ],
@@ -283,7 +284,7 @@ var namespace_p4 =
     [ "IterKeys", "class_p4_1_1_iter_keys.html", null ],
     [ "IterValues", "class_p4_1_1_iter_values.html", null ],
     [ "JsonBoolean", "class_p4_1_1_json_boolean.html", null ],
-    [ "JsonData", "class_p4_1_1_json_data.html", null ],
+    [ "JsonData", "class_p4_1_1_json_data.html", "class_p4_1_1_json_data" ],
     [ "JSONGenerator", "class_p4_1_1_j_s_o_n_generator.html", null ],
     [ "JSONLoader", "class_p4_1_1_j_s_o_n_loader.html", null ],
     [ "JsonNull", "class_p4_1_1_json_null.html", null ],
@@ -309,6 +310,7 @@ var namespace_p4 =
     [ "MatchActionTableMetrics", "namespace_p4.html#struct_p4_1_1_match_action_table_metrics", null ],
     [ "MatchActionTableMetricsPass", "class_p4_1_1_match_action_table_metrics_pass.html", null ],
     [ "MatchRegister", "class_p4_1_1_match_register.html", "class_p4_1_1_match_register" ],
+    [ "MatchRegisterSpec", "class_p4_1_1_match_register_spec.html", null ],
     [ "MethodInstance", "class_p4_1_1_method_instance.html", "class_p4_1_1_method_instance" ],
     [ "Metrics", "namespace_p4.html#struct_p4_1_1_metrics", null ],
     [ "MetricsPassManager", "class_p4_1_1_metrics_pass_manager.html", null ],
@@ -355,6 +357,7 @@ var namespace_p4 =
     [ "ParsePortableArchitecture", "class_p4_1_1_parse_portable_architecture.html", null ],
     [ "ParsePsaArchitecture", "class_p4_1_1_parse_psa_architecture.html", null ],
     [ "ParserAnalyzer", "class_p4_1_1_parser_analyzer.html", null ],
+    [ "ParserConfig", "namespace_p4.html#struct_p4_1_1_parser_config", null ],
     [ "ParserErrorMessage", "struct_p4_1_1_parser_error_message.html", null ],
     [ "ParserInfo", "class_p4_1_1_parser_info.html", null ],
     [ "ParserInstantiation", "class_p4_1_1_parser_instantiation.html", null ],
@@ -475,6 +478,7 @@ var namespace_p4 =
     [ "StorageLocation", "class_p4_1_1_storage_location.html", "class_p4_1_1_storage_location" ],
     [ "StorageMap", "class_p4_1_1_storage_map.html", null ],
     [ "StrengthReduction", "class_p4_1_1_strength_reduction.html", null ],
+    [ "StrengthReductionPolicy", "class_p4_1_1_strength_reduction_policy.html", "class_p4_1_1_strength_reduction_policy" ],
     [ "string_map", "class_p4_1_1string__map.html", "class_p4_1_1string__map" ],
     [ "StringRef", "struct_p4_1_1_string_ref.html", "struct_p4_1_1_string_ref" ],
     [ "StructInitializers", "class_p4_1_1_struct_initializers.html", null ],
@@ -536,7 +540,7 @@ var namespace_p4 =
     [ "UniqueNames", "class_p4_1_1_unique_names.html", null ],
     [ "UniqueParameters", "class_p4_1_1_unique_parameters.html", null ],
     [ "UnnestSelectList", "class_p4_1_1_unnest_select_list.html", null ],
-    [ "UnparsedConstant", "namespace_p4.html#struct_p4_1_1_unparsed_constant", "namespace_p4_struct_p4_1_1_unparsed_constant_dup" ],
+    [ "UnparsedConstant", "struct_p4_1_1_unparsed_constant.html", "struct_p4_1_1_unparsed_constant" ],
     [ "UnrollLoops", "class_p4_1_1_unroll_loops.html", "class_p4_1_1_unroll_loops" ],
     [ "UnusedCodeHelperVars", "namespace_p4.html#struct_p4_1_1_unused_code_helper_vars", null ],
     [ "UnusedCodeInstances", "struct_p4_1_1_unused_code_instances.html", null ],
@@ -646,6 +650,6 @@ var namespace_p4 =
     [ "dpdk_max_operand_size", "namespace_p4.html#a0e819dcdecc9b11a4df0244d8657256b", null ],
     [ "initial_member_id", "namespace_p4.html#a889852f6d7d3bfe21afbba8d4b86b581", null ],
     [ "outOfBoundsStateName", "namespace_p4.html#a132e88585329b8dba66c10b61d5bab01", null ],
-    [ "p4includePath", "namespace_p4.html#a563b674ae27014545a4c213790c2fbf6", null ],
+    [ "p4includePath", "namespace_p4.html#aeb68fd52131748ab61dbe357d0a70e6a", null ],
     [ "table_handle_prefix", "namespace_p4.html#a1c25849ac917e7b9f22873a29cc6c91b", null ]
 ];
