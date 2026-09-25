@@ -876,8 +876,7 @@ var hierarchy =
     ] ],
     [ "option_t", "structoption__t.html", null ],
     [ "P4::AbstractParserDriver", "class_p4_1_1_abstract_parser_driver.html", [
-      [ "P4::P4ParserDriver", "class_p4_1_1_p4_parser_driver.html", null ],
-      [ "P4::V1::V1ParserDriver", "class_p4_1_1_v1_1_1_v1_parser_driver.html", null ]
+      [ "P4::P4ParserDriver", "class_p4_1_1_p4_parser_driver.html", null ]
     ] ],
     [ "P4::ActionInvocation", "class_p4_1_1_action_invocation.html", null ],
     [ "P4::ActionReplacement", "class_p4_1_1_action_replacement.html", null ],
@@ -1808,6 +1807,7 @@ var hierarchy =
       [ "P4::P4Tools::P4Testgen::EBPF::STF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_s_t_f.html", null ],
       [ "P4::P4Tools::P4Testgen::Pna::Metadata", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_metadata.html", null ],
       [ "P4::P4Tools::P4Testgen::Pna::PTF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_p_t_f.html", null ],
+      [ "P4::P4Tools::P4Testgen::Pna::STF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_s_t_f.html", null ],
       [ "P4::P4Tools::P4Testgen::Tofino::PTF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_p_t_f.html", null ],
       [ "P4::P4Tools::P4Testgen::Tofino::STF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_s_t_f.html", null ]
     ] ],
@@ -3026,6 +3026,7 @@ var hierarchy =
         [ "P4::DoCheckConstants", "class_p4_1_1_do_check_constants.html", null ],
         [ "P4::DoCheckCoreMethods", "class_p4_1_1_do_check_core_methods.html", null ],
         [ "P4::DumpPipe", "struct_p4_1_1_dump_pipe.html", null ],
+        [ "P4::DuplicateActionControlPlaneNameCheck", "class_p4_1_1_duplicate_action_control_plane_name_check.html", null ],
         [ "P4::EBPF::CodeGenInspector", "class_p4_1_1_e_b_p_f_1_1_code_gen_inspector.html", [
           [ "P4::EBPF::ActionTranslationVisitor", "class_p4_1_1_e_b_p_f_1_1_action_translation_visitor.html", [
             [ "P4::EBPF::ActionTranslationVisitorPSA", "class_p4_1_1_e_b_p_f_1_1_action_translation_visitor_p_s_a.html", null ],
@@ -3535,6 +3536,7 @@ var hierarchy =
         [ "P4::DoEliminateSerEnums", "class_p4_1_1_do_eliminate_ser_enums.html", null ],
         [ "P4::DoEliminateSwitch", "class_p4_1_1_do_eliminate_switch.html", null ],
         [ "P4::DoExpandEmit", "class_p4_1_1_do_expand_emit.html", null ],
+        [ "P4::DoExpandHeaderUnionStackPushPop", "class_p4_1_1_do_expand_header_union_stack_push_pop.html", null ],
         [ "P4::DoExpandLookahead", "class_p4_1_1_do_expand_lookahead.html", null ],
         [ "P4::DoFlattenHeaderUnion", "class_p4_1_1_do_flatten_header_union.html", [
           [ "P4::DoFlattenHeaderUnionStack", "class_p4_1_1_do_flatten_header_union_stack.html", null ]
@@ -3575,7 +3577,6 @@ var hierarchy =
         [ "P4::DoTableHit", "class_p4_1_1_do_table_hit.html", null ],
         [ "P4::DoTableKeyNames", "class_p4_1_1_do_table_key_names.html", null ],
         [ "P4::DontcareArgs", "class_p4_1_1_dontcare_args.html", null ],
-        [ "P4::DuplicateActionControlPlaneNameCheck", "class_p4_1_1_duplicate_action_control_plane_name_check.html", null ],
         [ "P4::DuplicateActions", "class_p4_1_1_duplicate_actions.html", null ],
         [ "P4::EBPF::ConvertToEbpfPSA", "class_p4_1_1_e_b_p_f_1_1_convert_to_ebpf_p_s_a.html", null ],
         [ "P4::EBPF::LowerExpressions", "class_p4_1_1_e_b_p_f_1_1_lower_expressions.html", null ],

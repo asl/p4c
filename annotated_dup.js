@@ -1035,7 +1035,8 @@ var annotated_dup =
             [ "SharedPnaCmdStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_cmd_stepper.html", null ],
             [ "SharedPnaExprStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_expr_stepper.html", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_expr_stepper" ],
             [ "SharedPnaProgramInfo", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_program_info.html", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_program_info" ],
-            [ "SharedPnaTableStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper.html", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper" ]
+            [ "SharedPnaTableStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper.html", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper" ],
+            [ "STF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_s_t_f.html", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_s_t_f" ]
           ] ],
           [ "Tofino", null, [
             [ "AbstractTofinoProgramInfo", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_abstract_tofino_program_info.html", null ],
@@ -1589,9 +1590,6 @@ var annotated_dup =
         [ "SourcePosition", "class_p4_1_1_util_1_1_source_position.html", "class_p4_1_1_util_1_1_source_position" ],
         [ "TimerEntry", "struct_p4_1_1_util_1_1_timer_entry.html", "struct_p4_1_1_util_1_1_timer_entry" ]
       ] ],
-      [ "V1", null, [
-        [ "V1ParserDriver", "class_p4_1_1_v1_1_1_v1_parser_driver.html", "class_p4_1_1_v1_1_1_v1_parser_driver" ]
-      ] ],
       [ "AbstractInliner", "class_p4_1_1_abstract_inliner.html", null ],
       [ "AbstractParserDriver", "class_p4_1_1_abstract_parser_driver.html", "class_p4_1_1_abstract_parser_driver" ],
       [ "AbstractSolver", "class_p4_1_1_abstract_solver.html", "class_p4_1_1_abstract_solver" ],
@@ -1694,6 +1692,7 @@ var annotated_dup =
       [ "DoEliminateSerEnums", "class_p4_1_1_do_eliminate_ser_enums.html", "class_p4_1_1_do_eliminate_ser_enums" ],
       [ "DoEliminateSwitch", "class_p4_1_1_do_eliminate_switch.html", null ],
       [ "DoExpandEmit", "class_p4_1_1_do_expand_emit.html", null ],
+      [ "DoExpandHeaderUnionStackPushPop", "class_p4_1_1_do_expand_header_union_stack_push_pop.html", null ],
       [ "DoExpandLookahead", "class_p4_1_1_do_expand_lookahead.html", null ],
       [ "DoFlattenHeaderUnion", "class_p4_1_1_do_flatten_header_union.html", null ],
       [ "DoFlattenHeaderUnionStack", "class_p4_1_1_do_flatten_header_union_stack.html", null ],
